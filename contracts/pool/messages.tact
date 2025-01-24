@@ -56,37 +56,53 @@ message DelistToken {
     tokenId: Int as uint16;
 }
 
-message ClaimProtocolFee {
-    trxId: Int as uint64;
-    feeReceiver: Address;
+message WithdrawFee {
+    feeReceiver: Address?;
 }
 // ============================ LP ================================ //
 
 message CancelLiquidityOrder {
     orderId: Int as uint64;
     trxId: Int as uint64;
-    executionFeeReceiver: Address?;
 }
 
 message ExecuteLiquidityOrder {
     orderId: Int as uint64;
     trxId: Int as uint64;
-    executionFeeReceiver: Address?;
     prices: map<Int as uint16, Int as uint128>;
     lpFundingFeeGrowth: Int as coins;
     rolloverFeeGrowth: Int as coins;
 }
 
 // ============================ Perp ================================ //
-message CreateDecreasePerpOrder {
+
+message CreateIncreasePerpOrder{
+    trxId: Int as uint64;
+    tokenId: Int as uint16;
+    isLong: Bool;
+    isMarket: Bool;
+    marginDelta: Int as coins;
+    sizeDelta: Int as coins;
+    triggerPrice: Int as uint128;
+    requestTime: Int as uint32;
     executionFee: Int as coins;
+    // tpsl: Slice as remaining;
+    tpSize: Int as coins;
+    tpPrice: Int as coins;
+    slSize: Int as coins;
+    slPrice: Int as coins;
+}
+
+
+message CreateDecreasePerpOrder {
+    trxId: Int as uint64;
     tokenId: Int as uint16;
     isLong: Bool;
     marginDelta: Int as coins;
     sizeDelta: Int as coins;
     triggerPrice: Int as uint128;
-    trxId: Int as uint64;
     requestTime: Int as uint32;
+    executionFee: Int as coins;
 }
 
 message CreateTpSlPerpOrder {
@@ -102,13 +118,11 @@ message CreateTpSlPerpOrder {
 }
 
 message CancelPerpOrder {
-    executionFeeReceiver: Address?;
     orderId: Int as uint64;
     trxId: Int as uint64;
 }
 
 message ExecutePerpOrder {
-    executionFeeReceiver: Address?;
     orderId: Int as uint64;
     trxId: Int as uint64;
     tokenId: Int as uint16;
@@ -119,7 +133,6 @@ message ExecutePerpOrder {
 }
 
 message LiquidatePerpPosition {
-    liquidationFeeReceiver: Address?;
     tokenId: Int as uint16;
     account: Address;
     isLong: Bool;
@@ -158,4 +171,11 @@ message ExecuteOrCancelCompensate {
     isCancel: Bool;
     compensateId: Int as uint64;
     trxId: Int as uint64;
+}
+
+//------------------------------------------------------------------------------
+message CreateAddLiquidityOrder{
+    trxId: Int as uint64;
+    amount: Int as coins;
+    executionFee: Int as coins;
 }

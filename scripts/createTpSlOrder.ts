@@ -28,47 +28,26 @@ export async function run(provider: NetworkProvider) {
     let user0JettonData = await user0JettonWallet.getGetWalletData();
     console.log(`user jetton wallet ${user0JettonWallet.address} balance ${user0JettonData.balance}`);
 
-    let orderId = (await pool.getPerpOrder(0n)).perpOrderIndexNext;
-
     let trxId = BigInt(await provider.ui().input('trxId:'));
-    executionFee *= 3;
+    executionFee *= 2;
 
     const lastTrx = await getLastTransaction(provider, pool.address);
-    await user0JettonWallet.send(
+    await pool.send(
         provider.sender(),
         {
-            value: toNano(executionFee + 0.2),
+            value: toNano(0.2 + executionFee),
         },
         {
-            $$type: 'JettonTransfer',
-            query_id: trxId,
-            amount: toUnits(margin, MOCK_DECIMAL),
-            destination: pool.address,
-            response_destination: provider.sender().address!!,
-            custom_payload: null,
-            forward_ton_amount: toNano(executionFee + 0.1),
-            forward_payload: 
-                beginCell()
-                .storeUint(1, 1)
-                .storeRef(
-                    beginCell()
-                    .storeUint(OP_CREATE_INCREASE_PERP_POSITION_ORDER, 8) // op
-                    .storeCoins(toNano(executionFee)) // execution fee
-                    .storeInt(isMarket? -1n : 0n, 1)
-                    .storeUint(tokenId, 16)
-                    .storeInt(isLong? -1n : 0n, 1)
-                    .storeCoins(toUnits(margin, MOCK_DECIMAL))
-                    .storeCoins(toUnits(size, MOCK_DECIMAL))
-                    .storeUint(toUnits(triggerPrice, PRICE_DECIMAL), 128)
-                    .storeUint(now(), 32)
-                    .storeRef(
-                        beginCell()
-                        .storeCoins(toUnits(size, MOCK_DECIMAL))
-                        .storeUint(toUnits(tpPrice, PRICE_DECIMAL), 128)
-                        .storeCoins(toUnits(size, MOCK_DECIMAL))
-                        .storeUint(toUnits(slPrice, PRICE_DECIMAL), 128)
-                    ).endCell()
-                ).endCell().asSlice()
+            $$type: 'CreateTpSlPerpOrder',
+            executionFee: toNano(executionFee),
+            tokenId: BigInt(tokenId),
+            isLong: isLong,
+            tpSize: toUnits(size, MOCK_DECIMAL),
+            tpPrice: toUnits(tpPrice, PRICE_DECIMAL),
+            slSize: toUnits(size, MOCK_DECIMAL),
+            slPrice: toUnits(slPrice, PRICE_DECIMAL),
+            trxId: trxId,
+            requestTime: BigInt(now())
         }
     );
 
@@ -83,14 +62,5 @@ export async function run(provider: NetworkProvider) {
     let poolJettonData = await poolJettonWallet.getGetWalletData();
 
     console.log('pool jetton balance:', poolJettonData.balance);
-
-    // get index
-    let orderIdNext = (await pool.getPerpOrder(0n)).perpOrderIndexNext;
-    console.log(`orderId:`, orderId);
-    console.log(`orderIdNext:`, orderIdNext);
-
-    // get order
-    let order = await pool.getPerpOrder(orderId);
-    console.log(`order:`, order);
 
 }

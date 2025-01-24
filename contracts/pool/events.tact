@@ -2,7 +2,7 @@
 message LiquidityOrderCreatedEvent {
     opType: Int as uint8;
     account: Address;
-    jettonDelta: Int as coins;
+    amount: Int as coins;
     executionFee: Int as coins;
     orderId: Int as uint64;
     trxId: Int as uint64;
@@ -14,12 +14,12 @@ message LiquidityOrderCancelledEvent {
     trxId: Int as uint64;
 }
 
-message LiquidityPoolChangedEvent {
+message LiquidityPoolUpdatedEvent {
     trxId: Int as uint64;
     orderId: Int as uint64;
     opType: Int as uint8;
     account: Address;
-    jettonDelta: Int as coins;
+    amount: Int as coins;
     tlpDelta: Int as coins;
     tlpPrice: Int as uint128;
     tlpSupply: Int as coins;

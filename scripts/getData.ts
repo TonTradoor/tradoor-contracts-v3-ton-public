@@ -14,7 +14,7 @@ export async function run(provider: NetworkProvider) {
     console.log('=================== Config ===================');
     let tokenConfig = await pool.getTokenConfig(tokenId);
     console.log('token config:', tokenConfig);
-    console.log('pool config:', await pool.getConfigData());
+    console.log('pool config:', await pool.getPoolConfig());
 
     console.log('=================== Liquidity ===================');
     // get liquidity order

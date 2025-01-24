@@ -5,8 +5,7 @@ import { getLastTransaction, waitForTransaction, attachPool } from '../utils/uti
 export async function run(provider: NetworkProvider) {
     const pool = attachPool(provider);
 
-    /// create order
-    const orderId = BigInt(await provider.ui().input('orderId to cancel:'));
+    const orderId = BigInt(await provider.ui().input('orderId:'));
 
     const lastTrx = await getLastTransaction(provider, pool.address);
     await pool.send(
@@ -18,7 +17,6 @@ export async function run(provider: NetworkProvider) {
             $$type: 'CancelPerpOrder',
             orderId: orderId,
             trxId: 1n,
-            executionFeeReceiver: provider.sender().address!!
         }
     );
 
@@ -27,14 +25,5 @@ export async function run(provider: NetworkProvider) {
     if (transDone) {
         console.log(`cancel perp order submitted...`);
     }
-
-    // get index
-    let orderIdNext = (await pool.getPerpOrder(0n)).perpOrderIndexNext;
-    console.log(`orderId:`, orderId);
-    console.log(`orderIdNext:`, orderIdNext);
-
-    // get order
-    let order = await pool.getPerpOrder(orderId);
-    console.log(`order:`, order);
 
 }

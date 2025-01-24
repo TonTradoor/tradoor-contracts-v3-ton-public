@@ -8,6 +8,8 @@ import { MockJettonWallet } from '../build/JettonMock/tact_MockJettonWallet';
 import { TLPJettonWallet } from '../build/JettonTLP/tact_TLPJettonWallet';
 let fs = require('fs');
 
+export const PRICE_DECIMAL = 18;
+
 function getPath(network: string) {
     return getConfigPath(network + ".json")
 }
@@ -74,6 +76,10 @@ export const waitForTransaction = async (provider:NetworkProvider, address:Addre
     let endTime = Date.now();
     console.log(`trx period: ${(endTime - startTime) / 1000}s`);
     return done;
+}
+
+export function toPrice(src: number | string | bigint) {
+    return toUnits(src, PRICE_DECIMAL);
 }
 
 export function toUnits(src: number | string | bigint, decimal: number) {

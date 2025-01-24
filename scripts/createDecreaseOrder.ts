@@ -8,7 +8,6 @@ export async function run(provider: NetworkProvider) {
 
     /// create order
     let trxId = BigInt(await provider.ui().input('trxId:'));
-    let orderId = (await pool.getPerpOrder(0n)).perpOrderIndexNext;
     let executionFee = 0.1;
     let tokenId = 1;
     let isLong = true;
@@ -20,7 +19,7 @@ export async function run(provider: NetworkProvider) {
     await pool.send(
         provider.sender(),
         {
-            value: toNano('1'),
+            value: toNano(0.2),
         },
         {
             $$type: 'CreateDecreasePerpOrder',
@@ -40,14 +39,5 @@ export async function run(provider: NetworkProvider) {
     if (transDone) {
         console.log(`create decrease perp success`);
     }
-
-    // get index
-    let orderIdNext = (await pool.getPerpOrder(0n)).perpOrderIndexNext;
-    console.log(`orderId:`, orderId);
-    console.log(`orderIdNext:`, orderIdNext);
-
-    // get order
-    let order = await pool.getPerpOrder(orderId);
-    console.log(`order:`, order);
 
 }

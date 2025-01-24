@@ -5,21 +5,25 @@ struct AccountInfo {
     isClaimer: Bool;
 }
 
-struct ConfigData {
+struct PoolConfig {
     orderLockTime: Int as uint32;
+    mintJettonGas: Int as coins;
+    burnJettonGas: Int as coins;
+    transferJettonGas: Int as coins;
+    createPerpOrderGas: Int as coins;
+    cancelPerpOrderGas: Int as coins;
+    executePerpOrderGas: Int as coins;
+    createLiquidityOrderGas: Int as coins;
+    cancelLiquidityOrderGas: Int as coins;
+    executeLiquidityOrderGas: Int as coins;
+
+    minStorageReserve: Int as coins;
     lpMinExecutionFee: Int as coins;
     perpMinExecutionFee: Int as coins;
-    gasForLpTrader: Int as coins;
-    gasForLpExecutor: Int as coins;
-    gasForPerpTrader: Int as coins;
-    gasForPerpExecutor: Int as coins;
-    minTonsForStorage: Int as coins;
-    gasForTransferJetton: Int as coins;
-    gasForBurnTlp: Int as coins;
-    gasForMintTlp: Int as coins;
+
     tlpWallet: Address;
-    jettonWallet: Address;
     tlpJetton: Address;
+
     maxLpNetCap: Int as coins;
 }
 
@@ -39,8 +43,9 @@ struct TokenConfig {
 
 struct PoolStat {
     tlpSupply: Int as coins;
-    totalExecutionFee: Int as coins;
-    protocolTradingFee: Int as coins;
+    orderAmountReserve: Int as coins;
+    executionFeeReserve: Int as coins;
+    feeReserve: Int as coins;
     globalLPFund: Int as int128;
     globalLPUnrealizedPnl: Int as int128;
     globalLpFundingFeeGrowth: Int as coins;
@@ -74,7 +79,6 @@ struct GlobalLPPosition {
 }
 
 struct PerpPositionData {
-    perpPositionIndexNext: Int as uint64;
     perpPosition: DirectionPerpPosition?;
     globalLPPosition: GlobalLPPosition?;
     globalPosition: GlobalPosition?;
@@ -92,16 +96,19 @@ struct GlobalPosition {
 // ============================ Config ================================ //
 
 struct GasConfig {
+    mintJettonGas: Int as coins;
+    burnJettonGas: Int as coins;
+    transferJettonGas: Int as coins;
+    createPerpOrderGas: Int as coins;
+    cancelPerpOrderGas: Int as coins;
+    executePerpOrderGas: Int as coins;
+    createLiquidityOrderGas: Int as coins;
+    cancelLiquidityOrderGas: Int as coins;
+    executeLiquidityOrderGas: Int as coins;
+
+    minStorageReserve: Int as coins;
     lpMinExecutionFee: Int as coins;
     perpMinExecutionFee: Int as coins;
-    gasForPerpTrader: Int as coins;
-    gasForPerpExecutor: Int as coins;
-    gasForLpTrader: Int as coins;
-    gasForLpExecutor: Int as coins;
-    minTonsForStorage: Int as coins;
-    gasForTransferJetton: Int as coins;
-    gasForBurnTlp: Int as coins;
-    gasForMintTlp: Int as coins;
 }
 
 struct ExecutorConfig {
@@ -113,17 +120,16 @@ struct ExecutorConfig {
 struct ContractConfig {
     tlpJetton: Address;
     tlpWallet: Address;
-    jettonWallet: Address;
 }
 
 // ============================ LP ================================ //
 struct LiquidityOrder {
     isIncrease: Bool;
     account: Address;
-    jettonDelta: Int as coins;
+    amount: Int as coins;
     executionFee: Int as coins;
     blockTime: Int as uint32;
-    isPending: Bool;
+    isPending: Bool = false;
 }
 
 struct LiquidityOrderData {
@@ -143,7 +149,7 @@ struct PerpOrder {
     triggerAbove: Bool;
     executionFee: Int as coins;
     blockTime: Int as uint32;
-    isPending: Bool;
+    isPending: Bool = false;
 }
 
 struct PerpOrderEx {
@@ -155,7 +161,6 @@ struct PerpOrderEx {
 }
 
 struct PerpOrderData {
-    perpOrderIndexNext: Int as uint64;
     perpOrder: PerpOrder?;
     perpOrderEx: PerpOrderEx?;
 }
@@ -172,8 +177,10 @@ struct Compensate {
     unlockTime: Int as uint32;
 }
 
-struct CompensateData {
-    compensateIndexNext: Int as uint64;
-    compensate: Compensate?;
+struct TpSl {
+    tpSize: Int as coins;
+    tpPrice: Int as uint128;
+    slSize: Int as coins;
+    slPrice: Int as uint128;
 }
 

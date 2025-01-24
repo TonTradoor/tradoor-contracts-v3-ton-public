@@ -43,12 +43,7 @@ export async function run(provider: NetworkProvider) {
     // wait for trx
     const transDone = await waitForTransaction(provider, pool.address, lastTrx, 20);
     if (transDone) {
-        console.log(`create compensation success`);
+        console.log(`create compensation request success`);
     }
-
-    // get compensate order
-    let nextId = (await pool.getCompensate(1n));
-    let compensateResult = (await pool.getCompensate(nextId.compensateIndexNext - 1n));
-    console.log(`compensateResult:`, compensateResult);
 
 }

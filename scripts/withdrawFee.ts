@@ -20,9 +20,8 @@ export async function run(provider: NetworkProvider) {
             value: toNano('0.1')
         },
         {
-            $$type: 'ClaimProtocolFee',
-            feeReceiver: Address.parse(feeReceiver),
-            trxId: 0n,
+            $$type: 'WithdrawFee',
+            feeReceiver: Address.parse(feeReceiver)
         }
     );
 

@@ -1,12 +1,13 @@
 import "@stdlib/deploy";
 import "@stdlib/ownable";
 import "@stdlib/stoppable";
+import "./upgrade";
 import "./messages";
 import "./events";
 import "./structs";
 import "./constants";
 
-contract Pool with Deployable, Resumable {
+contract Pool with Deployable, Resumable, Upgradable{
 
     owner: Address;
     stopped: Bool = false;
@@ -15,27 +16,30 @@ contract Pool with Deployable, Resumable {
     orderLockTime: Int as uint32 = 3 * 60;
     maxLpNetCap: Int as coins = 0;
     lpRolloverFeeRate: Int as uint32 = 0;
-    
-    gasForPerpTrader: Int as coins = ton("0.08");
-    gasForPerpExecutor: Int as coins = ton("0.08");
-    gasForLpTrader: Int as coins = ton("0.08");
-    gasForLpExecutor: Int as coins = ton("0.08");
-    gasForTransferJetton: Int as coins = ton("0.08"); // estimated gas of transfer jetton
-    gasForBurnTlp: Int as coins = ton("0.08"); // estimated gas of burn TLP
-    gasForMintTlp: Int as coins = ton("0.01"); // estimated gas of mint TLP
-    lpMinExecutionFee: Int as coins = ton("0.05"); // fee for every operation
-    perpMinExecutionFee: Int as coins = ton("0.1"); // fee for every operation
-    minTonsForStorage: Int as coins = ton("0.01"); // min storage gas
 
-    tlpJetton: Address = newAddress(0, 0);// TLP address
-    tlpWallet: Address = newAddress(0, 0); // TLP jetton wallet address
-    jettonWallet: Address = newAddress(0, 0); //USDT jetton wallet address
+    mintJettonGas: Int as coins = 0;
+    burnJettonGas: Int as coins = 0;
+    transferJettonGas: Int as coins = 0;
+    createPerpOrderGas: Int as coins = 0;
+    cancelPerpOrderGas: Int as coins = 0;
+    executePerpOrderGas: Int as coins = 0;
+    createLiquidityOrderGas: Int as coins = 0;
+    cancelLiquidityOrderGas: Int as coins = 0;
+    executeLiquidityOrderGas: Int as coins = 0;
+
+    lpMinExecutionFee: Int as coins = ton("0.05"); 
+    perpMinExecutionFee: Int as coins = ton("0.1");
+    minStorageReserve: Int as coins = ton("0.01");
+
+    tlpSupply: Int as coins = 0;
+    tlpJetton: Address = newAddress(0, 0);
+    tlpWallet: Address = newAddress(0, 0);
 
     compensator: Address = newAddress(0, 0);
     claimer: Address = newAddress(0, 0);
-    executors: map<Address, Bool>; // only contains enabled executors, so values are always true
+    executors: map<Address, Bool>; 
 
-    tokenConfigs: map<Int as uint16, TokenConfig>; // tokenId => tokenConfig
+    tokenConfigs: map<Int as uint16, TokenConfig>; 
 
     // data
     liquidityOrders: map<Int as uint64, LiquidityOrder>; // orderId => order
@@ -48,15 +52,16 @@ contract Pool with Deployable, Resumable {
     compensates: map<Int as uint64, Compensate>; // id => compensate
     compensateIndexNext: Int as uint64 = 1;
 
-    perpPositionIndexNext: Int as uint64 = 1;
-    perpPositions: map<Int as uint16, AccountPerpPosition>; // tokenId => user => direction => position
+    positionIndexNext: Int as uint64 = 1;
+    positions: map<Int as uint16, AccountPerpPosition>; // tokenId => user => direction => position
 
     globalLPPositions: map<Int as uint16, GlobalLPPosition>; // tokenId => globalLP
     globalPositions: map<Int as uint16, GlobalPosition>; // tokenId => globalPosition
 
-    tlpSupply: Int as coins = 0;
-    totalExecutionFee: Int as coins = 0; // total execution fee of all pending orders
-    protocolTradingFee: Int as coins = 0; // protocol trading fee of tradoor.io
+    // ton reserve
+    feeReserve: Int as coins = 0; 
+    orderAmountReserve: Int as coins = 0; 
+    executionFeeReserve: Int as coins = 0; 
 
     globalLPFund: Int as int128 = 0;
     globalLPUnrealizedPnl: Int as int128 = 0;
@@ -64,18 +69,11 @@ contract Pool with Deployable, Resumable {
     globalLpFundingFeeGrowth: Int as coins = 0;
     globalRolloverFeeGrowth: Int as coins = 0;
 
-    /**
-     * Initializes the contract.
-     * @param deployId The deployment ID.
-     */
+   
     init(deployId: Int) {
         self.owner = sender();
     }
 
-    /**
-     * @dev Update the configuration of the contract.
-     * @param msg The UpdateConfig message containing the new configuration values.
-     */
     receive(msg: UpdateConfig) {
         self.requireOwner();
         self.orderLockTime = msg.orderLockTime!!;
@@ -87,7 +85,6 @@ contract Pool with Deployable, Resumable {
         if (contractConfig != null) {
             self.tlpJetton = contractConfig!!.tlpJetton; 
             self.tlpWallet = contractConfig!!.tlpWallet;
-            self.jettonWallet = contractConfig!!.jettonWallet;
         }
 
         // executors
@@ -104,43 +101,35 @@ contract Pool with Deployable, Resumable {
         // gas
         let gasConfig: GasConfig? = msg.gasConfig;
         if (gasConfig != null) {
-            self.gasForPerpTrader = gasConfig!!.gasForPerpTrader;
-            self.gasForPerpExecutor = gasConfig!!.gasForPerpExecutor;
-            self.gasForLpTrader = gasConfig!!.gasForLpTrader;
-            self.gasForLpExecutor = gasConfig!!.gasForLpExecutor;
-            self.minTonsForStorage = gasConfig!!.minTonsForStorage;
-            self.gasForTransferJetton = gasConfig!!.gasForTransferJetton;
+            self.minStorageReserve = gasConfig!!.minStorageReserve;
             self.lpMinExecutionFee = gasConfig!!.lpMinExecutionFee;
             self.perpMinExecutionFee = gasConfig!!.perpMinExecutionFee;
-            self.gasForBurnTlp = gasConfig!!.gasForBurnTlp;
-            self.gasForMintTlp = gasConfig!!.gasForMintTlp;
+    
+            self.mintJettonGas = gasConfig!!.mintJettonGas;
+            self.burnJettonGas = gasConfig!!.burnJettonGas;
+            self.transferJettonGas = gasConfig!!.transferJettonGas;
+            self.createPerpOrderGas = gasConfig!!.createPerpOrderGas;
+            self.cancelPerpOrderGas = gasConfig!!.cancelPerpOrderGas;
+            self.executePerpOrderGas = gasConfig!!.executePerpOrderGas;
+            self.createLiquidityOrderGas = gasConfig!!.createLiquidityOrderGas;
+            self.cancelLiquidityOrderGas = gasConfig!!.cancelLiquidityOrderGas;
+            self.executeLiquidityOrderGas = gasConfig!!.executeLiquidityOrderGas;
         }
 
         self.reply("config updated".asComment());
     }
 
-    /**
-     * @dev Update the content of the TLP jetton.
-     */
     receive(msg: JettonUpdateContent) {
         self.requireOwner();
         self.forward(self.tlpJetton, msg.toCell(), true, null);
     }
 
-    /**
-     * @dev List/Update a token.
-     * @param msg The ListToken message containing the token ID and config.
-     */
     receive(msg: ListToken) {
         self.requireOwner();
         self.tokenConfigs.set(msg.tokenId, msg.config);
         self.reply("token listed".asComment());
     }
 
-    /**
-     * @dev Delist a token after it has no orders or positions. but in this function, the orders are not checked.
-     * @param msg The DelistToken message containing the token ID.
-     */
     receive(msg: DelistToken) {
         self.requireOwner();
         let position: GlobalPosition? = self.globalPositions.get(msg.tokenId);
@@ -150,248 +139,97 @@ contract Pool with Deployable, Resumable {
         self.tokenConfigs.del(msg.tokenId);
         self.globalPositions.del(msg.tokenId);
         self.globalLPPositions.del(msg.tokenId);
-        self.perpPositions.del(msg.tokenId);
+        self.positions.del(msg.tokenId);
         self.reply("token delisted".asComment());
     }
 
-    /**
-     * @dev Claim the protocol trading fee.
-     * @param msg The ClaimProtocolFee message containing the transaction ID and fee receiver.
-     */
-    receive(msg: ClaimProtocolFee) {
+    receive(msg: WithdrawFee) {
         require(sender() == self.claimer, "invalid sender");
-        require(self.protocolTradingFee > 0, "no enough jettons to claim");
-        send(SendParameters{
-                to: self.jettonWallet, 
-                value: 0,
-                mode: SendRemainingValue | SendIgnoreErrors, 
-                bounce: false,
-                body: JettonTransfer{
-                    query_id: msg.trxId,
-                    amount: self.protocolTradingFee,
-                    destination: msg.feeReceiver,
-                    response_destination: msg.feeReceiver,
-                    custom_payload: null,
-                    forward_ton_amount: 0,
-                    forward_payload: beginCell().storeUint(0, 1).endCell().asSlice()
-                }.toCell()
-            });
-        self.protocolTradingFee = 0;
+        require(self.feeReserve > 0, "insufficient fee reserve");
+        let feeReceiver = msg.feeReceiver != null ? msg.feeReceiver!! : sender();
+        send(SendParameters{to: feeReceiver, value: self.feeReserve, mode: SendIgnoreErrors | SendRemainingValue});
+        self.feeReserve = 0;
     }
 
-    // ======================================================== Token ======================================================== //
-    /**
-     * receive TON coin transfers to the contract
-     */
     receive() {}
 
-    /**
-     * receive TON jetton transfers to the contract
-     * It handles incoming JettonTransferNotification messages and performs various operations based on the message's payload.
-     * If the sender is neither the contract's USDT wallet nor the contract's TLP wallet, the jetton will be transferred to the sender.
-     * If the contract is stopped, it refunds the token and sends a bounce message to the sender indicating that order creation is stopped.
-     * If the operation code is OP_CREATE_INCREASE_LP_POSITION_ORDER, it handles the creation of an increase LP position order.
-     * If the operation code is OP_CREATE_INCREASE_PERP_POSITION_ORDER, it handles the creation of an increase perpetual position order.
-     * If the operation code is not recognized, it refunds the token to the sender.
-     * @param msg the jetton transfer notification message 
-     */
     receive(msg: JettonTransferNotification) {
-        // just refund other token
-        if (sender() != self.jettonWallet && sender() != self.tlpWallet) {
-            self.transferJetton(sender(), msg.query_id, msg.amount, msg.sender, msg.sender);
-            self.forward(msg.sender, "jetton unsupported".asComment(), true, null);
+        let ctx: Context = context();
+        if (ctx.sender != self.tlpWallet) {
+            self.refundJetton(msg.query_id, msg.amount, msg.sender, msg.sender);
             return;
         }
         if (self.stopped) {
-            self.transferJetton(sender(), msg.query_id, msg.amount, msg.sender, msg.sender);
-            self.forward(msg.sender, "contract stopped".asComment(), true, null);
+            self.refundJetton(msg.query_id, msg.amount, msg.sender, msg.sender);
             return;
         }
-        if (msg.forward_payload.loadUint(1) != 1) {
-            self.transferJetton(sender(), msg.query_id, msg.amount, msg.sender, msg.sender);
-            self.forward(msg.sender, "payload invalid".asComment(), true, null);
+
+        let executionFee: Int = msg.forward_payload.loadCoins();
+        if (executionFee < self.lpMinExecutionFee || ctx.value < self.createLiquidityOrderGas + executionFee) {
+            self.refundJetton( msg.query_id, msg.amount, msg.sender, msg.sender);
             return;
         }
-        if (sender() == self.tlpWallet ) {
-            let operation: Slice = msg.forward_payload.loadRef().asSlice();
-            let jettonDelta: Int = operation.loadCoins();
-            let executionFee: Int = operation.loadCoins();
-            
-            self.createLiquidityOrder(msg.query_id, false, msg.amount, msg.sender, executionFee, jettonDelta);
-            return;
-        }
-        let operation: Slice = msg.forward_payload.loadRef().asSlice();
-        let opCode: Int = operation.loadUint(8);
-        if (opCode == OP_CREATE_INCREASE_LP_POSITION_ORDER) {
-            let jettonDelta: Int = operation.loadCoins();
-            let executionFee: Int = operation.loadCoins();
-
-            self.createLiquidityOrder(msg.query_id, true, msg.amount, msg.sender, executionFee, jettonDelta);
-        } else if (opCode == OP_CREATE_INCREASE_PERP_POSITION_ORDER) {
-            let executionFee: Int = operation.loadCoins();
-            let isMarket: Bool = operation.loadInt(1) == -1;
-            let tokenId: Int = operation.loadUint(16);
-            let isLong: Bool = operation.loadInt(1) == -1;
-            let marginDelta: Int = operation.loadCoins();
-            let sizeDelta: Int = operation.loadCoins();
-            let triggerPrice: Int = operation.loadUint(128);
-            let requestTime: Int = operation.loadUint(32);
-
-            let tpSl: Slice = operation.loadRef().asSlice();
-            let tpSize: Int = tpSl.loadCoins();
-            let tpPrice: Int = tpSl.loadUint(128);
-            let slSize: Int = tpSl.loadCoins();
-            let slPrice: Int = tpSl.loadUint(128);
-
-            self.createIncreasePerpOrder(msg.query_id, msg.amount, msg.sender, executionFee, isMarket, tokenId, isLong, marginDelta, 
-                sizeDelta, triggerPrice, tpSize, tpPrice, slSize, slPrice, requestTime);
-        } else {
-            self.transferJetton(sender(), msg.query_id, msg.amount, msg.sender, msg.sender);
-            self.forward(msg.sender, "operation unknown".asComment(), true, null);
-        }
+        
+        self.createLiquidityOrder(msg.query_id, msg.sender, false, msg.amount, executionFee);
     }
 
-    /**
-     * Transfer the specified amount of jetton to the specified address.
-     * 
-     * @param query_id The ID of the query.
-     * @param amount The amount of jetton to refund.
-     * @param destination The address to refund the jetton to.
-     * @param response_destination The optional address to specify as the response destination.
-     */
-    fun transferJetton(to: Address, query_id: Int, amount: Int, destination: Address, response_destination: Address?) {
-        if (amount > 0) {
-            send(SendParameters{
-                to: to, 
-                value: self.gasForTransferJetton,
-                mode: SendIgnoreErrors, 
-                bounce: false,
-                body: JettonTransfer{
-                    query_id: query_id,
-                    amount: amount,
-                    destination: destination,
-                    response_destination: response_destination,
-                    custom_payload: null,
-                    forward_ton_amount: 0,
-                    forward_payload: beginCell().storeUint(0, 1).endCell().asSlice()
-                }.toCell()
-            });
-        }
-    }
-
-    /**
-     * Refunds the excess ton tokens to the specified address.
-     * 
-     * @param orderType The type of the order.
-     * @param to The address to which the excess ton tokens will be refunded.
-     * @param executionFeeDelta The execution fee jettonDelta.
-     * @param executionMultiple The execution multiple.
-     * @param transferJetton A boolean value indicating whether to transfer jetton.
-     */
-    fun transferEstimatedRemainValue(gasConsumption: Int, to: Address, executionFeeDelta: Int, executionMultiple: Int, transferJetton: Bool) {
+    receive(msg: CreateAddLiquidityOrder){
         let ctx: Context = context();
-        let tonBalanceBeforeMsg: Int = myBalance() - self.totalExecutionFee + executionFeeDelta - ctx.value;
-        tonBalanceBeforeMsg = max(0, tonBalanceBeforeMsg);
-        let storageFee: Int = self.minTonsForStorage - min(tonBalanceBeforeMsg, self.minTonsForStorage);
-        let extraValue: Int = self.executors.get(ctx.sender) == null ? 0 : max(0, tonBalanceBeforeMsg - self.minTonsForStorage);
-
-        let refundValue: Int = ctx.value - storageFee - gasConsumption * executionMultiple + extraValue - 
-            (executionFeeDelta > 0 ? executionFeeDelta : 0) - (transferJetton ? self.gasForTransferJetton : 0);
-
-        if (refundValue > 0) {
-            send(SendParameters{ to: to, value: refundValue, mode: SendIgnoreErrors });
-        }
+        require(msg.executionFee >= self.lpMinExecutionFee, "insufficient execution fee");
+        require(ctx.value >= self.createLiquidityOrderGas + msg.amount + msg.executionFee, "incorrect value transferred");
+        self.createLiquidityOrder(msg.trxId, ctx.sender, true, msg.amount, msg.executionFee);
     }
 
-    // ======================================================== LP ======================================================== //
-
-    /**
-     * Create a new liquidity order.
-     * 
-     * @param query_id The ID of the query.
-     * @param isIncrease A boolean value indicating whether the order is increasing liquidity.
-     * @param jettonFromAmount The amount of jetton to refund.
-     * @param account The address of the account.
-     * @param executionFee The execution fee.
-     * @param jettonDelta Decreasing liquidity means the delta of TLP; Increasing liquidity means the delta of USDT.
-     */
-    fun createLiquidityOrder(query_id: Int, isIncrease: Bool, jettonFromAmount: Int, account: Address, executionFee: Int, jettonDelta: Int) {
-        let ctx: Context = context();
-        let wallet: Address = isIncrease ? self.jettonWallet : self.tlpWallet;
-        if( ctx.value < self.gasForLpTrader + executionFee) {
-            self.transferJetton(wallet, query_id, jettonDelta, account, account);
-            self.forward(account, "gas not enough".asComment(), true, null);
-            return;
-        }
-        if (jettonFromAmount < jettonDelta) {
-            self.transferJetton(wallet, query_id, jettonFromAmount, account, account);
-            self.forward(account, "jetton not enough".asComment(), true, null);
-            return;
-        }
-        if (executionFee < self.lpMinExecutionFee) {
-            self.transferJetton(wallet, query_id, jettonDelta, account, account);
-            self.forward(account, "execution fee not enough".asComment(), true, null);
-            return;
-        }
-
+    fun createLiquidityOrder(trxId: Int, account: Address, isIncrease: Bool, amount: Int,  executionFee: Int) {
         let orderId: Int = self.liquidityOrderIndexNext;
         self.liquidityOrderIndexNext += 1;
-        self.liquidityOrders.set(orderId, LiquidityOrder{
-            isIncrease: isIncrease,
-            account: account,
-            jettonDelta: jettonDelta,
-            executionFee: executionFee,
-            blockTime: now(),
-            isPending: false
-        });
+        self.liquidityOrders.set(orderId, LiquidityOrder{isIncrease, account, amount, executionFee, blockTime: now()});
 
-        self.totalExecutionFee += executionFee;
+        let orderAmountReserveDelta: Int = 0;
+        if (isIncrease) {
+            self.orderAmountReserve += amount;
+            orderAmountReserveDelta = amount;
+        }
+        self.executionFeeReserve += executionFee;
 
         emit(LiquidityOrderCreatedEvent{
             opType: isIncrease ? OP_TYPE_LP_INCREASE : OP_TYPE_LP_DECREASE,
             account: account,
-            jettonDelta: jettonDelta,
+            amount: amount,
             executionFee: executionFee,
             orderId: orderId,
-            trxId: query_id
+            trxId: trxId
         }.toCell());
 
-        self.transferEstimatedRemainValue(self.gasForLpTrader, account, executionFee, 1, false);
+        self.transferEstimatedRemainValue(self.createLiquidityOrderGas, account, executionFee + orderAmountReserveDelta);
     }
 
-    /**
-     * This function is called when a CancelLiquidityOrder message is received.
-     * It cancels a liquidity position order and performs various checks and operations.
-     *
-     * @param msg The CancelLiquidityOrder message containing the order ID and other parameters.
-     */
     receive(msg: CancelLiquidityOrder) {
         let ctx: Context = context();
-         // check gas, incr Liquidity and decr Liquidity all cost transfer gas.
-        require(ctx.value >= self.gasForLpTrader + self.gasForTransferJetton, "gas not enough");
+        require(ctx.value >= self.cancelLiquidityOrderGas + self.transferJettonGas, "insufficient value transferred");
 
         let orderOpt: LiquidityOrder? = self.liquidityOrders.get(msg.orderId);
-        require(orderOpt != null, "order not exist");
+        require(orderOpt != null, "non-existent order");
         let order: LiquidityOrder = orderOpt!!;
 
         require(!order.isPending, "order is pending");
 
-        let isExecutor: Bool = self.executors.get(ctx.sender) != null;
-        require(isExecutor || ctx.sender == order.account, "invalid sender");
-
-        if (!isExecutor) {
-            require(order.blockTime + self.orderLockTime <= now(), "too early to cancel");
-        }
+        require(self.executors.exists(ctx.sender) || ctx.sender == order.account, "invalid sender");
 
         self.liquidityOrders.del(msg.orderId);
 
-        self.transferJetton(order.isIncrease ? self.jettonWallet : self.tlpWallet, msg.trxId, order.jettonDelta, order.account, ctx.sender);
+        let orderAmountReserveDelta = 0;
+        if (order.isIncrease) {
+            send(SendParameters{ to: order.account, value: order.amount, mode: SendIgnoreErrors| SendPayGasSeparately });
+            self.orderAmountReserve -= order.amount;
+            orderAmountReserveDelta = order.amount
+        } else {
+            self.transferJetton(msg.trxId, order.amount, order.account, ctx.sender);
+        }
 
-        // transfer execution fee
-        let executionFeeReceiver: Address = msg.executionFeeReceiver != null ? msg.executionFeeReceiver!! : ctx.sender;
         if (order.executionFee > 0) {
-            send(SendParameters{ to: executionFeeReceiver, value: order.executionFee, mode: SendIgnoreErrors });
-            self.totalExecutionFee -= order.executionFee;
+            send(SendParameters{ to: ctx.sender, value: order.executionFee, mode: SendIgnoreErrors| SendPayGasSeparately });
+            self.executionFeeReserve -= order.executionFee;
         }
 
         emit(LiquidityOrderCancelledEvent{
@@ -400,36 +238,22 @@ contract Pool with Deployable, Resumable {
             trxId: msg.trxId
         }.toCell());
 
-        self.transferEstimatedRemainValue(self.gasForLpTrader, ctx.sender, -order.executionFee, 1, true);
+        self.transferEstimatedRemainValue(self.cancelLiquidityOrderGas, ctx.sender, -order.executionFee - orderAmountReserveDelta);
     }
 
-    /**
-     * This function is called when executing an liquidity order.
-     * It performs various checks and updates the order accordingly.
-     * 
-     * @param msg The ExecuteLiquidityOrder message containing the order details.
-     */
     receive(msg: ExecuteLiquidityOrder) {
         let ctx: Context = context();
-        require(self.executors.get(ctx.sender) != null, "invalid sender");
+        require(ctx.value >= self.executeLiquidityOrderGas + max(self.mintJettonGas, self.burnJettonGas), "insufficient value transferred");
+
+        require(self.executors.exists(ctx.sender), "invalid sender");
 
         let orderOpt: LiquidityOrder? = self.liquidityOrders.get(msg.orderId);
-        require(orderOpt != null, "order not exist");
+        require(orderOpt != null, "non-existent order");
 
         let order: LiquidityOrder = orderOpt!!;
         require(!order.isPending, "order is pending");
 
-        let estimatedGas: Int = self.gasForLpExecutor;
-        if(order.isIncrease){
-            estimatedGas += self.gasForMintTlp;
-            require(ctx.value >= estimatedGas, "gas not enough");
-        }else{
-            estimatedGas += self.gasForBurnTlp;
-            require(ctx.value >= estimatedGas + self.gasForTransferJetton, "gas not enough");
-        }
-
-        order.isPending = true;
-        self.liquidityOrders.set(msg.orderId, order);
+        self.liquidityOrders.del(msg.orderId);
 
         let prices: map<Int as uint16, Int as uint128> = msg.prices;
         let globalLPUnrealizedPnl: Int = 0;
@@ -452,58 +276,62 @@ contract Pool with Deployable, Resumable {
         self.globalRolloverFeeGrowth = msg.rolloverFeeGrowth;
 
         self.globalLPFund += lpFundingFeeGrowthDelta + lpRolloverFeeGrowthDelta;
-        self.protocolTradingFee += (rolloverFeeGrowthDelta - lpRolloverFeeGrowthDelta);
+        
+        let feeReserveDelta: Int = (rolloverFeeGrowthDelta - lpRolloverFeeGrowthDelta);
+        self.feeReserve += feeReserveDelta;
 
         let globalNetLP: Int = self.globalLPFund + self.globalLPUnrealizedPnl;
         let tlpPrice: Int = 0;
-        let jettonDelta: Int = 0;
+        let amount: Int = 0;
         let tlpDelta: Int = 0;
+        let orderAmountReserveDelta: Int = 0;
+        let gas: Int = self.executeLiquidityOrderGas;
         if (order.isIncrease) {
-            jettonDelta = order.jettonDelta; // usdt
-            let availableQuota: Int = max(0, (self.maxLpNetCap - globalNetLP));
-            require(jettonDelta <= availableQuota, "insufficient quota to supply");
+            gas += self.mintJettonGas;
+            amount = order.amount;
+            let remainingCap: Int = max(0, (self.maxLpNetCap - globalNetLP));
+            require(amount <= remainingCap, "insufficient capacity");
 
             tlpPrice = self.tlpSupply == 0 ? PRICE_DECIMAL_FACTOR : (globalNetLP * JETTON_PRICE_DECIMAL_FACTOR / self.tlpSupply);
-            tlpDelta = jettonDelta  * JETTON_PRICE_DECIMAL_FACTOR / tlpPrice; 
+            tlpDelta = amount  * JETTON_PRICE_DECIMAL_FACTOR / tlpPrice; 
 
             send(SendParameters{
                 to: self.tlpJetton, 
-                value: self.gasForMintTlp,
-                bounce: true,
+                value: self.mintJettonGas,
                 body: JettonMint{ origin: ctx.sender, receiver: order.account, amount: tlpDelta, custom_payload: null, forward_ton_amount: 0, forward_payload: emptySlice() }.toCell()
             });
-            self.globalLPFund += jettonDelta;
+            self.globalLPFund += amount;
             self.tlpSupply += tlpDelta;
         } else {
-            tlpDelta = order.jettonDelta; // tlp
+            gas += self.burnJettonGas;
+            tlpDelta = order.amount;
             tlpPrice = globalNetLP  * JETTON_PRICE_DECIMAL_FACTOR / self.tlpSupply;
-            jettonDelta = tlpPrice * tlpDelta / JETTON_PRICE_DECIMAL_FACTOR;
+            amount = tlpPrice * tlpDelta / JETTON_PRICE_DECIMAL_FACTOR;
 
             send(SendParameters{
                 to: self.tlpWallet,
-                value: self.gasForBurnTlp,
-                bounce: true,
-                body: JettonBurn{ query_id: msg.trxId, amount: tlpDelta, response_destination: order.account, custom_payload: null }.toCell()
+                value: self.burnJettonGas,
+                body: JettonBurn{ query_id: msg.trxId, amount: tlpDelta, response_destination: ctx.sender, custom_payload: null }.toCell()
             });
-            self.globalLPFund -= jettonDelta;
+            self.globalLPFund -= amount;
             self.tlpSupply -= tlpDelta;
 
-            self.transferJetton(self.jettonWallet, msg.trxId, jettonDelta, order.account, ctx.sender);
+            send(SendParameters{to: order.account, value: amount, mode: SendIgnoreErrors | SendPayGasSeparately});
+            self.orderAmountReserve -= amount;
+            orderAmountReserveDelta = amount
         }
-        self.liquidityOrders.del(msg.orderId);
 
         if (order.executionFee > 0) {
-            let receiver: Address = msg.executionFeeReceiver != null ? msg.executionFeeReceiver!! : ctx.sender;
-            send(SendParameters{ to: receiver, value: order.executionFee, mode: SendIgnoreErrors});
-            self.totalExecutionFee -= order.executionFee;
+            send(SendParameters{ to: ctx.sender, value: order.executionFee, mode: SendIgnoreErrors});
+            self.executionFeeReserve -= order.executionFee;
         }
 
-        emit(LiquidityPoolChangedEvent{
+        emit(LiquidityPoolUpdatedEvent{
             trxId: msg.trxId,
             orderId: msg.orderId,
             opType: order.isIncrease ? OP_TYPE_LP_INCREASE : OP_TYPE_LP_DECREASE,
             account: order.account,
-            jettonDelta: jettonDelta,
+            amount: amount,
             tlpPrice: tlpPrice,
             tlpDelta: tlpDelta,
             tlpSupply: self.tlpSupply,
@@ -514,93 +342,49 @@ contract Pool with Deployable, Resumable {
             entryRolloverFeeGrowth: self.globalRolloverFeeGrowth
         }.toCell());
 
-        self.transferEstimatedRemainValue(estimatedGas, ctx.sender, -order.executionFee, 1, !order.isIncrease);
+        self.transferEstimatedRemainValue(gas, ctx.sender, -order.executionFee - orderAmountReserveDelta - feeReserveDelta);
     }
 
-    // ======================================================== Perp ======================================================== //
-    /**
-     * Handles the creation and increase of a perpetual position order.
-     * 
-     * @param query_id The unique identifier for the order.
-     * @param jettonFromAmount The amount of jetton to be used for the order.
-     * @param account The address of the account placing the order.
-     * @param executionFee The execution fee for the order.
-     * @param isMarket A boolean indicating whether the order is a market order or a limit order.
-     * @param tokenId The ID of the token associated with the order.
-     * @param isLong A boolean indicating whether the order is a long position or a short position.
-     * @param marginDelta The change in margin for the order.
-     * @param sizeDelta The change in size for the order.
-     * @param triggerPrice The trigger price for the order.
-     * @param tpSize The take profit size for the order.
-     * @param tpPrice The take profit price for the order.
-     * @param slSize The stop loss size for the order.
-     * @param slPrice The stop loss price for the order.
-     */
-    fun createIncreasePerpOrder(query_id: Int, jettonFromAmount: Int, account: Address, executionFee: Int, isMarket: Bool,
-        tokenId: Int, isLong: Bool, marginDelta: Int, sizeDelta: Int, triggerPrice: Int, tpSize: Int, tpPrice: Int, slSize: Int, slPrice: Int, requestTime: Int) {
+    receive(msg: CreateIncreasePerpOrder){
+        self.requireNotStopped();
         let ctx: Context = context();
+        let executionFee = msg.executionFee;
+        require(executionFee >= self.perpMinExecutionFee, "OrderBook: insufficient execution fee");
 
-        if (ctx.value < executionFee + self.gasForPerpTrader) {
-            self.transferJetton(self.jettonWallet, query_id, jettonFromAmount, account, account);
-            self.forward(account, "gas not enough".asComment(), true, null);
-            return;
+        let totalExecutionFee  = executionFee;
+        if (msg.tpSize > 0 && msg.tpPrice > 0) {
+            totalExecutionFee += executionFee;
         }
-
-        if (jettonFromAmount < marginDelta) {
-            self.transferJetton(self.jettonWallet, query_id, jettonFromAmount, account, account);
-            self.forward(account, "jetton not enough".asComment(), true, null);
-            return;
+        if (msg.slSize > 0 && msg.slPrice > 0) {
+            totalExecutionFee += executionFee;
         }
+        require(ctx.value >= self.createPerpOrderGas + totalExecutionFee +  msg.marginDelta, "OrderBook: incorrect value transferred");
+        
+        let opType: Int = msg.isMarket ? OP_TYPE_PERP_INCREASE_MARKET : OP_TYPE_PERP_INCREASE_LIMIT;
+        let orderId = self.createPerpOrder(msg.trxId, opType, ctx.sender, msg.tokenId, msg.isLong, msg.marginDelta, msg.sizeDelta, msg.triggerPrice, executionFee, msg.requestTime);
 
-        let executionFeeMultiple: Int = 1;
-        if (tpSize > 0 && tpPrice > 0) {
-            executionFeeMultiple += 1;
+        if (totalExecutionFee > executionFee) {
+            self.perpOrderExs.set(orderId, PerpOrderEx{ tpSize: msg.tpSize, tpPrice: msg.tpPrice, slSize: msg.slSize, slPrice: msg.slPrice, executionFee });
         }
-        if (slSize > 0 && slPrice > 0) {
-            executionFeeMultiple += 1;
-        }
+        self.orderAmountReserve += msg.marginDelta;
+        self.executionFeeReserve += executionFee;
 
-        if (executionFee < self.perpMinExecutionFee * executionFeeMultiple) {
-            self.transferJetton(self.jettonWallet, query_id, jettonFromAmount, account, account);
-            self.forward(account, "execution fee not enough".asComment(), true, null);
-            return;
-        }
-
-        let opType: Int = isMarket ? OP_TYPE_PERP_INCREASE_MARKET : OP_TYPE_PERP_INCREASE_LIMIT;
-        self.createPerpOrder(query_id, opType, account, tokenId, isLong, marginDelta, sizeDelta, triggerPrice, 
-            tpSize, tpPrice, slSize, slPrice, executionFee / executionFeeMultiple, requestTime);
-
-        self.totalExecutionFee += executionFee;
-
-        self.transferEstimatedRemainValue(self.gasForPerpTrader, account, executionFee, 1, false);
+        self.transferEstimatedRemainValue(self.createPerpOrderGas, ctx.sender, totalExecutionFee + msg.marginDelta);
     }
 
-    /**
-     * Receive function for creating a decrease perpetual position order.
-     * 
-     * @param msg The CreateDecreasePerpOrder message containing the order details.
-     */
     receive(msg: CreateDecreasePerpOrder) {
         self.requireNotStopped();
-
         let ctx: Context = context();
-        require(ctx.value - msg.executionFee >= self.gasForPerpTrader, "gas not enough");
-        require(msg.executionFee >= self.perpMinExecutionFee, "execution fee not enough");
+        require(msg.executionFee >= self.perpMinExecutionFee, "insufficient execution fee");
+        require(ctx.value >= self.createPerpOrderGas + msg.executionFee, "insufficient transfered value");
 
-        self.createPerpOrder(msg.trxId, OP_TYPE_PERP_DECREASE_MARKET, ctx.sender, msg.tokenId, msg.isLong, msg.marginDelta, msg.sizeDelta, msg.triggerPrice, 
-                0, 0, 0, 0, msg.executionFee, msg.requestTime);
+        self.createPerpOrder(msg.trxId, OP_TYPE_PERP_DECREASE_MARKET, ctx.sender, msg.tokenId, msg.isLong, msg.marginDelta, msg.sizeDelta, msg.triggerPrice, msg.executionFee, msg.requestTime);
 
-        self.totalExecutionFee += msg.executionFee;
+        self.executionFeeReserve += msg.executionFee;
 
-        self.transferEstimatedRemainValue(self.gasForPerpTrader, ctx.sender, msg.executionFee, 1, false);
+        self.transferEstimatedRemainValue(self.createPerpOrderGas, ctx.sender, msg.executionFee);
     }
 
-    /**
-     * @dev This function is called when receiving a CreateTpSlPerpOrder message.
-     * It performs various checks on gas and execution fee, creates take profit (tp) and stop loss (sl) orders if necessary,
-     * updates the total execution fee, and transfers excess gas.
-     * @param msg The CreateTpSlPerpOrder message containing the necessary information for creating tp/sl orders.
-     */
     receive(msg: CreateTpSlPerpOrder) {
         self.requireNotStopped();
         
@@ -614,55 +398,30 @@ contract Pool with Deployable, Resumable {
             executionFeeMultiple += 1;
         }
 
-        require(ctx.value - msg.executionFee >= self.gasForPerpTrader * executionFeeMultiple, "gas not enough");
-        require(msg.executionFee >= self.perpMinExecutionFee * executionFeeMultiple, "execution fee not enough");
+        require(msg.executionFee >= self.perpMinExecutionFee, "execution fee not enough");
+        require(ctx.value >= (self.createPerpOrderGas + msg.executionFee) * executionFeeMultiple, "gas not enough");
 
         if (msg.tpSize > 0 && msg.tpPrice > 0) {
             self.createPerpOrder(msg.trxId, OP_TYPE_PERP_DECREASE_TP, ctx.sender, msg.tokenId, msg.isLong, 0, msg.tpSize, msg.tpPrice, 
-                0, 0, 0, 0, msg.executionFee / executionFeeMultiple, msg.requestTime);
+                msg.executionFee, msg.requestTime);
         }
 
         if (msg.slSize > 0 && msg.slPrice > 0) {
             self.createPerpOrder(msg.trxId, OP_TYPE_PERP_DECREASE_SL, ctx.sender, msg.tokenId, msg.isLong, 0, msg.slSize, msg.slPrice, 
-                0, 0, 0, 0, msg.executionFee / executionFeeMultiple, msg.requestTime);
+                msg.executionFee, msg.requestTime);
         }
 
-        self.totalExecutionFee += msg.executionFee;
-
-        self.transferEstimatedRemainValue(self.gasForPerpTrader, ctx.sender, msg.executionFee, executionFeeMultiple, false);
+        self.executionFeeReserve += msg.executionFee * executionFeeMultiple;
+        self.transferEstimatedRemainValue(self.createPerpOrderGas * executionFeeMultiple, ctx.sender, msg.executionFee * executionFeeMultiple);
     }
 
-    /**
-     * Creates a perpetual order in the order book.
-     * 
-     * @param trxId The transaction ID associated with the order.
-     * @param opType The operation type of the order.
-     * @param account The address of the account placing the order.
-     * @param tokenId The ID of the token being traded.
-     * @param isLong A boolean indicating whether the order is for a long position.
-     * @param marginDelta The change in margin for the order.
-     * @param sizeDelta The change in size for the order.
-     * @param triggerPrice The trigger price for the order.
-     * @param tpSize The take profit size for the order.
-     * @param tpPrice The take profit price for the order.
-     * @param slSize The stop loss size for the order.
-     * @param slPrice The stop loss price for the order.
-     * @param executionFee The execution fee for the order.
-     * @return The ID of the created order.
-     */    
-    fun createPerpOrder(trxId: Int, opType: Int, account: Address, tokenId: Int, isLong: Bool, marginDelta: Int, sizeDelta: Int, triggerPrice: Int, 
-        tpSize: Int, tpPrice: Int, slSize: Int, slPrice: Int, executionFee: Int, requestTime: Int) {
+    fun createPerpOrder(trxId: Int, opType: Int, account: Address, tokenId: Int, isLong: Bool, 
+        marginDelta: Int, sizeDelta: Int, triggerPrice: Int, executionFee: Int, requestTime: Int): Int {
         let triggerAbove: Bool = false;
-
-        let orderId: Int = self.perpOrderIndexNext;
-        self.perpOrderIndexNext += 1;
 
         if (opType == OP_TYPE_PERP_INCREASE_MARKET || opType == OP_TYPE_PERP_INCREASE_LIMIT) {
             // increase for long order, must trigger below the price
             triggerAbove = !isLong;
-            if ((tpSize > 0 && tpPrice > 0) || (slSize > 0 && slPrice > 0)) {
-                self.perpOrderExs.set(orderId, PerpOrderEx{ tpSize, tpPrice, slSize, slPrice, executionFee });
-            }
         } else {
             if (opType == OP_TYPE_PERP_DECREASE_MARKET) {
                 // decrease for long market order, must trigger above the price
@@ -673,44 +432,14 @@ contract Pool with Deployable, Resumable {
             }
         }
 
-        let blockTime: Int = now();
-        self.perpOrders.set(orderId, PerpOrder{
-            opType: opType,
-            tokenId: tokenId,
-            account: account,
-            isLong: isLong,
-            marginDelta: marginDelta,
-            sizeDelta: sizeDelta,
-            triggerPrice: triggerPrice,
-            triggerAbove: triggerAbove,
-            executionFee: executionFee,
-            blockTime: blockTime,
-            isPending: false
-        });
+        let orderId: Int = self.perpOrderIndexNext;
+        self.perpOrderIndexNext += 1;
+        self.perpOrders.set(orderId, PerpOrder{ opType, tokenId, account, isLong, marginDelta, sizeDelta, triggerPrice, triggerAbove, executionFee, blockTime: now()});
 
-        // event
-        emit(PerpOrderCreatedEvent{
-            opType: opType,
-            tokenId: tokenId,
-            account: account,
-            isLong: isLong,
-            marginDelta: marginDelta,
-            sizeDelta: sizeDelta,
-            executionFee: executionFee,
-            orderId: orderId,
-            triggerPrice: triggerPrice,
-            triggerAbove: triggerAbove,
-            requestTime: requestTime,
-            trxId: trxId
-        }.toCell());
+        emit(PerpOrderCreatedEvent{ opType, tokenId, account, isLong, marginDelta, sizeDelta, executionFee, orderId, triggerPrice, triggerAbove, requestTime, trxId}.toCell());
+        return orderId;
     }
 
-    /**
-     * This function is called when a CancelPerpOrder message is received.
-     * It cancels a perpetual position order and performs various checks and operations.
-     * 
-     * @param msg The CancelPerpOrder message containing the order ID and other parameters.
-     */
     receive(msg: CancelPerpOrder) {
         let ctx: Context = context();
         let orderOpt: PerpOrder? = self.perpOrders.get(msg.orderId);
@@ -718,23 +447,18 @@ contract Pool with Deployable, Resumable {
         let order: PerpOrder = orderOpt!!;
 
         require(!order.isPending, "order is pending");
+        require(ctx.value >= self.cancelPerpOrderGas + self.transferJettonGas, "gas not enough");
 
-        let increase: Bool = order.opType == OP_TYPE_PERP_INCREASE_MARKET || order.opType == OP_TYPE_PERP_INCREASE_LIMIT;
-        if (increase) {
-            // compute gas + transfer jetton gas(returns usdt to trader)
-            require(ctx.value >= self.gasForPerpTrader + self.gasForTransferJetton, "gas not enough");
-        } else {
-            require(ctx.value >= self.gasForPerpTrader, "gas not enough");
-        }
-
-        let isExecutor: Bool = self.executors.get(ctx.sender) != null;
+        let isExecutor: Bool = self.executors.exists(ctx.sender);
         require(isExecutor || ctx.sender == order.account, "invalid sender");
         
         if (!isExecutor && (order.opType == OP_TYPE_PERP_INCREASE_MARKET || order.opType == OP_TYPE_PERP_DECREASE_MARKET)) {
             require(order.blockTime + self.orderLockTime <= now(), "too early to cancel");
         }
 
-        let executionFee: Int = 0;
+        let executionFeeReserveDelta: Int = 0;
+        let orderAmountReserveDelta: Int = 0;
+        let increase: Bool = order.opType == OP_TYPE_PERP_INCREASE_MARKET || order.opType == OP_TYPE_PERP_INCREASE_LIMIT;
         if (increase) {
             let orderExOpt: PerpOrderEx? = self.perpOrderExs.get(msg.orderId);
             if (orderExOpt != null) {
@@ -750,23 +474,25 @@ contract Pool with Deployable, Resumable {
                 if (tpSlExecutionFee > 0) {
                     // transfer tpsl execution fee to user
                     send(SendParameters{ to: order.account, value: tpSlExecutionFee, mode: SendIgnoreErrors });
-                    executionFee += tpSlExecutionFee;
+                    executionFeeReserveDelta += tpSlExecutionFee;
+                    self.executionFeeReserve -= tpSlExecutionFee;
                 }
 
                 self.perpOrderExs.del(msg.orderId);
             }
 
-            self.transferJetton(self.jettonWallet, msg.trxId, order.marginDelta, order.account, ctx.sender);
+            send(SendParameters{ to: order.account, value: order.marginDelta, mode: SendIgnoreErrors| SendPayGasSeparately });
+            self.orderAmountReserve -= order.marginDelta;
+            orderAmountReserveDelta = order.marginDelta;
         }
         self.perpOrders.del(msg.orderId);
 
         // transfer execution fee
         if (order.executionFee > 0) {
-            let executionFeeReceiver: Address = msg.executionFeeReceiver == null ? ctx.sender : msg.executionFeeReceiver!!;
-            send(SendParameters{ to: executionFeeReceiver, value: order.executionFee, mode: SendIgnoreErrors });
-            executionFee += order.executionFee;
+            send(SendParameters{ to: ctx.sender, value: order.executionFee, mode: SendIgnoreErrors });
+            executionFeeReserveDelta += order.executionFee;
+            self.executionFeeReserve -= order.executionFee;
         }
-        self.totalExecutionFee -= executionFee;
 
         emit(PerpOrderCancelledEvent{
             opType: order.opType,
@@ -774,29 +500,17 @@ contract Pool with Deployable, Resumable {
             trxId: msg.trxId
         }.toCell());
 
-        self.transferEstimatedRemainValue(self.gasForPerpTrader, ctx.sender, -executionFee, 1, increase);
+        self.transferEstimatedRemainValue(self.cancelPerpOrderGas, ctx.sender, - executionFeeReserveDelta - orderAmountReserveDelta);
     }
 
-
-    /**
-     * Receives and executes a perpetual position order.
-     * 
-     * @param msg The ExecutePerpOrder message containing the order details.
-     */
     receive(msg: ExecutePerpOrder) {
         let ctx: Context = context();
+        require(ctx.value >= self.executePerpOrderGas + self.transferJettonGas, "gas not enough");
 
-        require(self.executors.get(ctx.sender) != null, "invalid sender");
+        require(self.executors.exists(ctx.sender), "invalid sender");
         let orderOpt: PerpOrder? = self.perpOrders.get(msg.orderId);
         require(orderOpt != null, "order not exist");
         let order: PerpOrder = orderOpt!!;
-
-        let increase: Bool = order.opType == OP_TYPE_PERP_INCREASE_MARKET || order.opType == OP_TYPE_PERP_INCREASE_LIMIT;
-        if (increase) {
-            require(ctx.value >= self.gasForPerpExecutor, "gas not enough");
-        } else {
-            require(ctx.value >= self.gasForPerpExecutor + self.gasForTransferJetton, "gas not enough");
-        }
         require(!order.isPending, "order is pending");
 
         order.isPending = true;
@@ -805,29 +519,15 @@ contract Pool with Deployable, Resumable {
         if (!(order.opType == OP_TYPE_PERP_INCREASE_MARKET || order.opType == OP_TYPE_PERP_DECREASE_MARKET)){
             require(order.triggerAbove ? (msg.price >= order.triggerPrice) : (msg.price <= order.triggerPrice), "not reach trigger price");
         }
-        let executionFeeReceiver = msg.executionFeeReceiver == null ? ctx.sender : msg.executionFeeReceiver!!;
+        let increase: Bool = order.opType == OP_TYPE_PERP_INCREASE_MARKET || order.opType == OP_TYPE_PERP_INCREASE_LIMIT;
         if (increase) {
-            self.increasePerpPosition(msg.trxId, msg.orderId, order.opType, order.account, order.tokenId, order.isLong, order.marginDelta, order.sizeDelta, msg.price, msg.fundingFeeGrowth, msg.rolloverFeeGrowth, executionFeeReceiver);
+            self.increasePerpPosition(msg.trxId, msg.orderId, order.opType, order.account, order.tokenId, order.isLong, order.marginDelta, order.sizeDelta, msg.price, msg.fundingFeeGrowth, msg.rolloverFeeGrowth);
         } else {
-            self.decreasePerpPosition(msg.trxId, msg.orderId, order.opType, order.account, order.tokenId, order.isLong, order.marginDelta, order.sizeDelta, msg.price, msg.fundingFeeGrowth, msg.rolloverFeeGrowth, executionFeeReceiver);
+            self.decreasePerpPosition(msg.trxId, msg.orderId, order.opType, order.account, order.tokenId, order.isLong, order.marginDelta, order.sizeDelta, msg.price, msg.fundingFeeGrowth, msg.rolloverFeeGrowth);
         }    
     }
 
-    /**
-     * Increases the perpetual position for a given account and token.
-     * 
-     * @param trxId The transaction ID.
-     * @param orderId The order ID.
-     * @param opType The operation type.
-     * @param account The account address.
-     * @param tokenId The token ID.
-     * @param isLong Indicates whether the position is long or short.
-     * @param marginDelta The change in margin.
-     * @param sizeDelta The change in size.
-     * @param avgPremiumRate The average premium rate.
-     * @param tradePrice The trade price.
-     */
-    fun increasePerpPosition(trxId: Int, orderId: Int, opType: Int, account: Address, tokenId: Int, isLong: Bool, marginDelta: Int, sizeDelta: Int, tradePrice: Int, fundingFeeGrowth: Int, rolloverFeeGrowth: Int, executionFeeReceiver: Address) {
+    fun increasePerpPosition(trxId: Int, orderId: Int, opType: Int, account: Address, tokenId: Int, isLong: Bool, marginDelta: Int, sizeDelta: Int, tradePrice: Int, fundingFeeGrowth: Int, rolloverFeeGrowth: Int) {
         let tokenConfigOpt: TokenConfig? = self.tokenConfigs.get(tokenId);
         require(tokenConfigOpt != null, "invalid token");
         let tokenConfig: TokenConfig = tokenConfigOpt!!;
@@ -836,23 +536,22 @@ contract Pool with Deployable, Resumable {
         let order: PerpOrder = self.perpOrders.get(orderId)!!;
 
         // get position
-        let accountPerpPositionOpt: AccountPerpPosition? = self.perpPositions.get(tokenId);
+        let accountPerpPositionOpt: AccountPerpPosition? = self.positions.get(tokenId);
         let accountPerpPosition: AccountPerpPosition = accountPerpPositionOpt != null ? accountPerpPositionOpt!! : AccountPerpPosition{
             positions: emptyMap()
         };
 
         let directionPerpPositionOpt: DirectionPerpPosition? = accountPerpPosition.positions.get(account);
         let directionPerpPosition: DirectionPerpPosition = directionPerpPositionOpt != null ? directionPerpPositionOpt!! : DirectionPerpPosition{
-            longPosition: PerpPosition {},
-            shortPosition: PerpPosition {}
+            longPosition: PerpPosition {}, shortPosition: PerpPosition {}
         };
 
         let perpPosition: PerpPosition = isLong ? directionPerpPosition.longPosition : directionPerpPosition.shortPosition;
 
         // check margin
         if (perpPosition.size == 0) {
-            perpPosition.positionId = self.perpPositionIndexNext;
-            self.perpPositionIndexNext += 1;
+            perpPosition.positionId = self.positionIndexNext;
+            self.positionIndexNext += 1;
         }
 
         // get global position
@@ -897,10 +596,11 @@ contract Pool with Deployable, Resumable {
         // trading fee
         let tradingFee: Int = 0;
         let lpTradingFee: Int = 0;
+        let feeReserveDelta: Int = 0;
         if (sizeDelta > 0) {
             tradingFee = sizeDelta * tradePrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);
             lpTradingFee = tradingFee * tokenConfig.lpTradingFeeRate / PERCENTAGE_BASIS_POINT;
-            self.protocolTradingFee += tradingFee - lpTradingFee;
+            self.feeReserve += tradingFee - lpTradingFee;
             self.globalLPFund += lpRealizedPnl + lpTradingFee;
         }
 
@@ -940,7 +640,7 @@ contract Pool with Deployable, Resumable {
             globalPosition.shortMargin += marginDeltaAfter;
         }
         accountPerpPosition.positions.set(account, directionPerpPosition);
-        self.perpPositions.set(tokenId, accountPerpPosition);
+        self.positions.set(tokenId, accountPerpPosition);
         self.globalPositions.set(tokenId, globalPosition);
         self.globalLPPositions.set(tokenId, globalLPPosition);
 
@@ -953,13 +653,13 @@ contract Pool with Deployable, Resumable {
             if (orderEx.tpSize > 0 && orderEx.tpPrice > 0) {
                 executionFeeMultiple += 1;
                 self.createPerpOrder(trxId, OP_TYPE_PERP_DECREASE_TP, order.account, order.tokenId, order.isLong, 0, orderEx.tpSize, orderEx.tpPrice, 
-                    0, 0, 0, 0, orderEx.executionFee, now());
+                    orderEx.executionFee, now());
             }
 
             if (orderEx.slSize > 0 && orderEx.slPrice > 0) {
                 executionFeeMultiple += 1;
                 self.createPerpOrder(trxId, OP_TYPE_PERP_DECREASE_SL, order.account, order.tokenId, order.isLong, 0, orderEx.slSize, orderEx.slPrice, 
-                    0, 0, 0, 0, orderEx.executionFee, now());
+                    orderEx.executionFee, now());
             }
             // delete
             self.perpOrderExs.del(orderId);
@@ -967,8 +667,8 @@ contract Pool with Deployable, Resumable {
 
         self.perpOrders.del(orderId);
         if (order.executionFee > 0) {
-            send(SendParameters{ to: executionFeeReceiver, value: order.executionFee, mode: SendIgnoreErrors});
-            self.totalExecutionFee -= order.executionFee;
+            send(SendParameters{ to: sender(), value: order.executionFee, mode: SendIgnoreErrors});
+            self.executionFeeReserve -= order.executionFee;
         }
 
         emit(PerpPositionIncreasedEvent{
@@ -1006,25 +706,12 @@ contract Pool with Deployable, Resumable {
             lpRealizedPnl: lpRealizedPnl,
         }.toCell());
 
-        self.transferEstimatedRemainValue(self.gasForPerpExecutor, sender(), -order.executionFee, executionFeeMultiple, false);
+        self.transferEstimatedRemainValue(self.executePerpOrderGas * executionFeeMultiple, sender(), -order.executionFee);
     }
 
-    /**
-     * Decreases the perpetual position for a given account and token.
-     * 
-     * @param trxId The transaction ID.
-     * @param orderId The order ID.
-     * @param opType The operation type.
-     * @param account The account address.
-     * @param tokenId The token ID.
-     * @param isLong Indicates whether the position is long or short.
-     * @param marginDelta The change in margin.
-     * @param sizeDelta The change in size.
-     * @param avgPremiumRate The average premium rate.
-     * @param tradePrice The trade price.
-     */
+
     fun decreasePerpPosition(trxId: Int, orderId: Int, opType: Int, account: Address, tokenId: Int, isLong: Bool, marginDelta: Int, sizeDelta: Int, tradePrice: Int,
-        fundingFeeGrowth: Int, rolloverFeeGrowth: Int, executionFeeReceiver: Address) {
+        fundingFeeGrowth: Int, rolloverFeeGrowth: Int) {
         let tokenConfigOpt: TokenConfig? = self.tokenConfigs.get(tokenId);
         require(tokenConfigOpt != null, "invalid token");
         let tokenConfig: TokenConfig = tokenConfigOpt!!;
@@ -1032,7 +719,7 @@ contract Pool with Deployable, Resumable {
 
         let order: PerpOrder = self.perpOrders.get(orderId)!!;
 
-        let accountPerpPositionOpt: AccountPerpPosition? = self.perpPositions.get(tokenId);
+        let accountPerpPositionOpt: AccountPerpPosition? = self.positions.get(tokenId);
         let accountPerpPosition: AccountPerpPosition = accountPerpPositionOpt != null ? accountPerpPositionOpt!! : AccountPerpPosition{
             positions: emptyMap()
         };
@@ -1087,7 +774,7 @@ contract Pool with Deployable, Resumable {
             tradingFee = sizeDelta * tradePrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);
             lpTradingFee = tradingFee * tokenConfig.lpTradingFeeRate / PERCENTAGE_BASIS_POINT;
 
-            self.protocolTradingFee += tradingFee - lpTradingFee;
+            self.feeReserve += tradingFee - lpTradingFee;
             self.globalLPFund += lpRealizedPnl + lpTradingFee;
         }
         let positionId: Int = perpPosition.positionId;
@@ -1153,14 +840,16 @@ contract Pool with Deployable, Resumable {
         globalPosition.shortValue = globalPosition.shortSize * tradePrice / PRICE_DECIMAL_FACTOR;
 
         accountPerpPosition.positions.set(account, directionPerpPosition);
-        self.perpPositions.set(tokenId, accountPerpPosition);
+        self.positions.set(tokenId, accountPerpPosition);
         self.globalPositions.set(tokenId, globalPosition);
         self.globalLPPositions.set(tokenId, globalLPPosition);
         self.perpOrders.del(orderId);
-        self.transferJetton(self.jettonWallet, trxId, payout, order.account, sender());
+
+        send(SendParameters{ to: order.account, value: payout, mode: SendIgnoreErrors | SendPayGasSeparately});
+        self.orderAmountReserve -= payout;
         if (order.executionFee > 0) {
-            send(SendParameters{ to: executionFeeReceiver, value: order.executionFee, mode: SendIgnoreErrors});
-            self.totalExecutionFee -= order.executionFee;
+            send(SendParameters{ to: sender(), value: order.executionFee, mode: SendIgnoreErrors});
+            self.executionFeeReserve -= order.executionFee;
         }
 
         emit(PerpPositionDecreasedEvent{
@@ -1200,21 +889,14 @@ contract Pool with Deployable, Resumable {
             lpRealizedPnl: lpRealizedPnl
         }.toCell());
 
-        self.transferEstimatedRemainValue(self.gasForPerpExecutor, sender(), -order.executionFee, 1, payout > 0);
+        self.transferEstimatedRemainValue(self.executePerpOrderGas, sender(), -order.executionFee - payout);
     }
 
-    /**
-     * This function is called when a LiquidatePerpPosition message is received.
-     * It performs various checks, adds a new order to the order book, and sends an update position message to the pool.
-     * 
-     * @param msg The LiquidatePerpPosition message containing information about the liquidation.
-     */
+    
     receive(msg: LiquidatePerpPosition) {
         let ctx: Context = context();
-        require(ctx.value >= self.gasForPerpExecutor + self.gasForTransferJetton, "gas not enough");
-        require(self.executors.get(ctx.sender) != null, "invalid sender");
-
-        let liquidationFeeReceiver: Address = msg.liquidationFeeReceiver != null ? msg.liquidationFeeReceiver!! : ctx.sender;
+        require(ctx.value >= self.executePerpOrderGas + self.transferJettonGas, "gas not enough");
+        require(self.executors.exists(ctx.sender), "invalid sender");
 
         let orderId: Int = self.perpOrderIndexNext;
         self.perpOrderIndexNext += 1;
@@ -1232,21 +914,10 @@ contract Pool with Deployable, Resumable {
             isPending: true
         });
 
-        self.liquidatePerpPosition( msg.trxId, orderId, msg.account, msg.tokenId, msg.isLong, msg.price, msg.fundingFeeGrowth, msg.rolloverFeeGrowth, liquidationFeeReceiver);
+        self.liquidatePerpPosition( msg.trxId, orderId, msg.account, msg.tokenId, msg.isLong, msg.price, msg.fundingFeeGrowth, msg.rolloverFeeGrowth);
     }
 
-    /**
-     * Liquidates a perpetual position.
-     * 
-     * @param trxId The transaction ID.
-     * @param orderId The order ID.
-     * @param account The account address.
-     * @param tokenId The token ID.
-     * @param isLong Indicates if the position is long.
-     * @param avgPremiumRate The average premium rate.
-     * @param tradePrice The trade price.
-     */
-    fun liquidatePerpPosition(trxId: Int, orderId: Int, account: Address, tokenId: Int, isLong: Bool, tradePrice: Int, fundingFeeGrowth: Int, rolloverFeeGrowth: Int, liquidationFeeReceiver: Address) {
+    fun liquidatePerpPosition(trxId: Int, orderId: Int, account: Address, tokenId: Int, isLong: Bool, tradePrice: Int, fundingFeeGrowth: Int, rolloverFeeGrowth: Int) {
         // get token config
         let tokenConfigOpt: TokenConfig? = self.tokenConfigs.get(tokenId);
         require(tokenConfigOpt != null, "invalid token");
@@ -1256,7 +927,7 @@ contract Pool with Deployable, Resumable {
         let order: PerpOrder = self.perpOrders.get(orderId)!!;
 
         // get position
-        let accountPerpPositionOpt: AccountPerpPosition? = self.perpPositions.get(tokenId);
+        let accountPerpPositionOpt: AccountPerpPosition? = self.positions.get(tokenId);
         let accountPerpPosition: AccountPerpPosition = accountPerpPositionOpt != null ? accountPerpPositionOpt!! : AccountPerpPosition{
             positions: emptyMap()
         };
@@ -1292,9 +963,8 @@ contract Pool with Deployable, Resumable {
         let maintenanceMargin: Int = perpPosition.size * tradePrice * (tokenConfig.tradingFeeRate + tokenConfig.maintenanceRate) / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR) + tokenConfig.liquidationFee;
         require(maintenanceMargin >= perpPosition.margin + fundingFee - rolloverFee + unrealizedPnl, "margin is too high to liquidate");
 
-        // liquidate price
-        let liquidatePrice: Int = ((perpPosition.margin + fundingFee - rolloverFee - tokenConfig.liquidationFee) * PRICE_DECIMAL_FACTOR + (isLong ? -perpPosition.entryPrice * perpPosition.size : perpPosition.entryPrice * perpPosition.size))
-            / (perpPosition.size * (tokenConfig.tradingFeeRate + tokenConfig.maintenanceRate + (isLong ? - PERCENTAGE_BASIS_POINT : PERCENTAGE_BASIS_POINT)) / PERCENTAGE_BASIS_POINT);
+        let bankruptcyPrice: Int = ((perpPosition.margin + fundingFee - rolloverFee - tokenConfig.liquidationFee) * PRICE_DECIMAL_FACTOR + (isLong ? -perpPosition.entryPrice * perpPosition.size : perpPosition.entryPrice * perpPosition.size))
+            / (perpPosition.size * (tokenConfig.tradingFeeRate + (isLong ? - PERCENTAGE_BASIS_POINT : PERCENTAGE_BASIS_POINT)) / PERCENTAGE_BASIS_POINT);
 
         // get global position
         let globalLPPositionOpt: GlobalLPPosition? = self.globalLPPositions.get(tokenId);
@@ -1306,9 +976,9 @@ contract Pool with Deployable, Resumable {
         if (globalLPPosition.netSize > 0 && (isLong != globalLPPosition.isLong)) {
             let sizeUsed: Int = min(globalLPPosition.netSize, sizeDelta);
             if (!isLong) {
-                lpRealizedPnl = sizeUsed * (liquidatePrice - globalLPPosition.entryPrice) / PRICE_DECIMAL_FACTOR;
+                lpRealizedPnl = sizeUsed * (bankruptcyPrice - globalLPPosition.entryPrice) / PRICE_DECIMAL_FACTOR;
             } else {
-                lpRealizedPnl = sizeUsed * (globalLPPosition.entryPrice - liquidatePrice) / PRICE_DECIMAL_FACTOR;
+                lpRealizedPnl = sizeUsed * (globalLPPosition.entryPrice - bankruptcyPrice) / PRICE_DECIMAL_FACTOR;
             }
             sizeRemaining -= sizeUsed;
             globalLPPosition.netSize -= sizeUsed;
@@ -1318,17 +988,16 @@ contract Pool with Deployable, Resumable {
         }
         // lp entry price
         if (sizeRemaining > 0) {
-            globalLPPosition.entryPrice = (globalLPPosition.netSize * globalLPPosition.entryPrice + sizeRemaining * liquidatePrice) / (globalLPPosition.netSize + sizeRemaining);
+            globalLPPosition.entryPrice = (globalLPPosition.netSize * globalLPPosition.entryPrice + sizeRemaining * bankruptcyPrice) / (globalLPPosition.netSize + sizeRemaining);
             globalLPPosition.netSize += sizeRemaining;
             globalLPPosition.isLong = isLong;
         }
 
         // trading fee
-        let tradingFee: Int = sizeDelta * liquidatePrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);
+        let tradingFee: Int = sizeDelta * bankruptcyPrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);
         let lpTradingFee: Int = tradingFee * tokenConfig.lpTradingFeeRate / PERCENTAGE_BASIS_POINT;
-        let protocolTradingFee: Int = tradingFee - lpTradingFee;
 
-        self.protocolTradingFee += protocolTradingFee;
+        self.feeReserve += tradingFee - lpTradingFee;
         self.globalLPFund += lpRealizedPnl + lpTradingFee;
 
         let positionId: Int = perpPosition.positionId;
@@ -1354,16 +1023,16 @@ contract Pool with Deployable, Resumable {
         globalPosition.shortValue = globalPosition.shortSize * tradePrice / PRICE_DECIMAL_FACTOR;
 
         accountPerpPosition.positions.set(account, directionPerpPosition);
-        self.perpPositions.set(tokenId, accountPerpPosition);
+        self.positions.set(tokenId, accountPerpPosition);
         self.globalPositions.set(tokenId, globalPosition);
         self.globalLPPositions.set(tokenId, globalLPPosition);
 
         self.perpOrders.del(orderId);
-        self.transferJetton(self.jettonWallet, trxId, payout, liquidationFeeReceiver, sender());
+        send(SendParameters{ to: sender(), value: payout, mode: SendIgnoreErrors | SendPayGasSeparately});
 
         if (order.executionFee > 0) {
-            send(SendParameters{ to: liquidationFeeReceiver, value: order.executionFee, mode: SendIgnoreErrors});
-            self.totalExecutionFee -= order.executionFee;
+            send(SendParameters{ to: sender(), value: order.executionFee, mode: SendIgnoreErrors});
+            self.executionFeeReserve -= order.executionFee;
         }
         emit(PerpPositionDecreasedEvent{
             trxId: trxId,
@@ -1377,7 +1046,7 @@ contract Pool with Deployable, Resumable {
             marginAfter: perpPosition.margin,
             sizeDelta: sizeDelta,
             sizeAfter: perpPosition.size,
-            tradePrice: liquidatePrice,
+            tradePrice: bankruptcyPrice,
             entryPrice: perpPosition.entryPrice,
             realizedPnLDelta: realizedPnl,
             tradingFee: tradingFee,
@@ -1402,21 +1071,12 @@ contract Pool with Deployable, Resumable {
             lpRealizedPnl: lpRealizedPnl
         }.toCell());
 
-        self.transferEstimatedRemainValue(self.gasForPerpExecutor, sender(), -order.executionFee, 1, payout > 0);
+        self.transferEstimatedRemainValue(self.executePerpOrderGas, sender(), -order.executionFee - payout);
     }
     
-    /**
-     * @dev This function is called when a new ADLPerpPosition is received.
-     * It performs the following steps:
-     * 1. Checks if there is enough gas for execution.
-     * 2. Verifies the sender is a valid executor.
-     * 3. Adds a new order to the order book.
-     * 4. Sends an update position message to the pool.
-     * @param msg The ADLPerpPosition message containing the order details.
-     */
     receive(msg: ADLPerpPosition) {
         let ctx: Context = context();
-        require(ctx.value >= self.gasForPerpExecutor + self.gasForTransferJetton, "gas not enough");
+        require(ctx.value >= self.executePerpOrderGas + self.transferJettonGas, "gas not enough");
         require(self.executors.get(ctx.sender) != null, "invalid sender");
 
         let orderId: Int = self.perpOrderIndexNext;
@@ -1435,21 +1095,14 @@ contract Pool with Deployable, Resumable {
             isPending: true
         });
 
-        self.decreasePerpPosition( msg.trxId, orderId, OP_TYPE_PERP_ADL, msg.account, msg.tokenId, msg.isLong, msg.marginDelta, msg.sizeDelta, msg.price, msg.fundingFeeGrowth, msg.rolloverFeeGrowth, ctx.sender);
+        self.decreasePerpPosition( msg.trxId, orderId, OP_TYPE_PERP_ADL, msg.account, msg.tokenId, msg.isLong, msg.marginDelta, msg.sizeDelta, msg.price, msg.fundingFeeGrowth, msg.rolloverFeeGrowth);
     }
 
-    // ======================================================== Compensate ================================================================ //
-    /**
-     * This function is called when a CreateCompensate message is received.
-     * It performs various checks and adds a new compensate to the order book.
-     * 
-     * @param msg The CreateCompensate message containing the details of the compensate.
-     */
     receive(msg: CreateCompensate) {
         require(self.compensator == sender(), "invalid sender");
 
         let ctx: Context = context();
-        require(ctx.value >= self.gasForPerpExecutor, "gas not enough");
+        require(ctx.value >= self.createPerpOrderGas, "gas not enough");
 
         let compensateId: Int = self.compensateIndexNext;
         self.compensateIndexNext += 1;
@@ -1476,7 +1129,7 @@ contract Pool with Deployable, Resumable {
             unlockTime: now() + 1 * DAY
         }.toCell());
 
-        self.transferEstimatedRemainValue(self.gasForPerpExecutor, sender(), 0, 1, false);
+        self.transferEstimatedRemainValue(self.createPerpOrderGas, sender(), 0);
     }
 
     /**
@@ -1485,7 +1138,7 @@ contract Pool with Deployable, Resumable {
      */
     receive(msg: ExecuteOrCancelCompensate) {
         require(self.compensator == sender(), "invalid sender");
-        require(context().value >= self.gasForPerpExecutor + self.gasForTransferJetton, "gas not enough");
+        require(context().value >= self.executePerpOrderGas, "gas not enough");
 
         let compensateOpt: Compensate? = self.compensates.get(msg.compensateId);
         require(compensateOpt != null, "compensate not exist");
@@ -1499,7 +1152,7 @@ contract Pool with Deployable, Resumable {
                 trxId: msg.trxId
             }.toCell());
 
-            self.transferEstimatedRemainValue(self.gasForPerpExecutor, sender(), 0, 1, false);
+            self.transferEstimatedRemainValue(self.cancelPerpOrderGas, sender(), 0);
             return;
         }
 
@@ -1513,13 +1166,18 @@ contract Pool with Deployable, Resumable {
                 self.perpOrderExs.del(compensate.orderId);
             }
         }
-
+        let orderAmountReserveDelta: Int = 0;
         if (compensate.refundReceiver != null && compensate.refundAmount > 0) {
-            self.transferJetton(self.jettonWallet, compensate.trxId, compensate.refundAmount, compensate.refundReceiver!!, sender());
+            send(SendParameters{ to: compensate.refundReceiver!!, value: compensate.refundAmount, mode: SendIgnoreErrors | SendPayGasSeparately });
+            self.orderAmountReserve -= compensate.refundAmount;
+            orderAmountReserveDelta = compensate.refundAmount;
         }
 
+        let executionFeeReserveDelta: Int = 0;
         if (compensate.executionFeeReceiver != null && compensate.executionFee > 0) {
             send(SendParameters{ to: compensate.executionFeeReceiver!!, bounce: true, value: compensate.executionFee, mode: SendIgnoreErrors });
+            self.executionFeeReserve -= compensate.executionFee;
+            executionFeeReserveDelta = compensate.executionFee;
         }
         self.compensates.del(msg.compensateId);
 
@@ -1528,92 +1186,119 @@ contract Pool with Deployable, Resumable {
             trxId: compensate.trxId
         }.toCell());
 
-        self.transferEstimatedRemainValue(self.gasForPerpExecutor, sender(), 0, 1, compensate.refundReceiver != null && compensate.refundAmount > 0);
+        self.transferEstimatedRemainValue(self.executePerpOrderGas, sender(), - executionFeeReserveDelta - orderAmountReserveDelta);
     }
 
-    /**
-     * Retrieves the account information for the given address.
-     * 
-     * @param account The address of the account.
-     * @return The AccountInfo object containing the account information.
-     */
+    fun refundJetton(query_id: Int, amount: Int, destination: Address, response_destination: Address?) {
+        if (amount > 0) {
+            send(SendParameters{
+                to: sender(),
+                value: 0,
+                mode: SendIgnoreErrors | SendRemainingValue,
+                bounce: false,
+                body: JettonTransfer{
+                    query_id: query_id,
+                    amount: amount,
+                    destination: destination,
+                    response_destination: response_destination,
+                    custom_payload: null,
+                    forward_ton_amount: 0,
+                    forward_payload: beginCell().storeUint(0, 1).endCell().asSlice()
+                }.toCell()
+            });
+        }
+    }
+
+    fun transferJetton(query_id: Int, amount: Int, destination: Address, response_destination: Address?) {
+        if (amount > 0) {
+            send(SendParameters{
+                to: self.tlpWallet, 
+                value: self.transferJettonGas,
+                mode: SendIgnoreErrors, 
+                bounce: false,
+                body: JettonTransfer{
+                    query_id: query_id,
+                    amount: amount,
+                    destination: destination,
+                    response_destination: response_destination,
+                    custom_payload: null,
+                    forward_ton_amount: 0,
+                    forward_payload: beginCell().storeUint(0, 1).endCell().asSlice()
+                }.toCell()
+            });
+        }
+    }
+
+    fun transferEstimatedRemainValue(gasConsumption: Int, to: Address, tonReserveDelta: Int) {
+        let ctx: Context = context();
+        let tonBalanceBeforeMsg: Int = myBalance() - self.feeReserve - self.executionFeeReserve - self.orderAmountReserve + tonReserveDelta - ctx.value;
+        tonBalanceBeforeMsg = max(0, tonBalanceBeforeMsg);
+        let storageFee: Int = self.minStorageReserve - min(tonBalanceBeforeMsg, self.minStorageReserve);
+        let extraValue: Int = !self.executors.exists(ctx.sender) ? 0 : max(0, tonBalanceBeforeMsg - self.minStorageReserve);
+
+        let refundValue: Int = ctx.value - storageFee - gasConsumption + extraValue -  (tonReserveDelta > 0 ? tonReserveDelta : 0);
+
+        if (refundValue > 0) {
+            send(SendParameters{ to: to, value: refundValue, mode: SendIgnoreErrors });
+        }
+    }
+
     get fun accountInfo(account: Address): AccountInfo {
         let isExecutor: Bool = self.executors.get(account) != null;
         let isCompensator: Bool = self.compensator == account;
         let isClaimer: Bool = self.claimer == account;
-        return AccountInfo{ isExecutor: isExecutor, isCompensator: isCompensator, isClaimer: isClaimer};
+        return AccountInfo{ isExecutor, isCompensator, isClaimer};
     }
 
-    /**
-     * Retrieves the perp position data for the given token ID and account.
-     * 
-     * @param tokenId The ID of the token.
-     * @param account The address of the account.
-     * @return The PerpPositionData object containing the perp position data.
-     */
     get fun perpPosition(tokenId: Int, account: Address?): PerpPositionData {
         let position: DirectionPerpPosition? = null;
         if (account != null) {
-            let accountPerpPositionOpt: AccountPerpPosition? = self.perpPositions.get(tokenId);
+            let accountPerpPositionOpt: AccountPerpPosition? = self.positions.get(tokenId);
             if (accountPerpPositionOpt != null) {
                 position = (accountPerpPositionOpt!!).positions.get(account!!);
             }
         }
         return PerpPositionData {
-            perpPositionIndexNext: self.perpPositionIndexNext,
             perpPosition: position,
             globalLPPosition: self.globalLPPositions.get(tokenId),
             globalPosition: self.globalPositions.get(tokenId)
         };
     }
 
-    /**
-     * Retrieves the configuration data for the order book.
-     * 
-     * @param account The address of the account.
-     * @return The ConfigData object containing the configuration data.
-     */
-    get fun configData(): ConfigData {
-        return ConfigData {
+    get fun poolConfig(): PoolConfig {
+        return PoolConfig {
             orderLockTime: self.orderLockTime,
+            mintJettonGas: self.mintJettonGas,
+            burnJettonGas: self.burnJettonGas,
+            transferJettonGas: self.transferJettonGas,
+            createPerpOrderGas: self.createPerpOrderGas,
+            cancelPerpOrderGas: self.cancelPerpOrderGas,
+            executePerpOrderGas: self.executePerpOrderGas,
+            createLiquidityOrderGas: self.createLiquidityOrderGas,
+            cancelLiquidityOrderGas: self.cancelLiquidityOrderGas,
+            executeLiquidityOrderGas: self.executeLiquidityOrderGas,
+
+            minStorageReserve: self.minStorageReserve,
             lpMinExecutionFee: self.lpMinExecutionFee,
             perpMinExecutionFee: self.perpMinExecutionFee,
-            gasForLpTrader: self.gasForLpTrader,
-            gasForLpExecutor: self.gasForLpExecutor,
-            gasForPerpTrader: self.gasForPerpTrader,
-            gasForPerpExecutor: self.gasForPerpExecutor,
-            minTonsForStorage: self.minTonsForStorage,
-            gasForTransferJetton: self.gasForTransferJetton,
-            gasForBurnTlp: self.gasForBurnTlp,
-            gasForMintTlp: self.gasForMintTlp,
+
             tlpWallet: self.tlpWallet,
-            jettonWallet: self.jettonWallet,
             tlpJetton: self.tlpJetton,
+            
             maxLpNetCap: self.maxLpNetCap,
-        };
+        }
     }
 
-    /**
-     * Retrieves the configuration of a token based on its ID.
-     * 
-     * @param tokenId The ID of the token.
-     * @return The TokenConfig object associated with the token ID, or null if not found.
-     */
     get fun tokenConfig(tokenId: Int): TokenConfig? {
         return self.tokenConfigs.get(tokenId);
     }
 
-    /**
-     * Retrieves the LP position data for a given account.
-     * 
-     * @param account The address of the account.
-     * @return LPPositionData The LP position data.
-     */
     get fun poolStat(): PoolStat {
         return PoolStat {
             tlpSupply: self.tlpSupply,
-            totalExecutionFee: self.totalExecutionFee,
-            protocolTradingFee: self.protocolTradingFee,
+            orderAmountReserve: self.orderAmountReserve,
+            executionFeeReserve: self.executionFeeReserve,
+            feeReserve: self.feeReserve,
             globalLPFund: self.globalLPFund,
             globalLPUnrealizedPnl: self.globalLPUnrealizedPnl,
             globalLpFundingFeeGrowth: self.globalLpFundingFeeGrowth,
@@ -1621,44 +1306,19 @@ contract Pool with Deployable, Resumable {
         };
     }
 
-    /**
-     * Retrieves the LiquidityOrderData for the specified order ID.
-     * 
-     * @param orderId The ID of the order to retrieve.
-     * @return The LiquidityOrderData object containing the next index and the LPPositionOrder associated with the order ID.
-     */
-    get fun liquidityOrder(orderId: Int): LiquidityOrderData {
-        return LiquidityOrderData{
-            liquidityOrderIndexNext: self.liquidityOrderIndexNext,
-            liquidityOrder: self.liquidityOrders.get(orderId)
-        };
+    get fun liquidityOrder(orderId: Int): LiquidityOrder? {
+        return self.liquidityOrders.get(orderId);
     }
 
-    /**
-     * Retrieves the PerpOrderData for the specified order ID.
-     * 
-     * @param orderId: The ID of the order to retrieve.
-     * @return The PerpOrderData object containing the next index, order details, and extended order details.
-     */
     get fun perpOrder(orderId: Int): PerpOrderData {
         return PerpOrderData{
-            perpOrderIndexNext: self.perpOrderIndexNext,
             perpOrder: self.perpOrders.get(orderId),
             perpOrderEx: self.perpOrderExs.get(orderId)
         };
     }
 
-    /**
-     * Retrieves the compensation data for a given compensateId.
-     * 
-     * @param compensateId The ID of the compensation to retrieve.
-     * @return The CompensateData object containing the compensateIndexNext and the compensate with the given compensateId.
-     */
-    get fun compensate(compensateId: Int): CompensateData {
-        return CompensateData{
-            compensateIndexNext: self.compensateIndexNext,
-            compensate: self.compensates.get(compensateId)
-        };
+    get fun compensate(compensateId: Int): Compensate? {
+        return self.compensates.get(compensateId);
     }
 
 }

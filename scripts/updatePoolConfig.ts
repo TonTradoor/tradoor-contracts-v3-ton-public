@@ -39,16 +39,18 @@ export async function run(provider: NetworkProvider) {
             lpRolloverFeeRate: toUnits(config["lpRolloverFeeRate"], PERCENTAGE_DECIMAL),
             gasConfig: {
                 $$type: 'GasConfig',
+                mintJettonGas: toNano(config["mintJettonGas"]),
+                burnJettonGas: toNano(config["burnJettonGas"]),
+                transferJettonGas: toNano(config["transferJettonGas"]),
+                createPerpOrderGas: toNano(config["createPerpOrderGas"]),
+                cancelPerpOrderGas: toNano(config["cancelPerpOrderGas"]),
+                executePerpOrderGas: toNano(config["executePerpOrderGas"]),
+                createLiquidityOrderGas: toNano(config["createLiquidityOrderGas"]),
+                cancelLiquidityOrderGas: toNano(config["cancelLiquidityOrderGas"]),
+                executeLiquidityOrderGas: toNano(config["executeLiquidityOrderGas"]),
+                minStorageReserve: toNano(config["minStorageReserve"]),
                 lpMinExecutionFee: toNano(config["lpMinExecutionFee"]),
                 perpMinExecutionFee: toNano(config["perpMinExecutionFee"]),
-                gasForLpTrader: toNano(config["gasForLpTrader"]),
-                gasForLpExecutor: toNano(config["gasForLpExecutor"]),
-                gasForPerpTrader: toNano(config["gasForPerpTrader"]),
-                gasForPerpExecutor: toNano(config["gasForPerpExecutor"]),
-                minTonsForStorage: toNano(config["minTonsForStorage"]),
-                gasForTransferJetton: toNano(config["gasForTransferJetton"]),
-                gasForBurnTlp: toNano(config["gasForBurnTlp"]),
-                gasForMintTlp: toNano(config["gasForMintTlp"]),
             },
             executorConfig: {
                 $$type: 'ExecutorConfig',
@@ -60,7 +62,6 @@ export async function run(provider: NetworkProvider) {
                 $$type: 'ContractConfig',
                 tlpJetton: tlpJetton.address,
                 tlpWallet: poolTLPJettonWallet,
-                jettonWallet: poolMockJettonWallet,
             }
         }
     );
