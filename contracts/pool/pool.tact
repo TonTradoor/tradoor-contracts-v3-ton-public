@@ -78,9 +78,11 @@ contract Pool with Deployable, Resumable, Upgradable{
 
     receive(msg: UpdateConfig) {
         self.requireOwner();
-        self.orderLockTime = msg.orderLockTime!!;
-        self.maxLpNetCap = msg.maxLpNetCap!!;
-        self.lpRolloverFeeRate = msg.lpRolloverFeeRate!!;
+        self.orderLockTime = msg.orderLockTime;
+        self.maxLpNetCap = msg.maxLpNetCap;
+        self.lpRolloverFeeRate = msg.lpRolloverFeeRate;
+        self.liquidatedPositionShareRate = msg.liquidatedPositionShareRate;
+        self.normalPositionShareRate = msg.normalPositionShareRate;
 
         // contract
         let contractConfig: ContractConfig? = msg.contractConfig;
