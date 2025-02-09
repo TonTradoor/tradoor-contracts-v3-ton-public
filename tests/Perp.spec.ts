@@ -73,7 +73,6 @@ describe('PERP', () => {
 
         // check config
         let configData = await pool.getConfigData();
-        expect(configData.jettonWallet).toEqualAddress(poolJettonWallet.address);
     });
 
     // it('should deploy', async () => {
@@ -629,7 +628,6 @@ describe('PERP', () => {
             success: true
         });
         console.log('pool ton balance after create order', fromNano(createResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee after create order with tp/sl', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
         /// cancel order
         const cancelResult = await cancelPerpOrder(executor, createResult.orderIdBefore);
@@ -641,7 +639,6 @@ describe('PERP', () => {
             success: true
         });
         console.log('pool ton balance after cancel order', fromNano(cancelResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee after cancel order with tp/sl', fromNano((await pool.getPoolStat()).totalExecutionFee));
         console.log('receive execution fee', fromNano(cancelResult.balanceAfter.user1TonBalance - cancelResult.balanceBefore.user1TonBalance));
 
         // create order
@@ -656,7 +653,6 @@ describe('PERP', () => {
         expect(createResult1.orderEx?.tpSize).toEqual(toJettonUnits(tpSize));
         expect(createResult1.orderEx?.slPrice).toEqual(toPriceUnits(slPrice));
         expect(createResult1.orderEx?.slSize).toEqual(toJettonUnits(slSize));
-        console.log('total execution fee after create order with tp/sl', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
         /// executor order
         const executeResult = await executePerpOrder(executor, createResult1.orderIdBefore, indexPrice, _fundingFeeGrowth, _rolloverFeeGrowth);
@@ -666,7 +662,6 @@ describe('PERP', () => {
             to: pool.address,
             success: true
         });
-        console.log('total execution fee after execute order', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
         // check order
         expect(executeResult.orderAfter).toBeNull();
@@ -788,7 +783,6 @@ describe('PERP', () => {
             success: true
         });
         console.log('pool ton balance', fromNano(createDecreaseResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee after create order', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
         let tpOrder = createDecreaseResult.order0;
         expect(tpOrder?.opType).toEqual(ORDER_OP_TYPE_DECREASE_TP);
@@ -816,7 +810,6 @@ describe('PERP', () => {
         console.log('global pool data after decrease:', executeDecreaseResult.poolStatAfter);
 
         console.log('pool ton balance', fromNano(executeDecreaseResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee after execute order', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
         // check position
         // let tradingFee = tpSize * decreasePrice * TestEnv.tradingFeeRate;

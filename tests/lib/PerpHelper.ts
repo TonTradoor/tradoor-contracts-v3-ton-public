@@ -76,8 +76,7 @@ export async function cancelPerpOrder(executor: SandboxContract<TreasuryContract
         {
             $$type: 'CancelPerpOrder',
             orderId: orderId,
-            trxId: 0n,
-            executionFeeReceiver: executor.address
+            trxId: 0n
         }
     );
 
@@ -110,7 +109,6 @@ export async function executePerpOrder(executor: SandboxContract<TreasuryContrac
             $$type: 'ExecutePerpOrder',
             orderId: orderId,
             trxId: 2n,
-            executionFeeReceiver: executor.address,
             tokenId: 1n,
             price: toPriceUnits(price),
             premiumRate: 0n,
@@ -246,7 +244,6 @@ export async function liquidatePerpPosition(executor: SandboxContract<TreasuryCo
             account: account,
             isLong: isLong,
             trxId: 2n,
-            liquidationFeeReceiver: executor.address,
             price: toPriceUnits(price),
             premiumRate: 0n,
             fundingFeeGrowth: toJettonUnits(1),
@@ -331,8 +328,7 @@ export async function claimProtocolFee(feeReceiver: SandboxContract<TreasuryCont
             value: toNano(0.2),
         },
         {
-            $$type: 'ClaimProtocolFee',
-            trxId: 0n,
+            $$type: 'WithdrawFee',
             feeReceiver: feeReceiver.address
         }
     );

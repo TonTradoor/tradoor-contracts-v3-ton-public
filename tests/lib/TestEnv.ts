@@ -7,7 +7,8 @@ import { buildOnchainMetadata } from '../../contracts/jetton/utils/jetton-helper
 import { MockJettonWallet } from '../../wrappers/MockJettonWallet';
 import { TLPJettonWallet } from '../../wrappers/TLPJettonWallet';
 import { toJettonUnits } from './TokenHelper';
-import { PERCENTAGE_BASIS_POINT } from '../../utils/constants';
+import { PERCENTAGE_BASIS_POINT, PERCENTAGE_DECIMAL } from '../../utils/constants';
+import { toUnits } from '../../utils/util';
 
 export class TestEnv {
 
@@ -37,6 +38,8 @@ export class TestEnv {
     static priceDecimal: number = 18;
 
     static lpRolloverFeeRate: number = 0.7;
+    static liquidatedPositionShareRate: number = 0.5;
+    static normalPositionShareRate: number = 0.5;
     static tokenConfig = [{
         tokenId: 1n,
         name: 'BTC',
@@ -174,18 +177,22 @@ export class TestEnv {
                 orderLockTime: 3n * 60n,
                 maxLpNetCap: toJettonUnits(100000n),
                 lpRolloverFeeRate: BigInt(this.lpRolloverFeeRate * PERCENTAGE_BASIS_POINT),
+                liquidatedPositionShareRate: BigInt(this.liquidatedPositionShareRate * PERCENTAGE_BASIS_POINT),
+                normalPositionShareRate: BigInt(this.normalPositionShareRate * PERCENTAGE_BASIS_POINT),
                 gasConfig: {
                     $$type: 'GasConfig',
-                    lpMinExecutionFee: toNano(0.05),
-                    perpMinExecutionFee: toNano(0.1),
-                    gasForLpTrader: toNano(0.02),
-                    gasForLpExecutor: toNano(0.02),
-                    gasForPerpTrader: toNano(0.02),
-                    gasForPerpExecutor: toNano(0.02),
-                    minTonsForStorage: toNano(0.01),
-                    gasForTransferJetton: toNano(0.038),
-                    gasForBurnTlp: toNano(0.03),
-                    gasForMintTlp: toNano(0.03),
+                    mintJettonGas: toNano(0.03),
+                    burnJettonGas: toNano(0.03),
+                    transferJettonGas: toNano(0.03),
+                    createPerpOrderGas: toNano(0.03),
+                    cancelPerpOrderGas: toNano(0.03),
+                    executePerpOrderGas: toNano(0.03),
+                    createLiquidityOrderGas: toNano(0.03),
+                    cancelLiquidityOrderGas: toNano(0.03),
+                    executeLiquidityOrderGas: toNano(0.03),
+                    minStorageReserve: toNano(0.03),
+                    lpMinExecutionFee: toNano(0.03),
+                    perpMinExecutionFee: toNano(0.03),
                 },
                 executorConfig: {
                     $$type: 'ExecutorConfig',
@@ -196,8 +203,7 @@ export class TestEnv {
                 contractConfig: {
                     $$type: 'ContractConfig',
                     tlpJetton: TestEnv.tlp.address,
-                    tlpWallet: TestEnv.poolTlpWallet.address,
-                    jettonWallet: TestEnv.poolJettonWallet.address,
+                    tlpWallet: TestEnv.poolTlpWallet.address
                 }
             }
         );

@@ -60,8 +60,7 @@ export async function cancelLiquidityOrder(executor: SandboxContract<TreasuryCon
         {
             $$type: 'CancelLiquidityOrder',
             orderId: orderId,
-            trxId: 1n,
-            executionFeeReceiver: executor.address
+            trxId: 1n
         }
     );
 
@@ -93,7 +92,6 @@ export async function executeLiquidityOrder(executor: SandboxContract<TreasuryCo
             $$type: 'ExecuteLiquidityOrder',
             orderId: orderId,
             trxId: 2n,
-            executionFeeReceiver: executor.address,
             prices: prices,
             lpFundingFeeGrowth: toJettonUnits(lpFundingFeeGrowth),
             rolloverFeeGrowth: toJettonUnits(rolloverFeeGrowth)

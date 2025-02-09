@@ -45,7 +45,6 @@ describe('GAS', () => {
 
         // check config
         let orderBookConfigData = await pool.getConfigData();
-        expect(orderBookConfigData.jettonWallet).toEqualAddress(poolJettonWallet.address);
     });
 
     it('should deploy', async () => {
@@ -74,7 +73,6 @@ describe('GAS', () => {
 
         console.log('create increase LP order gas used:', fromNano(createIncreaseResult.balanceBefore.user0TonBalance - createIncreaseResult.balanceAfter.user0TonBalance - toNano(executionFee)));
         console.log('pool ton balance', fromNano(createIncreaseResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
         /// executor order
         const executeIncreaseResult = await executeLiquidityOrder(executor, createIncreaseResult.orderIdBefore, prices, lpFundingFeeGrowth, rolloverFeeGrowth);
@@ -87,7 +85,6 @@ describe('GAS', () => {
 
         console.log('execute increase LP order gas used:', fromNano(executeIncreaseResult.balanceBefore.executorTonBalance - executeIncreaseResult.balanceAfter.executorTonBalance + toNano(executionFee)));
         console.log('pool ton balance', fromNano(executeIncreaseResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
         // check order
         expect(executeIncreaseResult.orderAfter).toBeNull();
@@ -116,7 +113,6 @@ describe('GAS', () => {
         });
         console.log('create increase long perp order gas used:', fromNano(createResult.balanceBefore.user1TonBalance - createResult.balanceAfter.user1TonBalance - toNano(executionFee)));
         console.log('pool ton balance', fromNano(createResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
 
         // executor order
@@ -133,7 +129,6 @@ describe('GAS', () => {
 
         console.log('position data after increase long:', executeResult.positionDataAfter);
         console.log('pool ton balance', fromNano(executeResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
 
         expect(executeResult.positionDataAfter.globalLPPosition?.netSize).toEqual(toJettonUnits(size));
@@ -158,7 +153,6 @@ describe('GAS', () => {
         });
         console.log('create increase short perp order gas used:', fromNano(createIncreaseShortResult.balanceBefore.user1TonBalance - createIncreaseShortResult.balanceAfter.user1TonBalance - toNano(executionFee)));
         console.log('pool ton balance', fromNano(createIncreaseShortResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
 
         // executor order
@@ -175,7 +169,6 @@ describe('GAS', () => {
 
         console.log('position data after increase short:', executeIncreaseShortResult.positionDataAfter);
         console.log('pool ton balance', fromNano(executeIncreaseShortResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
 
         expect(executeIncreaseShortResult.positionDataAfter.globalLPPosition?.netSize).toEqual(toJettonUnits(increaseShortSize - size));
@@ -200,7 +193,6 @@ describe('GAS', () => {
         console.log('decrease short order:', createDecreaseShortResult.order);
         console.log('create decrease short perp order gas used:', fromNano(createDecreaseShortResult.balanceBefore.user1TonBalance - createDecreaseShortResult.balanceAfter.user1TonBalance - toNano(executionFee)));
         console.log('pool ton balance', fromNano(createDecreaseShortResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
 
         // executor order
@@ -217,7 +209,6 @@ describe('GAS', () => {
 
         console.log('position data after decrease short:', executeDecreaseShortResult.positionDataAfter);
         console.log('pool ton balance', fromNano(executeDecreaseShortResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
 
         expect(executeDecreaseShortResult.positionDataAfter.globalLPPosition?.netSize).toEqual(toJettonUnits(size));
@@ -242,7 +233,6 @@ describe('GAS', () => {
         console.log('decrease long order:', createDecreaseLongResult.order);
         console.log('create decrease long perp order gas used:', fromNano(createDecreaseLongResult.balanceBefore.user1TonBalance - createDecreaseLongResult.balanceAfter.user1TonBalance - toNano(executionFee)));
         console.log('pool ton balance', fromNano(createDecreaseLongResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
 
         // executor order
@@ -259,7 +249,6 @@ describe('GAS', () => {
 
         console.log('position data after decrease long:', executeDecreaseLongResult.positionDataAfter);
         console.log('pool ton balance', fromNano(executeDecreaseLongResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
 
         expect(executeDecreaseLongResult.positionDataAfter.globalLPPosition?.netSize).toEqual(0n);
@@ -272,7 +261,6 @@ describe('GAS', () => {
 
         console.log('create decrease LP order gas used:', fromNano(createDecreaseLPResult.balanceBefore.user0TonBalance - createDecreaseLPResult.balanceAfter.user0TonBalance - toNano(executionFee)));
         console.log('pool ton balance', fromNano(createDecreaseLPResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
 
         /// executor order
@@ -289,7 +277,6 @@ describe('GAS', () => {
 
         console.log('execute decrease LP order gas used:', fromNano(executeDecreaseLPResult.balanceBefore.executorTonBalance - executeDecreaseLPResult.balanceAfter.executorTonBalance + toNano(executionFee)));
         console.log('pool ton balance', fromNano(executeDecreaseLPResult.balanceAfter.poolTonBalance));
-        console.log('total execution fee', fromNano((await pool.getPoolStat()).totalExecutionFee));
 
         // check order
         expect(executeIncreaseResult.orderAfter).toBeNull();

@@ -1277,8 +1277,8 @@ contract Pool with Deployable, Resumable, Upgradable{
         };
     }
 
-    get fun poolConfig(): PoolConfig {
-        return PoolConfig {
+    get fun configData(): ConfigData {
+        return ConfigData {
             orderLockTime: self.orderLockTime,
             mintJettonGas: self.mintJettonGas,
             burnJettonGas: self.burnJettonGas,
@@ -1318,19 +1318,26 @@ contract Pool with Deployable, Resumable, Upgradable{
         };
     }
 
-    get fun liquidityOrder(orderId: Int): LiquidityOrder? {
-        return self.liquidityOrders.get(orderId);
+    get fun liquidityOrder(orderId: Int): LiquidityOrderData {
+        return LiquidityOrderData{
+            liquidityOrderIndexNext: self.liquidityOrderIndexNext,
+            liquidityOrder: self.liquidityOrders.get(orderId)
+        };
     }
 
     get fun perpOrder(orderId: Int): PerpOrderData {
         return PerpOrderData{
+            perpOrderIndexNext: self.perpOrderIndexNext,
             perpOrder: self.perpOrders.get(orderId),
             perpOrderEx: self.perpOrderExs.get(orderId)
         };
     }
 
-    get fun compensate(compensateId: Int): Compensate? {
-        return self.compensates.get(compensateId);
+    get fun compensate(compensateId: Int): CompensateData {
+        return CompensateData{
+            compensateIndexNext: self.compensateIndexNext,
+            compensate: self.compensates.get(compensateId)
+        }
     }
 
 }

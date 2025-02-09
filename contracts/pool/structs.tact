@@ -5,7 +5,7 @@ struct AccountInfo {
     isClaimer: Bool;
 }
 
-struct PoolConfig {
+struct ConfigData {
     orderLockTime: Int as uint32;
     mintJettonGas: Int as coins;
     burnJettonGas: Int as coins;
@@ -161,6 +161,7 @@ struct PerpOrderEx {
 }
 
 struct PerpOrderData {
+    perpOrderIndexNext: Int as uint64;
     perpOrder: PerpOrder?;
     perpOrderEx: PerpOrderEx?;
 }
@@ -182,5 +183,10 @@ struct TpSl {
     tpPrice: Int as uint128;
     slSize: Int as coins;
     slPrice: Int as uint128;
+}
+
+struct CompensateData {
+    compensateIndexNext: Int as uint64;
+    compensate: Compensate?;
 }
 

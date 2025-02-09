@@ -73,7 +73,6 @@ describe('LP', () => {
 
         // check config
         let configData = await pool.getConfigData();
-        expect(configData.jettonWallet).toEqualAddress(poolJettonWallet.address);
     });
 
     it('should deploy', async () => {
@@ -221,7 +220,7 @@ describe('LP', () => {
         // check order
         expect(createResult.orderIdAfter).toEqual(createResult.orderIdBefore + 1n);
         expect(createResult.order).not.toBeNull();
-        expect(createResult.order?.jettonDelta).toEqual(toJettonUnits(liquidity));
+        expect(createResult.order?.amount).toEqual(toJettonUnits(liquidity));
         // check jetton
         expect(createResult.balanceAfter.user0JettonBalance).toEqual(createResult.balanceBefore.user0JettonBalance - toJettonUnits(liquidity));
         expect(createResult.balanceAfter.poolJettonBalance).toEqual(createResult.balanceBefore.poolJettonBalance + toJettonUnits(liquidity));
@@ -461,7 +460,7 @@ describe('LP', () => {
         // check order
         expect(createResult.orderIdAfter).toEqual(createResult.orderIdBefore + 1n);
         expect(createResult.order).not.toBeNull();
-        expect(createResult.order?.jettonDelta).toEqual(toTlpUnits(tlpAmount));
+        expect(createResult.order?.amount).toEqual(toTlpUnits(tlpAmount));
 
         /// cancel order
         const cancelResult = await cancelLiquidityOrder(executor, createResult.orderIdBefore);
@@ -533,7 +532,7 @@ describe('LP', () => {
         // check order
         expect(createDecreaseResult.orderIdAfter).toEqual(createDecreaseResult.orderIdBefore + 1n);
         expect(createDecreaseResult.order).not.toBeNull();
-        expect(createDecreaseResult.order?.jettonDelta).toEqual(toTlpUnits(tlpAmount));
+        expect(createDecreaseResult.order?.amount).toEqual(toTlpUnits(tlpAmount));
 
         blockchain.now += 60;
         /// executor order
@@ -681,7 +680,7 @@ describe('LP', () => {
         // check order
         expect(createDecreaseResult.orderIdAfter).toEqual(createDecreaseResult.orderIdBefore + 1n);
         expect(createDecreaseResult.order).not.toBeNull();
-        expect(createDecreaseResult.order?.jettonDelta).toEqual(toTlpUnits(decreaseTlpAmount));
+        expect(createDecreaseResult.order?.amount).toEqual(toTlpUnits(decreaseTlpAmount));
 
         blockchain.now = blockchain.now + 10;
         /// executor order
@@ -740,7 +739,7 @@ describe('LP', () => {
         // check order
         expect(createResult.orderIdAfter).toEqual(createResult.orderIdBefore + 1n);
         expect(createResult.order).not.toBeNull();
-        expect(createResult.order?.jettonDelta).toEqual(toJettonUnits(liquidity));
+        expect(createResult.order?.amount).toEqual(toJettonUnits(liquidity));
         // check jetton
         expect(createResult.balanceAfter.user0JettonBalance).toEqual(createResult.balanceBefore.user0JettonBalance - toJettonUnits(liquidity));
         expect(createResult.balanceAfter.poolJettonBalance).toEqual(createResult.balanceBefore.poolJettonBalance + toJettonUnits(liquidity));
