@@ -226,7 +226,7 @@ contract Pool with Deployable, Resumable, Upgradable{
         if (order.isIncrease) {
             send(SendParameters{ to: order.account, value: order.amount, mode: SendIgnoreErrors| SendPayGasSeparately });
             self.orderAmountReserve -= order.amount;
-            orderAmountReserveDelta = order.amount
+            orderAmountReserveDelta = order.amount;
         } else {
             self.transferJetton(msg.trxId, order.amount, order.account, ctx.sender);
         }
@@ -604,10 +604,9 @@ contract Pool with Deployable, Resumable, Upgradable{
         if (sizeDelta > 0) {
             tradingFee = sizeDelta * tradePrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);
             lpTradingFee = tradingFee * tokenConfig.lpTradingFeeRate / PERCENTAGE_BASIS_POINT;
-            //todo
             let tradoorProfit: Int = 0;
             if (lpRealizedPnl > 0){
-                tradoorProfit = lpRealizedPnl * self.normalPositionShareRate;
+                tradoorProfit = lpRealizedPnl * self.normalPositionShareRate / PERCENTAGE_BASIS_POINT;
             }
             self.feeReserve += tradingFee - lpTradingFee + tradoorProfit;
             self.globalLPFund += lpRealizedPnl - tradoorProfit + lpTradingFee;
@@ -784,7 +783,7 @@ contract Pool with Deployable, Resumable, Upgradable{
             lpTradingFee = tradingFee * tokenConfig.lpTradingFeeRate / PERCENTAGE_BASIS_POINT;
             let tradoorProfit: Int = 0;
             if (lpRealizedPnl > 0) {
-                tradoorProfit = lpRealizedPnl * self.normalPositionShareRate;
+                tradoorProfit = lpRealizedPnl * self.normalPositionShareRate / PERCENTAGE_BASIS_POINT;
             }
             self.feeReserve += tradingFee - lpTradingFee + tradoorProfit;
             self.globalLPFund += lpRealizedPnl - tradoorProfit + lpTradingFee;
@@ -1008,7 +1007,7 @@ contract Pool with Deployable, Resumable, Upgradable{
         // trading fee
         let tradingFee: Int = sizeDelta * bankruptcyPrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);
         let lpTradingFee: Int = tradingFee * tokenConfig.lpTradingFeeRate / PERCENTAGE_BASIS_POINT;
-        let tradoorProfit: Int = lpRealizedPnl * self.liquidatedPositionShareRate;
+        let tradoorProfit: Int = lpRealizedPnl * self.liquidatedPositionShareRate / PERCENTAGE_BASIS_POINT;
         self.feeReserve += tradingFee - lpTradingFee + tradoorProfit;
         self.globalLPFund += lpRealizedPnl - tradoorProfit + lpTradingFee;
 

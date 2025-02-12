@@ -31,13 +31,13 @@ export async function run(provider: NetworkProvider) {
             isLong: isLong,
             isMarket: isMarket,
             marginDelta: toNano(margin),
-            sizeDelta: toUnits(size, MOCK_DECIMAL),
+            sizeDelta: toNano(size),
             triggerPrice: toUnits(triggerPrice, PRICE_DECIMAL),
             requestTime: BigInt(now()),
             executionFee: toNano(executionFee),
-            tpSize: toUnits(0, MOCK_DECIMAL),
+            tpSize: toNano(0),
             tpPrice: toUnits(0, PRICE_DECIMAL),
-            slSize: toUnits(0, MOCK_DECIMAL),
+            slSize: toNano(0),
             slPrice: toUnits(0, PRICE_DECIMAL),
         }
     );

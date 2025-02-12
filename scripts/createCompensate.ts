@@ -34,7 +34,7 @@ export async function run(provider: NetworkProvider) {
             orderId: orderId,
             trxId: 0n,
             refundReceiver: refundReceiver,
-            refundAmount: toUnits(refundAmount, MOCK_DECIMAL),
+            refundAmount: toNano(refundAmount),
             executionFeeReceiver: executionFeeReceiver,
             executionFee: toNano(executionFee)
         }

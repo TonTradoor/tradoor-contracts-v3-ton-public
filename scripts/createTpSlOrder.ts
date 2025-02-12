@@ -42,9 +42,9 @@ export async function run(provider: NetworkProvider) {
             executionFee: toNano(executionFee),
             tokenId: BigInt(tokenId),
             isLong: isLong,
-            tpSize: toUnits(size, MOCK_DECIMAL),
+            tpSize: toNano(size),
             tpPrice: toUnits(tpPrice, PRICE_DECIMAL),
-            slSize: toUnits(size, MOCK_DECIMAL),
+            slSize: toNano(size),
             slPrice: toUnits(slPrice, PRICE_DECIMAL),
             trxId: trxId,
             requestTime: BigInt(now())

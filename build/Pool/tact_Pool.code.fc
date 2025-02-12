@@ -130,7 +130,7 @@
         $lpTradingFee = (($tradingFee * $tokenConfig'lpTradingFeeRate) / 1000000000);
         int $tradoorProfit = 0;
         if (($lpRealizedPnl > 0)) {
-            $tradoorProfit = ($lpRealizedPnl * $self'normalPositionShareRate);
+            $tradoorProfit = (($lpRealizedPnl * $self'normalPositionShareRate) / 1000000000);
         }
         $self'feeReserve = $self'feeReserve + (($tradingFee - $lpTradingFee) + $tradoorProfit);
         $self'globalLPFund = $self'globalLPFund + (($lpRealizedPnl - $tradoorProfit) + $lpTradingFee);
@@ -237,7 +237,7 @@
         $lpTradingFee = (($tradingFee * $tokenConfig'lpTradingFeeRate) / 1000000000);
         int $tradoorProfit = 0;
         if (($lpRealizedPnl > 0)) {
-            $tradoorProfit = ($lpRealizedPnl * $self'normalPositionShareRate);
+            $tradoorProfit = (($lpRealizedPnl * $self'normalPositionShareRate) / 1000000000);
         }
         $self'feeReserve = $self'feeReserve + (($tradingFee - $lpTradingFee) + $tradoorProfit);
         $self'globalLPFund = $self'globalLPFund + (($lpRealizedPnl - $tradoorProfit) + $lpTradingFee);
@@ -359,7 +359,7 @@
     }
     int $tradingFee = ((($sizeDelta * $bankruptcyPrice) * $tokenConfig'tradingFeeRate) / 1000000000000000000000000000);
     int $lpTradingFee = (($tradingFee * $tokenConfig'lpTradingFeeRate) / 1000000000);
-    int $tradoorProfit = ($lpRealizedPnl * $self'liquidatedPositionShareRate);
+    int $tradoorProfit = (($lpRealizedPnl * $self'liquidatedPositionShareRate) / 1000000000);
     $self'feeReserve = $self'feeReserve + (($tradingFee - $lpTradingFee) + $tradoorProfit);
     $self'globalLPFund = $self'globalLPFund + (($lpRealizedPnl - $tradoorProfit) + $lpTradingFee);
     int $positionId = $perpPosition'positionId;
@@ -967,6 +967,7 @@
 (((slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int)), ()) $Pool$_internal_binary_UpdateContract((slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int) $self, (slice, slice) $msg) impure inline {
     var ($self'owner, $self'stopped, $self'orderLockTime, $self'maxLpNetCap, $self'lpRolloverFeeRate, $self'liquidatedPositionShareRate, $self'normalPositionShareRate, $self'mintJettonGas, $self'burnJettonGas, $self'transferJettonGas, $self'createPerpOrderGas, $self'cancelPerpOrderGas, $self'executePerpOrderGas, $self'createLiquidityOrderGas, $self'cancelLiquidityOrderGas, $self'executeLiquidityOrderGas, $self'lpMinExecutionFee, $self'perpMinExecutionFee, $self'minStorageReserve, $self'tlpSupply, $self'tlpJetton, $self'tlpWallet, $self'compensator, $self'claimer, $self'executors, $self'tokenConfigs, $self'liquidityOrders, $self'liquidityOrderIndexNext, $self'perpOrders, $self'perpOrderExs, $self'perpOrderIndexNext, $self'compensates, $self'compensateIndexNext, $self'positionIndexNext, $self'positions, $self'globalLPPositions, $self'globalPositions, $self'feeReserve, $self'orderAmountReserve, $self'executionFeeReserve, $self'globalLPFund, $self'globalLPUnrealizedPnl, $self'globalLpFundingFeeGrowth, $self'globalRolloverFeeGrowth) = $self;
     var ($msg'code, $msg'data) = $msg;
+    ($self'owner, $self'stopped, $self'orderLockTime, $self'maxLpNetCap, $self'lpRolloverFeeRate, $self'liquidatedPositionShareRate, $self'normalPositionShareRate, $self'mintJettonGas, $self'burnJettonGas, $self'transferJettonGas, $self'createPerpOrderGas, $self'cancelPerpOrderGas, $self'executePerpOrderGas, $self'createLiquidityOrderGas, $self'cancelLiquidityOrderGas, $self'executeLiquidityOrderGas, $self'lpMinExecutionFee, $self'perpMinExecutionFee, $self'minStorageReserve, $self'tlpSupply, $self'tlpJetton, $self'tlpWallet, $self'compensator, $self'claimer, $self'executors, $self'tokenConfigs, $self'liquidityOrders, $self'liquidityOrderIndexNext, $self'perpOrders, $self'perpOrderExs, $self'perpOrderIndexNext, $self'compensates, $self'compensateIndexNext, $self'positionIndexNext, $self'positions, $self'globalLPPositions, $self'globalPositions, $self'feeReserve, $self'orderAmountReserve, $self'executionFeeReserve, $self'globalLPFund, $self'globalLPUnrealizedPnl, $self'globalLpFundingFeeGrowth, $self'globalRolloverFeeGrowth)~$Pool$_fun_requireOwner();
     $global_nativeSetCode($Builder$_fun_endCell($Builder$_fun_storeSlice($global_beginCell(), $msg'code)));
     if ((~ null?($msg'data))) {
         $global_nativeSetData($Builder$_fun_endCell($Builder$_fun_storeSlice($global_beginCell(), __tact_not_null($msg'data))));

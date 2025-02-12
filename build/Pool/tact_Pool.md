@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: Pool
-BOC Size: 20558 bytes
+BOC Size: 21370 bytes
 
 # Types
-Total Types: 64
+Total Types: 63
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -248,10 +248,6 @@ Signature: `PerpOrderData{perpOrderIndexNext:uint64,perpOrder:Maybe PerpOrder{op
 ## Compensate
 TLB: `_ orderType:Maybe uint8 orderId:uint64 trxId:uint64 refundReceiver:Maybe address refundAmount:coins executionFeeReceiver:Maybe address executionFee:coins unlockTime:uint32 = Compensate`
 Signature: `Compensate{orderType:Maybe uint8,orderId:uint64,trxId:uint64,refundReceiver:Maybe address,refundAmount:coins,executionFeeReceiver:Maybe address,executionFee:coins,unlockTime:uint32}`
-
-## TpSl
-TLB: `_ tpSize:coins tpPrice:uint128 slSize:coins slPrice:uint128 = TpSl`
-Signature: `TpSl{tpSize:coins,tpPrice:uint128,slSize:coins,slPrice:uint128}`
 
 ## CompensateData
 TLB: `_ compensateIndexNext:uint64 compensate:Maybe Compensate{orderType:Maybe uint8,orderId:uint64,trxId:uint64,refundReceiver:Maybe address,refundAmount:coins,executionFeeReceiver:Maybe address,executionFee:coins,unlockTime:uint32} = CompensateData`

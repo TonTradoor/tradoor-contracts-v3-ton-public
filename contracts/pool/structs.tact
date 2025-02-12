@@ -178,13 +178,6 @@ struct Compensate {
     unlockTime: Int as uint32;
 }
 
-struct TpSl {
-    tpSize: Int as coins;
-    tpPrice: Int as uint128;
-    slSize: Int as coins;
-    slPrice: Int as uint128;
-}
-
 struct CompensateData {
     compensateIndexNext: Int as uint64;
     compensate: Compensate?;
