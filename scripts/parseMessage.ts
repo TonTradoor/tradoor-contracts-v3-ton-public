@@ -1,6 +1,6 @@
 import { Cell } from '@ton/core';
 import { NetworkProvider } from '@ton/blueprint';
-import { loadCreateTpSlPerpOrder } from '../wrappers/Pool';
+import { loadCancelPerpOrder, loadCreateTpSlPerpOrder } from '../wrappers/Pool';
 
 export async function run(provider: NetworkProvider) {
 
@@ -8,11 +8,16 @@ export async function run(provider: NetworkProvider) {
 
     await provider.ui().choose('Choose message type:', [
         'CreateTpSlPerpOrder',
+        'CancelPerpOrder',
     ], a => a).then(async (msg) => {
         const body = Buffer.from(rawBody, 'hex').toString('base64');
         const slice = Cell.fromBase64(body).asSlice();
         if (msg === 'CreateTpSlPerpOrder') {
             const msg = loadCreateTpSlPerpOrder(slice);
+            console.log(`msg:`, msg);
+        }
+        if (msg === 'CancelPerpOrder') {
+            const msg = loadCancelPerpOrder(slice);
             console.log(`msg:`, msg);
         }
     });

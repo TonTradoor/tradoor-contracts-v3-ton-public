@@ -371,7 +371,7 @@ contract Pool with Deployable, Resumable, Upgradable{
             self.perpOrderExs.set(orderId, PerpOrderEx{ tpSize: msg.tpSize, tpPrice: msg.tpPrice, slSize: msg.slSize, slPrice: msg.slPrice, executionFee });
         }
         self.orderAmountReserve += msg.marginDelta;
-        self.executionFeeReserve += executionFee;
+        self.executionFeeReserve += totalExecutionFee;
 
         self.transferEstimatedRemainValue(self.createPerpOrderGas, ctx.sender, totalExecutionFee + msg.marginDelta);
     }

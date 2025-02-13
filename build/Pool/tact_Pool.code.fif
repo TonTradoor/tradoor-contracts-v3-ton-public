@@ -6109,34 +6109,35 @@ PROGRAM{
     53 s() PUSH
     GREATER
     IF:<{
-      s2 51 s() XCHG
-      s1 50 s() XCHG
-      s0 49 s() XCHG
+      s3 51 s() XCHG
+      s2 50 s() XCHG
+      s1 49 s() XCHG
+      s0 48 s() XCHG
       64 PUSHINT
-      s0 49 s() XCHG
-      53 s() PUSH
+      s0 53 s() XCHG
       $PerpOrderEx$_constructor_tpSize_tpPrice_slSize_slPrice_executionFee INLINECALLDICT
       $PerpOrderEx$_store_cell INLINECALLDICT
-      s3 s13 XCHG
-      s2 46 s() XCHG
-      s1 47 s() XCHG
+      s3 s12 XCHG
+      s2 49 s() XCHG
+      s1 45 s() XCHG
       __tact_dict_set_uint_cell INLINECALLDICT
-      43 s() 46 s() XCHG
-      44 s() 45 s() XCHG
-      43 s() 44 s() XCHG
-      s0 s10 XCHG
+      42 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      42 s() 43 s() XCHG
+      s0 s9 XCHG
     }>ELSE<{
       DROP
+      s4 51 s() XCHG
       s3 50 s() XCHG
       s2 49 s() XCHG
       47 s() POP
       47 s() POP
-      2DROP
+      3 BLKDROP
     }>
-    SWAP
-    40 s() PUSH
+    39 s() PUSH
     ADD
-    s0 47 s() XCHG
+    s0 46 s() XCHG
+    41 s() PUSH
     ADD
     s1 41 s() XCHG
     s0 39 s() XCHG
