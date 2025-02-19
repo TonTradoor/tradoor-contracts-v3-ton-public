@@ -24,7 +24,7 @@ export async function run(provider: NetworkProvider) {
                     name: token["name"],
                     enable: token["enable"],
                     maxLeverage: BigInt(token["maxLeverage"]),
-                    liquidationFee: toUnits(token["liquidationFee"], MOCK_DECIMAL),
+                    liquidationFee: toNano(token["liquidationFee"]),
                     maintenanceRate: toUnits(token["maintenanceRate"], PERCENTAGE_DECIMAL),
                     tradingFeeRate: toUnits(token["tradingFeeRate"], PERCENTAGE_DECIMAL),
                     lpTradingFeeRate: toUnits(token["lpTradingFeeRate"], PERCENTAGE_DECIMAL)

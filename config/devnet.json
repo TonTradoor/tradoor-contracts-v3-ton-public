@@ -1,13 +1,29 @@
 {
   "nextDeployId": 4,
   "mockJetton": "EQAJGpLnnf_8hDcQX0AFxPAygd6sERrqgJyq77Z-iEgWVC3B",
-  "tlpJetton": "EQArpHO0ImrK4I2CMXxHnbcLW2PvZLI-Forj0OvBO63y8f5G",
-  "pool": "EQBIpUCfZmo8z2EPZ5iDYoQVqGhrjtV-CK_reU0Uscnkxjtx",
+  "tlpJetton": "EQDF3wqTiM2YZsitZV9aQToxa2_9R-TjgF-vdlDQg-lNQ0MD",
+  "pool": "EQD7UDRdp4bXBB3WTKHAufhoh1eR8GmiqlrbwbY5tDt8OaRp",
   "executors": [
     "0QBWA3yJYPJ9LJCdy2WlzoGO2_0Cw6l7D3exFw25hxR_bDkS",
     "0QAjBLsS_axAf647M2sPtCVCsJ-kI4WP82N72gPLHjsNHY9i",
     "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk"
   ],
+  "members": [
+    {
+      "address": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
+      "weight": 3
+    },
+    {
+      "address": "0QAjBLsS_axAf647M2sPtCVCsJ-kI4WP82N72gPLHjsNHY9i",
+      "weight": 1
+    },
+    {
+      "address": "0QBWA3yJYPJ9LJCdy2WlzoGO2_0Cw6l7D3exFw25hxR_bDkS",
+      "weight": 1
+    }
+  ],
+  "multisig": "EQBhUbaLxfTvrWiIzG5Bv2uBK5kHxu-IXX5glZvuAA_8HGW8",
+  "manager": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
   "compensator": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
   "claimer": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
   "mintJettonGas": 0.05,

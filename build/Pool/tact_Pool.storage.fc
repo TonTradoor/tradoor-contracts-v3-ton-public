@@ -338,56 +338,85 @@ _ $ExecutorConfig$_get_claimer((cell, slice, slice) v) inline {
 
 ;;
 ;; Type: ContractConfig
-;; TLB: _ tlpJetton:address tlpWallet:address = ContractConfig
+;; TLB: _ multisig:address tlpJetton:address tlpWallet:address = ContractConfig
 ;;
 
-(slice, ((slice, slice))) $ContractConfig$_load(slice sc_0) inline {
+(slice, ((slice, slice, slice))) $ContractConfig$_load(slice sc_0) inline {
+    var v'multisig = sc_0~__tact_load_address();
     var v'tlpJetton = sc_0~__tact_load_address();
     var v'tlpWallet = sc_0~__tact_load_address();
-    return (sc_0, (v'tlpJetton, v'tlpWallet));
+    return (sc_0, (v'multisig, v'tlpJetton, v'tlpWallet));
 }
 
-tuple $ContractConfig$_as_optional((slice, slice) v) inline {
-    var (v'tlpJetton, v'tlpWallet) = v;
-    return __tact_tuple_create_2(v'tlpJetton, v'tlpWallet);
+tuple $ContractConfig$_as_optional((slice, slice, slice) v) inline {
+    var (v'multisig, v'tlpJetton, v'tlpWallet) = v;
+    return __tact_tuple_create_3(v'multisig, v'tlpJetton, v'tlpWallet);
 }
 
-_ $ContractConfig$_get_tlpJetton((slice, slice) v) inline {
-    var (v'tlpJetton, v'tlpWallet) = v;
+_ $ContractConfig$_get_multisig((slice, slice, slice) v) inline {
+    var (v'multisig, v'tlpJetton, v'tlpWallet) = v;
+    return v'multisig;
+}
+
+_ $ContractConfig$_get_tlpJetton((slice, slice, slice) v) inline {
+    var (v'multisig, v'tlpJetton, v'tlpWallet) = v;
     return v'tlpJetton;
 }
 
-_ $ContractConfig$_get_tlpWallet((slice, slice) v) inline {
-    var (v'tlpJetton, v'tlpWallet) = v;
+_ $ContractConfig$_get_tlpWallet((slice, slice, slice) v) inline {
+    var (v'multisig, v'tlpJetton, v'tlpWallet) = v;
     return v'tlpWallet;
 }
 
-((slice, slice)) $ContractConfig$_not_null(tuple v) inline {
+((slice, slice, slice)) $ContractConfig$_not_null(tuple v) inline {
     throw_if(128, null?(v));
-    var (slice vvv'tlpJetton, slice vvv'tlpWallet) = __tact_tuple_destroy_2(v);
-    return (vvv'tlpJetton, vvv'tlpWallet);
+    var (slice vvv'multisig, slice vvv'tlpJetton, slice vvv'tlpWallet) = __tact_tuple_destroy_3(v);
+    return (vvv'multisig, vvv'tlpJetton, vvv'tlpWallet);
 }
 
 ;;
-;; Type: UpdateConfig
-;; Header: 0x614b3255
-;; TLB: update_config#614b3255 orderLockTime:uint32 maxLpNetCap:coins lpRolloverFeeRate:uint32 liquidatedPositionShareRate:uint32 normalPositionShareRate:uint32 gasConfig:Maybe GasConfig{mintJettonGas:coins,burnJettonGas:coins,transferJettonGas:coins,createPerpOrderGas:coins,cancelPerpOrderGas:coins,executePerpOrderGas:coins,createLiquidityOrderGas:coins,cancelLiquidityOrderGas:coins,executeLiquidityOrderGas:coins,minStorageReserve:coins,lpMinExecutionFee:coins,perpMinExecutionFee:coins} executorConfig:Maybe ExecutorConfig{executors:dict<address, bool>,compensator:address,claimer:address} contractConfig:Maybe ContractConfig{tlpJetton:address,tlpWallet:address} = UpdateConfig
+;; Type: UpdateBaseConfig
+;; Header: 0x8374e4fa
+;; TLB: update_base_config#8374e4fa gasConfig:Maybe GasConfig{mintJettonGas:coins,burnJettonGas:coins,transferJettonGas:coins,createPerpOrderGas:coins,cancelPerpOrderGas:coins,executePerpOrderGas:coins,createLiquidityOrderGas:coins,cancelLiquidityOrderGas:coins,executeLiquidityOrderGas:coins,minStorageReserve:coins,lpMinExecutionFee:coins,perpMinExecutionFee:coins} executorConfig:Maybe ExecutorConfig{executors:dict<address, bool>,compensator:address,claimer:address} contractConfig:Maybe ContractConfig{multisig:address,tlpJetton:address,tlpWallet:address} = UpdateBaseConfig
 ;;
 
-(slice, ((int, int, int, int, int, tuple, tuple, tuple))) $UpdateConfig$_load(slice sc_0) inline_ref {
-    throw_unless(129, sc_0~load_uint(32) == 1632318037);
-    var v'orderLockTime = sc_0~load_uint(32);
-    var v'maxLpNetCap = sc_0~load_coins();
-    var v'lpRolloverFeeRate = sc_0~load_uint(32);
-    var v'liquidatedPositionShareRate = sc_0~load_uint(32);
-    var v'normalPositionShareRate = sc_0~load_uint(32);
+(slice, ((tuple, tuple, tuple))) $UpdateBaseConfig$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2205476090);
     slice sc_1 = sc_0~load_ref().begin_parse();
     var v'gasConfig = sc_1~load_int(1) ? $GasConfig$_as_optional(sc_1~$GasConfig$_load()) : null();
     slice sc_2 = sc_1~load_ref().begin_parse();
     var v'executorConfig = sc_2~load_int(1) ? $ExecutorConfig$_as_optional(sc_2~$ExecutorConfig$_load()) : null();
     slice sc_3 = sc_2~load_ref().begin_parse();
     var v'contractConfig = sc_3~load_int(1) ? $ContractConfig$_as_optional(sc_3~$ContractConfig$_load()) : null();
-    return (sc_0, (v'orderLockTime, v'maxLpNetCap, v'lpRolloverFeeRate, v'liquidatedPositionShareRate, v'normalPositionShareRate, v'gasConfig, v'executorConfig, v'contractConfig));
+    return (sc_0, (v'gasConfig, v'executorConfig, v'contractConfig));
+}
+
+;;
+;; Type: UpdatePoolConfig
+;; Header: 0xa62f856c
+;; TLB: update_pool_config#a62f856c orderLockTime:uint32 maxLpNetCap:coins lpRolloverFeeRate:uint32 liquidatedPositionShareRate:uint32 normalPositionShareRate:uint32 = UpdatePoolConfig
+;;
+
+(slice, ((int, int, int, int, int))) $UpdatePoolConfig$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2788132204);
+    var v'orderLockTime = sc_0~load_uint(32);
+    var v'maxLpNetCap = sc_0~load_coins();
+    var v'lpRolloverFeeRate = sc_0~load_uint(32);
+    var v'liquidatedPositionShareRate = sc_0~load_uint(32);
+    var v'normalPositionShareRate = sc_0~load_uint(32);
+    return (sc_0, (v'orderLockTime, v'maxLpNetCap, v'lpRolloverFeeRate, v'liquidatedPositionShareRate, v'normalPositionShareRate));
+}
+
+;;
+;; Type: SetManager
+;; Header: 0x92f200ce
+;; TLB: set_manager#92f200ce manager:address = SetManager
+;;
+
+(slice, ((slice))) $SetManager$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2465333454);
+    var v'manager = sc_0~__tact_load_address();
+    return (sc_0, (v'manager));
 }
 
 ;;
@@ -1038,16 +1067,16 @@ cell $CompensateExecutedEvent$_store_cell((int, int) v) inline {
 
 ;;
 ;; Type: AccountInfo
-;; TLB: _ isExecutor:bool isCompensator:bool isClaimer:bool = AccountInfo
+;; TLB: _ isExecutor:bool isCompensator:bool isClaimer:bool isManager:bool = AccountInfo
 ;;
 
-(int, int, int) $AccountInfo$_to_external(((int, int, int)) v) inline {
-    var (v'isExecutor, v'isCompensator, v'isClaimer) = v; 
-    return (v'isExecutor, v'isCompensator, v'isClaimer);
+(int, int, int, int) $AccountInfo$_to_external(((int, int, int, int)) v) inline {
+    var (v'isExecutor, v'isCompensator, v'isClaimer, v'isManager) = v; 
+    return (v'isExecutor, v'isCompensator, v'isClaimer, v'isManager);
 }
 
-((int, int, int)) $AccountInfo$_constructor_isExecutor_isCompensator_isClaimer(int $isExecutor, int $isCompensator, int $isClaimer) inline {
-    return ($isExecutor, $isCompensator, $isClaimer);
+((int, int, int, int)) $AccountInfo$_constructor_isExecutor_isCompensator_isClaimer_isManager(int $isExecutor, int $isCompensator, int $isClaimer, int $isManager) inline {
+    return ($isExecutor, $isCompensator, $isClaimer, $isManager);
 }
 
 ;;
@@ -1602,8 +1631,8 @@ tuple $Compensate$_load_opt(cell cl) inline {
 ;; Type: Pool
 ;;
 
-builder $Pool$_store(builder build_0, (slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int) v) inline {
-    var (v'owner, v'stopped, v'orderLockTime, v'maxLpNetCap, v'lpRolloverFeeRate, v'liquidatedPositionShareRate, v'normalPositionShareRate, v'mintJettonGas, v'burnJettonGas, v'transferJettonGas, v'createPerpOrderGas, v'cancelPerpOrderGas, v'executePerpOrderGas, v'createLiquidityOrderGas, v'cancelLiquidityOrderGas, v'executeLiquidityOrderGas, v'lpMinExecutionFee, v'perpMinExecutionFee, v'minStorageReserve, v'tlpSupply, v'tlpJetton, v'tlpWallet, v'compensator, v'claimer, v'executors, v'tokenConfigs, v'liquidityOrders, v'liquidityOrderIndexNext, v'perpOrders, v'perpOrderExs, v'perpOrderIndexNext, v'compensates, v'compensateIndexNext, v'positionIndexNext, v'positions, v'globalLPPositions, v'globalPositions, v'feeReserve, v'orderAmountReserve, v'executionFeeReserve, v'globalLPFund, v'globalLPUnrealizedPnl, v'globalLpFundingFeeGrowth, v'globalRolloverFeeGrowth) = v;
+builder $Pool$_store(builder build_0, (slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int, slice) v) inline {
+    var (v'owner, v'stopped, v'orderLockTime, v'maxLpNetCap, v'lpRolloverFeeRate, v'liquidatedPositionShareRate, v'normalPositionShareRate, v'mintJettonGas, v'burnJettonGas, v'transferJettonGas, v'createPerpOrderGas, v'cancelPerpOrderGas, v'executePerpOrderGas, v'createLiquidityOrderGas, v'cancelLiquidityOrderGas, v'executeLiquidityOrderGas, v'lpMinExecutionFee, v'perpMinExecutionFee, v'minStorageReserve, v'tlpSupply, v'tlpJetton, v'tlpWallet, v'manager, v'compensator, v'claimer, v'executors, v'tokenConfigs, v'liquidityOrders, v'liquidityOrderIndexNext, v'perpOrders, v'perpOrderExs, v'perpOrderIndexNext, v'compensates, v'compensateIndexNext, v'positionIndexNext, v'positions, v'globalLPPositions, v'globalPositions, v'feeReserve, v'orderAmountReserve, v'executionFeeReserve, v'globalLPFund, v'globalLPUnrealizedPnl, v'globalLpFundingFeeGrowth, v'globalRolloverFeeGrowth, v'multisig) = v;
     build_0 = __tact_store_address(build_0, v'owner);
     build_0 = build_0.store_int(v'stopped, 1);
     build_0 = build_0.store_uint(v'orderLockTime, 32);
@@ -1628,8 +1657,9 @@ builder $Pool$_store(builder build_0, (slice, int, int, int, int, int, int, int,
     build_2 = build_2.store_coins(v'tlpSupply);
     build_2 = __tact_store_address(build_2, v'tlpJetton);
     build_2 = __tact_store_address(build_2, v'tlpWallet);
-    build_2 = __tact_store_address(build_2, v'compensator);
+    build_2 = __tact_store_address(build_2, v'manager);
     var build_3 = begin_cell();
+    build_3 = __tact_store_address(build_3, v'compensator);
     build_3 = __tact_store_address(build_3, v'claimer);
     build_3 = build_3.store_dict(v'executors);
     build_3 = build_3.store_dict(v'tokenConfigs);
@@ -1653,6 +1683,9 @@ builder $Pool$_store(builder build_0, (slice, int, int, int, int, int, int, int,
     build_5 = build_5.store_int(v'globalLPUnrealizedPnl, 128);
     build_5 = build_5.store_coins(v'globalLpFundingFeeGrowth);
     build_5 = build_5.store_coins(v'globalRolloverFeeGrowth);
+    var build_6 = begin_cell();
+    build_6 = __tact_store_address(build_6, v'multisig);
+    build_5 = store_ref(build_5, build_6.end_cell());
     build_4 = store_ref(build_4, build_5.end_cell());
     build_3 = store_ref(build_3, build_4.end_cell());
     build_2 = store_ref(build_2, build_3.end_cell());
@@ -1661,7 +1694,7 @@ builder $Pool$_store(builder build_0, (slice, int, int, int, int, int, int, int,
     return build_0;
 }
 
-(slice, ((slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int))) $Pool$_load(slice sc_0) inline {
+(slice, ((slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int, slice))) $Pool$_load(slice sc_0) inline {
     var v'owner = sc_0~__tact_load_address();
     var v'stopped = sc_0~load_int(1);
     var v'orderLockTime = sc_0~load_uint(32);
@@ -1686,8 +1719,9 @@ builder $Pool$_store(builder build_0, (slice, int, int, int, int, int, int, int,
     var v'tlpSupply = sc_2~load_coins();
     var v'tlpJetton = sc_2~__tact_load_address();
     var v'tlpWallet = sc_2~__tact_load_address();
-    var v'compensator = sc_2~__tact_load_address();
+    var v'manager = sc_2~__tact_load_address();
     slice sc_3 = sc_2~load_ref().begin_parse();
+    var v'compensator = sc_3~__tact_load_address();
     var v'claimer = sc_3~__tact_load_address();
     var v'executors = sc_3~load_dict();
     var v'tokenConfigs = sc_3~load_dict();
@@ -1711,7 +1745,9 @@ builder $Pool$_store(builder build_0, (slice, int, int, int, int, int, int, int,
     var v'globalLPUnrealizedPnl = sc_5~load_int(128);
     var v'globalLpFundingFeeGrowth = sc_5~load_coins();
     var v'globalRolloverFeeGrowth = sc_5~load_coins();
-    return (sc_0, (v'owner, v'stopped, v'orderLockTime, v'maxLpNetCap, v'lpRolloverFeeRate, v'liquidatedPositionShareRate, v'normalPositionShareRate, v'mintJettonGas, v'burnJettonGas, v'transferJettonGas, v'createPerpOrderGas, v'cancelPerpOrderGas, v'executePerpOrderGas, v'createLiquidityOrderGas, v'cancelLiquidityOrderGas, v'executeLiquidityOrderGas, v'lpMinExecutionFee, v'perpMinExecutionFee, v'minStorageReserve, v'tlpSupply, v'tlpJetton, v'tlpWallet, v'compensator, v'claimer, v'executors, v'tokenConfigs, v'liquidityOrders, v'liquidityOrderIndexNext, v'perpOrders, v'perpOrderExs, v'perpOrderIndexNext, v'compensates, v'compensateIndexNext, v'positionIndexNext, v'positions, v'globalLPPositions, v'globalPositions, v'feeReserve, v'orderAmountReserve, v'executionFeeReserve, v'globalLPFund, v'globalLPUnrealizedPnl, v'globalLpFundingFeeGrowth, v'globalRolloverFeeGrowth));
+    slice sc_6 = sc_5~load_ref().begin_parse();
+    var v'multisig = sc_6~__tact_load_address();
+    return (sc_0, (v'owner, v'stopped, v'orderLockTime, v'maxLpNetCap, v'lpRolloverFeeRate, v'liquidatedPositionShareRate, v'normalPositionShareRate, v'mintJettonGas, v'burnJettonGas, v'transferJettonGas, v'createPerpOrderGas, v'cancelPerpOrderGas, v'executePerpOrderGas, v'createLiquidityOrderGas, v'cancelLiquidityOrderGas, v'executeLiquidityOrderGas, v'lpMinExecutionFee, v'perpMinExecutionFee, v'minStorageReserve, v'tlpSupply, v'tlpJetton, v'tlpWallet, v'manager, v'compensator, v'claimer, v'executors, v'tokenConfigs, v'liquidityOrders, v'liquidityOrderIndexNext, v'perpOrders, v'perpOrderExs, v'perpOrderIndexNext, v'compensates, v'compensateIndexNext, v'positionIndexNext, v'positions, v'globalLPPositions, v'globalPositions, v'feeReserve, v'orderAmountReserve, v'executionFeeReserve, v'globalLPFund, v'globalLPUnrealizedPnl, v'globalLpFundingFeeGrowth, v'globalRolloverFeeGrowth, v'multisig));
 }
 
 (slice, ((int))) $Pool$init$_load(slice sc_0) inline {
@@ -1719,7 +1755,7 @@ builder $Pool$_store(builder build_0, (slice, int, int, int, int, int, int, int,
     return (sc_0, (v'deployId));
 }
 
-(slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int) $Pool$_contract_load() impure inline_ref {
+(slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int, slice) $Pool$_contract_load() impure inline_ref {
     slice $sc = get_data().begin_parse();
     __tact_context_sys = $sc~load_ref();
     int $loaded = $sc~load_int(1);
@@ -1734,7 +1770,7 @@ builder $Pool$_store(builder build_0, (slice, int, int, int, int, int, int, int,
     }
 }
 
-() $Pool$_contract_store((slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int) v) impure inline {
+() $Pool$_contract_store((slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, slice, slice, slice, slice, slice, cell, cell, cell, int, cell, cell, int, cell, int, int, cell, cell, cell, int, int, int, int, int, int, int, slice) v) impure inline {
     builder b = begin_cell();
     b = b.store_ref(__tact_context_sys);
     b = b.store_int(true, 1);

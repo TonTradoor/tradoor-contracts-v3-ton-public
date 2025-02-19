@@ -37,6 +37,7 @@ contract Pool with Deployable, Resumable, Upgradable{
     tlpJetton: Address = newAddress(0, 0);
     tlpWallet: Address = newAddress(0, 0);
 
+    manager: Address = newAddress(0, 0);
     compensator: Address = newAddress(0, 0);
     claimer: Address = newAddress(0, 0);
     executors: map<Address, Bool>; 
@@ -71,22 +72,30 @@ contract Pool with Deployable, Resumable, Upgradable{
     globalLpFundingFeeGrowth: Int as coins = 0;
     globalRolloverFeeGrowth: Int as coins = 0;
 
-   
+    multisig: Address = newAddress(0,0);
+
+
     init(deployId: Int) {
         self.owner = sender();
     }
 
-    receive(msg: UpdateConfig) {
+    receive(msg: JettonUpdateContent) {
         self.requireOwner();
-        self.orderLockTime = msg.orderLockTime;
-        self.maxLpNetCap = msg.maxLpNetCap;
-        self.lpRolloverFeeRate = msg.lpRolloverFeeRate;
-        self.liquidatedPositionShareRate = msg.liquidatedPositionShareRate;
-        self.normalPositionShareRate = msg.normalPositionShareRate;
+        self.forward(self.tlpJetton, msg.toCell(), true, null);
+    }
+
+    receive(msg: SetManager){
+        require(sender() == self.multisig, "invalid sender");
+        self.manager = msg.manager;
+    }
+
+    receive(msg: UpdateBaseConfig) {
+        self.requireOwner();
 
         // contract
         let contractConfig: ContractConfig? = msg.contractConfig;
         if (contractConfig != null) {
+            self.multisig = contractConfig!!.multisig;
             self.tlpJetton = contractConfig!!.tlpJetton; 
             self.tlpWallet = contractConfig!!.tlpWallet;
         }
@@ -120,12 +129,17 @@ contract Pool with Deployable, Resumable, Upgradable{
             self.executeLiquidityOrderGas = gasConfig!!.executeLiquidityOrderGas;
         }
 
-        self.reply("config updated".asComment());
+        self.reply("base config updated".asComment());
     }
 
-    receive(msg: JettonUpdateContent) {
-        self.requireOwner();
-        self.forward(self.tlpJetton, msg.toCell(), true, null);
+    receive (msg: UpdatePoolConfig) {
+        require(self.manager == sender(), "invalid sender");
+        self.orderLockTime = msg.orderLockTime;
+        self.maxLpNetCap = msg.maxLpNetCap;
+        self.lpRolloverFeeRate = msg.lpRolloverFeeRate;
+        self.liquidatedPositionShareRate = msg.liquidatedPositionShareRate;
+        self.normalPositionShareRate = msg.normalPositionShareRate;
+        self.reply("pool config updated".asComment());
     }
 
     receive(msg: ListToken) {
@@ -1258,7 +1272,8 @@ contract Pool with Deployable, Resumable, Upgradable{
         let isExecutor: Bool = self.executors.get(account) != null;
         let isCompensator: Bool = self.compensator == account;
         let isClaimer: Bool = self.claimer == account;
-        return AccountInfo{ isExecutor, isCompensator, isClaimer};
+        let isManager: Bool = self.manager == account;
+        return AccountInfo{ isExecutor, isCompensator, isClaimer, isManager };
     }
 
     get fun perpPosition(tokenId: Int, account: Address?): PerpPositionData {

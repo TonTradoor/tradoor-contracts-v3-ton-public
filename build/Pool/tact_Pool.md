@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: Pool
-BOC Size: 21379 bytes
+BOC Size: 22221 bytes
 
 # Types
-Total Types: 63
+Total Types: 65
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -69,9 +69,17 @@ Signature: `JettonMint{origin:address,receiver:address,amount:int257,custom_payl
 TLB: `jetton_update_content#5b8f271d jetton_content:^cell = JettonUpdateContent`
 Signature: `JettonUpdateContent{jetton_content:^cell}`
 
-## UpdateConfig
-TLB: `update_config#614b3255 orderLockTime:uint32 maxLpNetCap:coins lpRolloverFeeRate:uint32 liquidatedPositionShareRate:uint32 normalPositionShareRate:uint32 gasConfig:Maybe GasConfig{mintJettonGas:coins,burnJettonGas:coins,transferJettonGas:coins,createPerpOrderGas:coins,cancelPerpOrderGas:coins,executePerpOrderGas:coins,createLiquidityOrderGas:coins,cancelLiquidityOrderGas:coins,executeLiquidityOrderGas:coins,minStorageReserve:coins,lpMinExecutionFee:coins,perpMinExecutionFee:coins} executorConfig:Maybe ExecutorConfig{executors:dict<address, bool>,compensator:address,claimer:address} contractConfig:Maybe ContractConfig{tlpJetton:address,tlpWallet:address} = UpdateConfig`
-Signature: `UpdateConfig{orderLockTime:uint32,maxLpNetCap:coins,lpRolloverFeeRate:uint32,liquidatedPositionShareRate:uint32,normalPositionShareRate:uint32,gasConfig:Maybe GasConfig{mintJettonGas:coins,burnJettonGas:coins,transferJettonGas:coins,createPerpOrderGas:coins,cancelPerpOrderGas:coins,executePerpOrderGas:coins,createLiquidityOrderGas:coins,cancelLiquidityOrderGas:coins,executeLiquidityOrderGas:coins,minStorageReserve:coins,lpMinExecutionFee:coins,perpMinExecutionFee:coins},executorConfig:Maybe ExecutorConfig{executors:dict<address, bool>,compensator:address,claimer:address},contractConfig:Maybe ContractConfig{tlpJetton:address,tlpWallet:address}}`
+## UpdateBaseConfig
+TLB: `update_base_config#8374e4fa gasConfig:Maybe GasConfig{mintJettonGas:coins,burnJettonGas:coins,transferJettonGas:coins,createPerpOrderGas:coins,cancelPerpOrderGas:coins,executePerpOrderGas:coins,createLiquidityOrderGas:coins,cancelLiquidityOrderGas:coins,executeLiquidityOrderGas:coins,minStorageReserve:coins,lpMinExecutionFee:coins,perpMinExecutionFee:coins} executorConfig:Maybe ExecutorConfig{executors:dict<address, bool>,compensator:address,claimer:address} contractConfig:Maybe ContractConfig{multisig:address,tlpJetton:address,tlpWallet:address} = UpdateBaseConfig`
+Signature: `UpdateBaseConfig{gasConfig:Maybe GasConfig{mintJettonGas:coins,burnJettonGas:coins,transferJettonGas:coins,createPerpOrderGas:coins,cancelPerpOrderGas:coins,executePerpOrderGas:coins,createLiquidityOrderGas:coins,cancelLiquidityOrderGas:coins,executeLiquidityOrderGas:coins,minStorageReserve:coins,lpMinExecutionFee:coins,perpMinExecutionFee:coins},executorConfig:Maybe ExecutorConfig{executors:dict<address, bool>,compensator:address,claimer:address},contractConfig:Maybe ContractConfig{multisig:address,tlpJetton:address,tlpWallet:address}}`
+
+## UpdatePoolConfig
+TLB: `update_pool_config#a62f856c orderLockTime:uint32 maxLpNetCap:coins lpRolloverFeeRate:uint32 liquidatedPositionShareRate:uint32 normalPositionShareRate:uint32 = UpdatePoolConfig`
+Signature: `UpdatePoolConfig{orderLockTime:uint32,maxLpNetCap:coins,lpRolloverFeeRate:uint32,liquidatedPositionShareRate:uint32,normalPositionShareRate:uint32}`
+
+## SetManager
+TLB: `set_manager#92f200ce manager:address = SetManager`
+Signature: `SetManager{manager:address}`
 
 ## ListToken
 TLB: `list_token#e49b3bf0 tokenId:uint16 config:TokenConfig{name:^string,enable:bool,maxLeverage:uint16,liquidationFee:coins,maintenanceRate:uint32,tradingFeeRate:uint32,lpTradingFeeRate:uint32} = ListToken`
@@ -174,8 +182,8 @@ TLB: `compensate_executed_event#db45e438 compensateId:uint64 trxId:uint64 = Comp
 Signature: `CompensateExecutedEvent{compensateId:uint64,trxId:uint64}`
 
 ## AccountInfo
-TLB: `_ isExecutor:bool isCompensator:bool isClaimer:bool = AccountInfo`
-Signature: `AccountInfo{isExecutor:bool,isCompensator:bool,isClaimer:bool}`
+TLB: `_ isExecutor:bool isCompensator:bool isClaimer:bool isManager:bool = AccountInfo`
+Signature: `AccountInfo{isExecutor:bool,isCompensator:bool,isClaimer:bool,isManager:bool}`
 
 ## ConfigData
 TLB: `_ orderLockTime:uint32 mintJettonGas:coins burnJettonGas:coins transferJettonGas:coins createPerpOrderGas:coins cancelPerpOrderGas:coins executePerpOrderGas:coins createLiquidityOrderGas:coins cancelLiquidityOrderGas:coins executeLiquidityOrderGas:coins minStorageReserve:coins lpMinExecutionFee:coins perpMinExecutionFee:coins tlpWallet:address tlpJetton:address maxLpNetCap:coins = ConfigData`
@@ -222,8 +230,8 @@ TLB: `_ executors:dict<address, bool> compensator:address claimer:address = Exec
 Signature: `ExecutorConfig{executors:dict<address, bool>,compensator:address,claimer:address}`
 
 ## ContractConfig
-TLB: `_ tlpJetton:address tlpWallet:address = ContractConfig`
-Signature: `ContractConfig{tlpJetton:address,tlpWallet:address}`
+TLB: `_ multisig:address tlpJetton:address tlpWallet:address = ContractConfig`
+Signature: `ContractConfig{multisig:address,tlpJetton:address,tlpWallet:address}`
 
 ## LiquidityOrder
 TLB: `_ isIncrease:bool account:address amount:coins executionFee:coins blockTime:uint32 isPending:bool = LiquidityOrder`

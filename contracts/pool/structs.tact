@@ -3,6 +3,7 @@ struct AccountInfo {
     isExecutor: Bool;
     isCompensator: Bool;
     isClaimer: Bool;
+    isManager: Bool;
 }
 
 struct ConfigData {
@@ -118,6 +119,7 @@ struct ExecutorConfig {
 }
 
 struct ContractConfig {
+    multisig: Address;
     tlpJetton: Address;
     tlpWallet: Address;
 }

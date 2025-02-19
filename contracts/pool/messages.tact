@@ -38,15 +38,22 @@ message JettonUpdateContent {
 }
 
 // ============================ Config ================================ //
-message UpdateConfig {
+message UpdateBaseConfig {
+    gasConfig: GasConfig?;
+    executorConfig: ExecutorConfig?;
+    contractConfig: ContractConfig?;
+}
+
+message UpdatePoolConfig {
     orderLockTime: Int as uint32;
     maxLpNetCap: Int as coins;
     lpRolloverFeeRate: Int as uint32;
     liquidatedPositionShareRate: Int as uint32;
     normalPositionShareRate: Int as uint32;
-    gasConfig: GasConfig?;
-    executorConfig: ExecutorConfig?;
-    contractConfig: ContractConfig?;
+}
+
+message SetManager {
+    manager: Address;
 }
 
 message ListToken {
