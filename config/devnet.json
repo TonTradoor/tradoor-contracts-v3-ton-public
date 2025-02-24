@@ -1,8 +1,8 @@
 {
   "nextDeployId": 4,
   "mockJetton": "EQAJGpLnnf_8hDcQX0AFxPAygd6sERrqgJyq77Z-iEgWVC3B",
-  "tlpJetton": "EQC8N6VQOhA7UovcOL_HDzLe7qw4dhc4fP9KJKyrBrtb-b2_",
-  "pool": "EQA72bXw7bNFg7ZLCW9q7uz7oqYP8z_rRIAvidYsPhiOVScY",
+  "tlpJetton": "EQBkdOzMj6I_C4v6vWxgUgtL3Y4WmpmivjtVAS6TSsOE_GGK",
+  "pool": "EQDigcxrKHmSRfuZXHUrWKgUDFlF2yMks1wrxOpWBOIm7En-",
   "executors": [
     "0QBWA3yJYPJ9LJCdy2WlzoGO2_0Cw6l7D3exFw25hxR_bDkS",
     "0QAjBLsS_axAf647M2sPtCVCsJ-kI4WP82N72gPLHjsNHY9i",
@@ -18,7 +18,7 @@
       "weight": 1
     }
   ],
-  "multisig": "EQCtlKxj8aAIUU0sUjf9IkfZDoAkc_9ddmNXuT_AQWfOfg5I",
+  "multisig": "EQA2BciHBj-z2lZ3GmAKpgBgeMqucp9MnprTCSeMk51rZ2aO",
   "manager": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
   "compensator": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
   "claimer": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",

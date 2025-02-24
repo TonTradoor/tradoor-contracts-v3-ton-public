@@ -43,7 +43,7 @@ PROGRAM{
   DECLPROC $Multisig$_fun_owner
   DECLPROC $SendParameters$_constructor_value_to_mode_bounce_code_data
   DECLPROC $SendParameters$_constructor_to_value_mode_body
-  DECLPROC $SetManager$_constructor_manager
+  DECLPROC $SetManager$_constructor_manager_compensator_claimer
   DECLPROC $DeployOk$_constructor_queryId
   DECLPROC $Multisig$_internal_binary_LaunchConfig
   DECLPROC $Multisig$_internal_binary_Request
@@ -187,15 +187,19 @@ PROGRAM{
     ENDC
   }>
   $SetManager$_store PROCINLINE:<{
-    2465333454 PUSHINT
-    ROT
+    3368041608 PUSHINT
+    s0 s4 XCHG2
     32 STU
+    ROT
+    __tact_store_address INLINECALLDICT
+    SWAP
+    __tact_store_address INLINECALLDICT
     SWAP
     __tact_store_address INLINECALLDICT
   }>
   $SetManager$_store_cell PROCINLINE:<{
     NEWC
-    SWAP
+    3 -ROLL
     $SetManager$_store INLINECALLDICT
     ENDC
   }>
@@ -210,31 +214,50 @@ PROGRAM{
     -ROT
   }>
   $Request$_store PROCINLINE:<{
-    3570490360 PUSHINT
-    s0 s4 XCHG2
+    3281407310 PUSHINT
+    s0 s6 XCHG2
     32 STU
-    ROT
+    s0 s4 XCHG2
     __tact_store_address INLINECALLDICT
+    s1 s2 XCHG
     32 STU
     SWAP
     __tact_store_address INLINECALLDICT
+    SWAP
+    __tact_store_address INLINECALLDICT
+    NEWC
+    ROT
+    __tact_store_address INLINECALLDICT
+    ENDC
+    SWAP
+    STREF
   }>
   $Request$_load PROCINLINE:<{
     32 LDU
     SWAP
-    3570490360 PUSHINT
+    3281407310 PUSHINT
     EQUAL
     129 THROWIFNOT
     __tact_load_address INLINECALLDICT
     SWAP
     32 LDU
     __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    SWAP
+    CTOS
+    __tact_load_address INLINECALLDICT
+    NIP
+    s1 s5 XCHG
+    s1 s4 XCHG
     s3 s3 s0 XCHG3
   }>
   $Signed$_load PROCINLINE:<{
     32 LDU
     SWAP
-    1935724027 PUSHINT
+    586748514 PUSHINT
     EQUAL
     129 THROWIFNOT
     $Request$_load INLINECALLDICT
@@ -260,14 +283,15 @@ PROGRAM{
         2 UNTUPLE
   }>
   $MultisigSigner$init$_store PROCINLINE:<{
-    s6 s5 XCHG2
+    s8 s7 XCHG2
     __tact_store_address INLINECALLDICT
-    s1 s3 XCHG
+    s1 s5 XCHG
     STDICT
+    s1 s3 XCHG
     257 PUSHINT
     STIX
     NEWC
-    s4 s3 XCHG2
+    s4 s6 s5 XCHG3
     $Request$_store INLINECALLDICT
     ENDC
     SWAP
@@ -427,7 +451,7 @@ PROGRAM{
         SENDMSG
   }>
   $MultisigSigner$_init_child PROCREF:<{
-    s0 s6 XCHG
+    s0 s8 XCHG
     CTOS
     LDDICT
     DROP
@@ -449,8 +473,8 @@ PROGRAM{
     FALSE
     SWAP
     1 STI
-    6 -ROLL
-    s0 s7 XCHG
+    8 -ROLL
+    s0 s9 XCHG
     $MultisigSigner$init$_store INLINECALLDICT
     ENDC
   }>
@@ -524,7 +548,7 @@ PROGRAM{
     PUSHNULL
     PUSHNULL
   }>
-  $SetManager$_constructor_manager PROCINLINE:<{
+  $SetManager$_constructor_manager_compensator_claimer PROCINLINE:<{
   }>
   $DeployOk$_constructor_queryId PROCINLINE:<{
   }>
@@ -540,15 +564,16 @@ PROGRAM{
     46307 PUSHINT
     267 PUSHINT
     __tact_context_get_sender INLINECALLDICT
-    s7 PUSH
+    s9 PUSH
     -ROT
     __tact_dict_exists_slice INLINECALLDICT
     THROWANYIFNOT
     __tact_context_sys GETGLOB
         MYADDR
-    s4 s3 s6 XC2PU
-    s3 s6 XCPU
-    3 -ROLL
+    s6 s5 s8 XC2PU
+    s5 s8 XCPU
+    s0 s5 XCHG
+    4 ROLL
     $MultisigSigner$_init_child INLINECALLDICT
     0 PUSHINT
     s2 s1 PUSH2
@@ -566,8 +591,9 @@ PROGRAM{
     __tact_context_get_sender INLINECALLDICT
     __tact_context_sys GETGLOB
         MYADDR
-    s7 s6 s5 PUSH3
-    s7 s6 PUSH2
+    s9 s8 s7 PUSH3
+    s9 s8 s7 PUSH3
+    s9 PUSH
     $MultisigSigner$_init_child INLINECALLDICT
     $global_contractAddress INLINECALLDICT
     SWAP
@@ -577,14 +603,15 @@ PROGRAM{
     THROWANYIFNOT
     4755 PUSHINT
         NOW
-    s1 s3 XCHG
+    s1 s5 XCHG
     GREATER
-    s1 s2 XCHG
+    s1 s4 XCHG
     THROWANYIFNOT
     0 PUSHINT
+    -ROT
     66 PUSHINT
-    s0 s2 XCHG
-    $SetManager$_constructor_manager INLINECALLDICT
+    s0 s4 XCHG
+    $SetManager$_constructor_manager_compensator_claimer INLINECALLDICT
     $SetManager$_store_cell INLINECALLDICT
     s1 s2 XCHG
     $SendParameters$_constructor_to_value_mode_body INLINECALLDICT
@@ -645,22 +672,22 @@ PROGRAM{
       TRUE
     }>
     DUP
-    3570490360 PUSHINT
+    3281407310 PUSHINT
     EQUAL
     IFJMP:<{
       DROP
       $Request$_load INLINECALLDICT
-      1 3 BLKDROP2
+      1 5 BLKDROP2
       $Multisig$_internal_binary_Request INLINECALLDICT
       TRUE
     }>
     DUP
-    1935724027 PUSHINT
+    586748514 PUSHINT
     EQUAL
     IFJMP:<{
       DROP
       $Signed$_load INLINECALLDICT
-      1 3 BLKDROP2
+      1 5 BLKDROP2
       $Multisig$_internal_binary_Signed INLINECALLDICT
       TRUE
     }>

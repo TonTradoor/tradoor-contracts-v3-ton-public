@@ -115,7 +115,7 @@ cell $JettonUpdateContent$_store_cell((cell) v) inline;
 (slice, ((int, int, int, int, int, int, int, int, int, int, int, int))) $GasConfig$_load(slice sc_0) inline_ref;
 
 ;; $ExecutorConfig$_load
-(slice, ((cell, slice, slice))) $ExecutorConfig$_load(slice sc_0) inline;
+(slice, ((cell))) $ExecutorConfig$_load(slice sc_0) inline;
 
 ;; $ContractConfig$_load
 (slice, ((slice, slice, slice))) $ContractConfig$_load(slice sc_0) inline;
@@ -124,7 +124,7 @@ cell $JettonUpdateContent$_store_cell((cell) v) inline;
 tuple $GasConfig$_as_optional((int, int, int, int, int, int, int, int, int, int, int, int) v) inline;
 
 ;; $ExecutorConfig$_as_optional
-tuple $ExecutorConfig$_as_optional((cell, slice, slice) v) inline;
+tuple $ExecutorConfig$_as_optional((cell) v) inline;
 
 ;; $ContractConfig$_as_optional
 tuple $ContractConfig$_as_optional((slice, slice, slice) v) inline;
@@ -136,7 +136,7 @@ tuple $ContractConfig$_as_optional((slice, slice, slice) v) inline;
 (slice, ((int, int, int, int, int))) $UpdatePoolConfig$_load(slice sc_0) inline;
 
 ;; $SetManager$_load
-(slice, ((slice))) $SetManager$_load(slice sc_0) inline;
+(slice, ((slice, slice, slice))) $SetManager$_load(slice sc_0) inline;
 
 ;; $TokenConfig$_store
 builder $TokenConfig$_store(builder build_0, (slice, int, int, int, int, int, int) v) inline_ref;
@@ -481,16 +481,10 @@ _ $GasConfig$_get_perpMinExecutionFee((int, int, int, int, int, int, int, int, i
 ((int, int, int, int, int, int, int, int, int, int, int, int)) $GasConfig$_not_null(tuple v) inline;
 
 ;; $ExecutorConfig$_get_executors
-_ $ExecutorConfig$_get_executors((cell, slice, slice) v) inline;
-
-;; $ExecutorConfig$_get_compensator
-_ $ExecutorConfig$_get_compensator((cell, slice, slice) v) inline;
-
-;; $ExecutorConfig$_get_claimer
-_ $ExecutorConfig$_get_claimer((cell, slice, slice) v) inline;
+_ $ExecutorConfig$_get_executors((cell) v) inline;
 
 ;; $ExecutorConfig$_not_null
-((cell, slice, slice)) $ExecutorConfig$_not_null(tuple v) inline;
+((cell)) $ExecutorConfig$_not_null(tuple v) inline;
 
 ;; $ContractConfig$_get_multisig
 _ $ContractConfig$_get_multisig((slice, slice, slice) v) inline;

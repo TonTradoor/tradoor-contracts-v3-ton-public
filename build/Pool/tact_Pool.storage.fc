@@ -300,40 +300,28 @@ _ $GasConfig$_get_perpMinExecutionFee((int, int, int, int, int, int, int, int, i
 
 ;;
 ;; Type: ExecutorConfig
-;; TLB: _ executors:dict<address, bool> compensator:address claimer:address = ExecutorConfig
+;; TLB: _ executors:dict<address, bool> = ExecutorConfig
 ;;
 
-(slice, ((cell, slice, slice))) $ExecutorConfig$_load(slice sc_0) inline {
+(slice, ((cell))) $ExecutorConfig$_load(slice sc_0) inline {
     var v'executors = sc_0~load_dict();
-    var v'compensator = sc_0~__tact_load_address();
-    var v'claimer = sc_0~__tact_load_address();
-    return (sc_0, (v'executors, v'compensator, v'claimer));
+    return (sc_0, (v'executors));
 }
 
-tuple $ExecutorConfig$_as_optional((cell, slice, slice) v) inline {
-    var (v'executors, v'compensator, v'claimer) = v;
-    return __tact_tuple_create_3(v'executors, v'compensator, v'claimer);
+tuple $ExecutorConfig$_as_optional((cell) v) inline {
+    var (v'executors) = v;
+    return __tact_tuple_create_1(v'executors);
 }
 
-_ $ExecutorConfig$_get_executors((cell, slice, slice) v) inline {
-    var (v'executors, v'compensator, v'claimer) = v;
+_ $ExecutorConfig$_get_executors((cell) v) inline {
+    var (v'executors) = v;
     return v'executors;
 }
 
-_ $ExecutorConfig$_get_compensator((cell, slice, slice) v) inline {
-    var (v'executors, v'compensator, v'claimer) = v;
-    return v'compensator;
-}
-
-_ $ExecutorConfig$_get_claimer((cell, slice, slice) v) inline {
-    var (v'executors, v'compensator, v'claimer) = v;
-    return v'claimer;
-}
-
-((cell, slice, slice)) $ExecutorConfig$_not_null(tuple v) inline {
+((cell)) $ExecutorConfig$_not_null(tuple v) inline {
     throw_if(128, null?(v));
-    var (cell vvv'executors, slice vvv'compensator, slice vvv'claimer) = __tact_tuple_destroy_3(v);
-    return (vvv'executors, vvv'compensator, vvv'claimer);
+    var (cell vvv'executors) = __tact_tuple_destroy_1(v);
+    return (vvv'executors);
 }
 
 ;;
@@ -376,18 +364,17 @@ _ $ContractConfig$_get_tlpWallet((slice, slice, slice) v) inline {
 
 ;;
 ;; Type: UpdateBaseConfig
-;; Header: 0x8374e4fa
-;; TLB: update_base_config#8374e4fa gasConfig:Maybe GasConfig{mintJettonGas:coins,burnJettonGas:coins,transferJettonGas:coins,createPerpOrderGas:coins,cancelPerpOrderGas:coins,executePerpOrderGas:coins,createLiquidityOrderGas:coins,cancelLiquidityOrderGas:coins,executeLiquidityOrderGas:coins,minStorageReserve:coins,lpMinExecutionFee:coins,perpMinExecutionFee:coins} executorConfig:Maybe ExecutorConfig{executors:dict<address, bool>,compensator:address,claimer:address} contractConfig:Maybe ContractConfig{multisig:address,tlpJetton:address,tlpWallet:address} = UpdateBaseConfig
+;; Header: 0xd05e72b3
+;; TLB: update_base_config#d05e72b3 gasConfig:Maybe GasConfig{mintJettonGas:coins,burnJettonGas:coins,transferJettonGas:coins,createPerpOrderGas:coins,cancelPerpOrderGas:coins,executePerpOrderGas:coins,createLiquidityOrderGas:coins,cancelLiquidityOrderGas:coins,executeLiquidityOrderGas:coins,minStorageReserve:coins,lpMinExecutionFee:coins,perpMinExecutionFee:coins} executorConfig:Maybe ExecutorConfig{executors:dict<address, bool>} contractConfig:Maybe ContractConfig{multisig:address,tlpJetton:address,tlpWallet:address} = UpdateBaseConfig
 ;;
 
 (slice, ((tuple, tuple, tuple))) $UpdateBaseConfig$_load(slice sc_0) inline {
-    throw_unless(129, sc_0~load_uint(32) == 2205476090);
+    throw_unless(129, sc_0~load_uint(32) == 3495850675);
     slice sc_1 = sc_0~load_ref().begin_parse();
     var v'gasConfig = sc_1~load_int(1) ? $GasConfig$_as_optional(sc_1~$GasConfig$_load()) : null();
+    var v'executorConfig = sc_1~load_int(1) ? $ExecutorConfig$_as_optional(sc_1~$ExecutorConfig$_load()) : null();
     slice sc_2 = sc_1~load_ref().begin_parse();
-    var v'executorConfig = sc_2~load_int(1) ? $ExecutorConfig$_as_optional(sc_2~$ExecutorConfig$_load()) : null();
-    slice sc_3 = sc_2~load_ref().begin_parse();
-    var v'contractConfig = sc_3~load_int(1) ? $ContractConfig$_as_optional(sc_3~$ContractConfig$_load()) : null();
+    var v'contractConfig = sc_2~load_int(1) ? $ContractConfig$_as_optional(sc_2~$ContractConfig$_load()) : null();
     return (sc_0, (v'gasConfig, v'executorConfig, v'contractConfig));
 }
 
@@ -409,14 +396,16 @@ _ $ContractConfig$_get_tlpWallet((slice, slice, slice) v) inline {
 
 ;;
 ;; Type: SetManager
-;; Header: 0x92f200ce
-;; TLB: set_manager#92f200ce manager:address = SetManager
+;; Header: 0xc8c03c88
+;; TLB: set_manager#c8c03c88 manager:address compensator:address claimer:address = SetManager
 ;;
 
-(slice, ((slice))) $SetManager$_load(slice sc_0) inline {
-    throw_unless(129, sc_0~load_uint(32) == 2465333454);
+(slice, ((slice, slice, slice))) $SetManager$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3368041608);
     var v'manager = sc_0~__tact_load_address();
-    return (sc_0, (v'manager));
+    var v'compensator = sc_0~__tact_load_address();
+    var v'claimer = sc_0~__tact_load_address();
+    return (sc_0, (v'manager, v'compensator, v'claimer));
 }
 
 ;;

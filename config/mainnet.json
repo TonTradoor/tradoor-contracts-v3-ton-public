@@ -11,15 +11,15 @@
   ],
   "members": [
     {
-      "address": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
+      "address": "UQBA2jphQyEMMZtnAR2BR4R_DDCtcOBtEkceZgbM-bOF1LgX",
       "weight": 1
     },
     {
-      "address": "0QAjBLsS_axAf647M2sPtCVCsJ-kI4WP82N72gPLHjsNHY9i",
+      "address": "UQDc4usEhndbyr6ENpdjRaN92nL9qgk7eghSMEzElfRffqm9",
       "weight": 1
     }
   ],
-  "multisig": "EQCtlKxj8aAIUU0sUjf9IkfZDoAkc_9ddmNXuT_AQWfOfg5I",
+  "multisig": "",
   "manager": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
   "compensator": "UQAtHKMrPPufS4svtQAszP0A8GD7nGHp7gbTWUGndlRqnJro",
   "claimer": "UQAtHKMrPPufS4svtQAszP0A8GD7nGHp7gbTWUGndlRqnJro",

@@ -3,6 +3,8 @@ import "@stdlib/ownable";
 
 message SetManager {
     manager: Address;
+    compensator: Address;
+    claimer: Address;
 }
 
 message LaunchConfig {
@@ -14,6 +16,8 @@ message Request {
     to: Address;
     timeout: Int as uint32;
     manager: Address;
+    compensator: Address;
+    claimer: Address;
 }
 
 message Signed {
@@ -111,7 +115,7 @@ contract Multisig with Deployable, Ownable {
             to: msg.request.to,
             value: 0,
             mode: SendRemainingValue | SendIgnoreErrors,
-            body: SetManager{ manager: msg.request.manager }.toCell()
+            body: SetManager{ manager: msg.request.manager, compensator:  msg.request.compensator, claimer:  msg.request.claimer }.toCell()
         });
     }
 

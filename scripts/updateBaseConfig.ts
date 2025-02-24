@@ -51,9 +51,7 @@ export async function run(provider: NetworkProvider) {
             },
             executorConfig: {
                 $$type: 'ExecutorConfig',
-                executors: executors,
-                compensator: Address.parse(config["compensator"]),
-                claimer: Address.parse(config["claimer"]),
+                executors: executors
             },
             contractConfig: {
                 $$type: 'ContractConfig',

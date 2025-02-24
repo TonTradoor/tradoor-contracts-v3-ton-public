@@ -87,6 +87,8 @@ contract Pool with Deployable, Resumable, Upgradable{
     receive(msg: SetManager){
         require(sender() == self.multisig, "invalid sender");
         self.manager = msg.manager;
+        self.compensator = msg.compensator;
+        self.claimer = msg.claimer;
     }
 
     receive(msg: UpdateBaseConfig) {
@@ -107,8 +109,6 @@ contract Pool with Deployable, Resumable, Upgradable{
             foreach (executor,enable in executors) {
                 self.executors.set(executor, enable? true : null);
             }
-            self.compensator = executorConfig!!.compensator;
-            self.claimer = executorConfig!!.claimer;
         }
 
         // gas

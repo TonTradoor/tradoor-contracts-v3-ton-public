@@ -159,8 +159,6 @@ PROGRAM{
   DECLPROC $GasConfig$_get_perpMinExecutionFee
   DECLPROC $GasConfig$_not_null
   DECLPROC $ExecutorConfig$_get_executors
-  DECLPROC $ExecutorConfig$_get_compensator
-  DECLPROC $ExecutorConfig$_get_claimer
   DECLPROC $ExecutorConfig$_not_null
   DECLPROC $ContractConfig$_get_multisig
   DECLPROC $ContractConfig$_get_tlpJetton
@@ -715,10 +713,7 @@ PROGRAM{
   }>
   $ExecutorConfig$_load PROCINLINE:<{
     LDDICT
-    __tact_load_address INLINECALLDICT
     SWAP
-    __tact_load_address INLINECALLDICT
-    s3 s3 s0 XCHG3
   }>
   $ContractConfig$_load PROCINLINE:<{
     __tact_load_address INLINECALLDICT
@@ -732,7 +727,7 @@ PROGRAM{
         12 TUPLE
   }>
   $ExecutorConfig$_as_optional PROCINLINE:<{
-        3 TUPLE
+        1 TUPLE
   }>
   $ContractConfig$_as_optional PROCINLINE:<{
         3 TUPLE
@@ -740,7 +735,7 @@ PROGRAM{
   $UpdateBaseConfig$_load PROCINLINE:<{
     32 LDU
     SWAP
-    2205476090 PUSHINT
+    3495850675 PUSHINT
     EQUAL
     129 THROWIFNOT
     LDREF
@@ -755,9 +750,6 @@ PROGRAM{
       PUSHNULL
     }>
     SWAP
-    LDREF
-    DROP
-    CTOS
     1 LDI
     SWAP
     IF:<{
@@ -797,10 +789,15 @@ PROGRAM{
   $SetManager$_load PROCINLINE:<{
     32 LDU
     SWAP
-    2465333454 PUSHINT
+    3368041608 PUSHINT
     EQUAL
     129 THROWIFNOT
     __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    SWAP
+    __tact_load_address INLINECALLDICT
+    s3 s3 s0 XCHG3
   }>
   $TokenConfig$_store PROCREF:<{
     NEWC
@@ -2228,20 +2225,12 @@ PROGRAM{
         12 UNTUPLE
   }>
   $ExecutorConfig$_get_executors PROCINLINE:<{
-    2DROP
-  }>
-  $ExecutorConfig$_get_compensator PROCINLINE:<{
-    DROP
-    NIP
-  }>
-  $ExecutorConfig$_get_claimer PROCINLINE:<{
-    2 1 BLKDROP2
   }>
   $ExecutorConfig$_not_null PROCINLINE:<{
     DUP
     ISNULL
     128 THROWIF
-        3 UNTUPLE
+        1 UNTUPLE
   }>
   $ContractConfig$_get_multisig PROCINLINE:<{
     2DROP
@@ -5019,6 +5008,8 @@ PROGRAM{
   }>
   $Pool$_internal_binary_SetManager PROCINLINE:<{
     24 s() POP
+    24 s() POP
+    24 s() POP
     41207 PUSHINT
     __tact_context_get_sender INLINECALLDICT
     s2 s(-1) PUXC
@@ -5099,9 +5090,7 @@ PROGRAM{
     ISNULL
     NOT
     IF:<{
-      20 s() POP
-      20 s() POP
-      43 s() PUSH
+      s0 45 s() XCHG
       $ExecutorConfig$_not_null INLINECALLDICT
       $ExecutorConfig$_get_executors INLINECALLDICT
       DUP
@@ -5117,28 +5106,19 @@ PROGRAM{
         }>ELSE<{
           PUSHNULL
         }>
-        s2 21 s() XCHG
-        21 s() PUSH
+        s2 22 s() XCHG
+        22 s() PUSH
         SWAP
         1 PUSHINT
         __tact_dict_set_slice_int INLINECALLDICT
         267 PUSHINT
         s2 PUSH
         s0 s2 XCHG
-        s0 21 s() XCHG
+        s0 22 s() XCHG
         1 PUSHINT
         __tact_dict_next_slice_int INLINECALLDICT
       }>
       3 BLKDROP
-      43 s() PUSH
-      $ExecutorConfig$_not_null INLINECALLDICT
-      $ExecutorConfig$_get_compensator INLINECALLDICT
-      s0 44 s() XCHG
-      $ExecutorConfig$_not_null INLINECALLDICT
-      $ExecutorConfig$_get_claimer INLINECALLDICT
-      s0 19 s() XCHG
-      s0 44 s() XCHG
-      s0 20 s() XCHG
     }>ELSE<{
       45 s() POP
     }>
@@ -7679,17 +7659,17 @@ PROGRAM{
       TRUE
     }>
     DUP
-    2465333454 PUSHINT
+    3368041608 PUSHINT
     EQUAL
     IFJMP:<{
       DROP
       $SetManager$_load INLINECALLDICT
-      NIP
+      1 3 BLKDROP2
       $Pool$_internal_binary_SetManager INLINECALLDICT
       TRUE
     }>
     DUP
-    2205476090 PUSHINT
+    3495850675 PUSHINT
     EQUAL
     IFJMP:<{
       DROP

@@ -114,8 +114,6 @@ struct GasConfig {
 
 struct ExecutorConfig {
     executors: map<Address, Bool>;
-    compensator: Address;
-    claimer: Address;
 }
 
 struct ContractConfig {

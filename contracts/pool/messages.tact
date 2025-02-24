@@ -54,6 +54,8 @@ message UpdatePoolConfig {
 
 message SetManager {
     manager: Address;
+    compensator: Address;
+    claimer: Address;
 }
 
 message ListToken {
