@@ -1,6 +1,6 @@
 # TACT Compilation Report
 Contract: Multisig
-BOC Size: 1403 bytes
+BOC Size: 1393 bytes
 
 # Types
 Total Types: 16
@@ -50,8 +50,8 @@ TLB: `set_manager#92f200ce manager:address = SetManager`
 Signature: `SetManager{manager:address}`
 
 ## LaunchConfig
-TLB: `launch_config#5a3aeb31 members:dict<address, int> requiredWeight:uint16 = LaunchConfig`
-Signature: `LaunchConfig{members:dict<address, int>,requiredWeight:uint16}`
+TLB: `launch_config#020eafe2 members:dict<address, uint8> requiredWeight:uint8 = LaunchConfig`
+Signature: `LaunchConfig{members:dict<address, uint8>,requiredWeight:uint8}`
 
 ## Request
 TLB: `request#d4d15bf8 to:address timeout:uint32 manager:address = Request`

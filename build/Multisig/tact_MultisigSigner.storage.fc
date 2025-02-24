@@ -64,23 +64,20 @@ builder $MultisigSigner$_store(builder build_0, (slice, cell, int, int, int, (sl
     var (v'master, v'members, v'weight, v'requiredWeight, v'completed, (v'request'to, v'request'timeout, v'request'manager)) = v;
     build_0 = __tact_store_address(build_0, v'master);
     build_0 = build_0.store_dict(v'members);
-    build_0 = build_0.store_int(v'weight, 257);
-    build_0 = build_0.store_int(v'requiredWeight, 257);
+    build_0 = build_0.store_uint(v'weight, 8);
+    build_0 = build_0.store_uint(v'requiredWeight, 8);
     build_0 = build_0.store_int(v'completed, 1);
-    var build_1 = begin_cell();
-    build_1 = $Request$_store(build_1, (v'request'to, v'request'timeout, v'request'manager));
-    build_0 = store_ref(build_0, build_1.end_cell());
+    build_0 = $Request$_store(build_0, (v'request'to, v'request'timeout, v'request'manager));
     return build_0;
 }
 
 (slice, ((slice, cell, int, int, int, (slice, int, slice)))) $MultisigSigner$_load(slice sc_0) inline {
     var v'master = sc_0~__tact_load_address();
     var v'members = sc_0~load_dict();
-    var v'weight = sc_0~load_int(257);
-    var v'requiredWeight = sc_0~load_int(257);
+    var v'weight = sc_0~load_uint(8);
+    var v'requiredWeight = sc_0~load_uint(8);
     var v'completed = sc_0~load_int(1);
-    slice sc_1 = sc_0~load_ref().begin_parse();
-    var v'request = sc_1~$Request$_load();
+    var v'request = sc_0~$Request$_load();
     return (sc_0, (v'master, v'members, v'weight, v'requiredWeight, v'completed, v'request));
 }
 

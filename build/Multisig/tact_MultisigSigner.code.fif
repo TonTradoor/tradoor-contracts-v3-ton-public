@@ -5,7 +5,7 @@ PROGRAM{
   DECLPROC __tact_not_null
   DECLPROC __tact_context_get_sender
   DECLPROC __tact_store_bool
-  DECLPROC __tact_dict_get_slice_int
+  DECLPROC __tact_dict_get_slice_uint
   DECLPROC $Request$_store
   DECLPROC $Request$_load
   DECLPROC $Signed$_store
@@ -68,12 +68,12 @@ PROGRAM{
     SWAP
     1 STI
   }>
-  __tact_dict_get_slice_int PROCINLINE:<{
+  __tact_dict_get_slice_uint PROCINLINE:<{
     s1 s3 s3 XCHG3
         DICTGET NULLSWAPIFNOT
     IF:<{
       SWAP
-      LDIX
+      LDUX
       DROP
     }>ELSE<{
       2DROP
@@ -121,38 +121,25 @@ PROGRAM{
     s1 s5 XCHG
     STDICT
     s1 s3 XCHG
-    257 PUSHINT
-    STIX
-    257 PUSHINT
-    STIX
+    8 STU
+    8 STU
     1 STI
-    NEWC
-    s4 s3 XCHG2
+    s1 s3 s3 XCHG3
     $Request$_store INLINECALLDICT
-    ENDC
-    SWAP
-    STREF
   }>
   $MultisigSigner$_load PROCINLINE:<{
     __tact_load_address INLINECALLDICT
     SWAP
     LDDICT
-    257 PUSHINT
-    LDIX
-    257 PUSHINT
-    LDIX
+    8 LDU
+    8 LDU
     1 LDI
-    LDREF
-    SWAP
-    CTOS
     $Request$_load INLINECALLDICT
-    s3 POP
     s3 s8 XCHG
     s3 s7 XCHG
     s3 s6 XCHG
     s3 s5 XCHG
     s3 s4 XCHG
-    ROT
   }>
   $Request$_to_external PROCINLINE:<{
   }>
@@ -343,8 +330,8 @@ PROGRAM{
     s7 PUSH
     267 PUSHINT
     s2 PUSH
-    257 PUSHINT
-    __tact_dict_get_slice_int INLINECALLDICT
+    8 PUSHINT
+    __tact_dict_get_slice_uint INLINECALLDICT
     46307 PUSHINT
     OVER
     ISNULL

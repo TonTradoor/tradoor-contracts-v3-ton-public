@@ -7,7 +7,7 @@ import { Multisig } from '../wrappers/Multisig';
 export async function run(provider: NetworkProvider) {
     let deployId = getConfig("nextDeployId");
 
-    let members = Dictionary.empty(Dictionary.Keys.Address(), Dictionary.Values.BigInt(8));
+    let members = Dictionary.empty(Dictionary.Keys.Address(), Dictionary.Values.Uint(8));
     const config = getConfig();
     const memberAddrs = config["members"];
     for (const i in memberAddrs) {

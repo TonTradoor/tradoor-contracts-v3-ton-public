@@ -82,14 +82,14 @@ cell $SetManager$_store_cell((slice) v) inline {
 
 ;;
 ;; Type: LaunchConfig
-;; Header: 0x5a3aeb31
-;; TLB: launch_config#5a3aeb31 members:dict<address, int> requiredWeight:uint16 = LaunchConfig
+;; Header: 0x020eafe2
+;; TLB: launch_config#020eafe2 members:dict<address, uint8> requiredWeight:uint8 = LaunchConfig
 ;;
 
 (slice, ((cell, int))) $LaunchConfig$_load(slice sc_0) inline {
-    throw_unless(129, sc_0~load_uint(32) == 1513810737);
+    throw_unless(129, sc_0~load_uint(32) == 34516962);
     var v'members = sc_0~load_dict();
-    var v'requiredWeight = sc_0~load_uint(16);
+    var v'requiredWeight = sc_0~load_uint(8);
     return (sc_0, (v'members, v'requiredWeight));
 }
 
@@ -168,14 +168,14 @@ builder $Multisig$_store(builder build_0, (slice, cell, int) v) inline {
     var (v'owner, v'members, v'requiredWeight) = v;
     build_0 = __tact_store_address(build_0, v'owner);
     build_0 = build_0.store_dict(v'members);
-    build_0 = build_0.store_int(v'requiredWeight, 257);
+    build_0 = build_0.store_uint(v'requiredWeight, 8);
     return build_0;
 }
 
 (slice, ((slice, cell, int))) $Multisig$_load(slice sc_0) inline {
     var v'owner = sc_0~__tact_load_address();
     var v'members = sc_0~load_dict();
-    var v'requiredWeight = sc_0~load_int(257);
+    var v'requiredWeight = sc_0~load_uint(8);
     return (sc_0, (v'owner, v'members, v'requiredWeight));
 }
 

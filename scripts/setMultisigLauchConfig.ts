@@ -12,7 +12,7 @@ export async function run(provider: NetworkProvider) {
     const multisig = attachMultisig(provider);
     const pool = attachPool(provider);
 
-    let members = Dictionary.empty(Dictionary.Keys.Address(), Dictionary.Values.BigInt(8));
+    let members = Dictionary.empty(Dictionary.Keys.Address(), Dictionary.Values.Uint(8));
     const config = getConfig();
     const memberAddrs = config["members"];
     for (const i in memberAddrs) {

@@ -8,7 +8,7 @@ PROGRAM{
   DECLPROC __tact_context_get
   DECLPROC __tact_context_get_sender
   DECLPROC __tact_store_bool
-  DECLPROC __tact_dict_get_slice_int
+  DECLPROC __tact_dict_get_slice_uint
   DECLPROC __tact_slice_eq_bits
   DECLPROC __tact_dict_set_code
   DECLPROC __tact_dict_get_code
@@ -133,12 +133,12 @@ PROGRAM{
     SWAP
     1 STI
   }>
-  __tact_dict_get_slice_int PROCINLINE:<{
+  __tact_dict_get_slice_uint PROCINLINE:<{
     s1 s3 s3 XCHG3
         DICTGET NULLSWAPIFNOT
     IF:<{
       SWAP
-      LDIX
+      LDUX
       DROP
     }>ELSE<{
       2DROP
@@ -202,11 +202,11 @@ PROGRAM{
   $LaunchConfig$_load PROCINLINE:<{
     32 LDU
     SWAP
-    1513810737 PUSHINT
+    34516962 PUSHINT
     EQUAL
     129 THROWIFNOT
     LDDICT
-    16 LDU
+    8 LDU
     -ROT
   }>
   $Request$_store PROCINLINE:<{
@@ -244,15 +244,13 @@ PROGRAM{
     __tact_store_address INLINECALLDICT
     s1 s2 XCHG
     STDICT
-    257 PUSHINT
-    STIX
+    8 STU
   }>
   $Multisig$_load PROCINLINE:<{
     __tact_load_address INLINECALLDICT
     SWAP
     LDDICT
-    257 PUSHINT
-    LDIX
+    8 LDU
     3 -ROLL
   }>
   $StateInit$_not_null PROCINLINE:<{
@@ -462,8 +460,8 @@ PROGRAM{
     267 PUSHINT
     s3 PUSH
     s0 s2 XCHG
-    257 PUSHINT
-    __tact_dict_get_slice_int INLINECALLDICT
+    8 PUSHINT
+    __tact_dict_get_slice_uint INLINECALLDICT
   }>
   $Multisig$_fun_members PROCREF:<{
     OVER
@@ -637,7 +635,7 @@ PROGRAM{
       32 PLDU
     }>
     DUP
-    1513810737 PUSHINT
+    34516962 PUSHINT
     EQUAL
     IFJMP:<{
       DROP

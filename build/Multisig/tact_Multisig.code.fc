@@ -21,7 +21,7 @@
 
 ((slice, cell, int), int) $Multisig$_fun_member((slice, cell, int) $self, slice $address) impure inline_ref {
     var (($self'owner, $self'members, $self'requiredWeight)) = $self;
-    var $fresh$ret_5 = __tact_dict_get_slice_int($self'members, 267, $address, 257);
+    var $fresh$ret_5 = __tact_dict_get_slice_uint($self'members, 267, $address, 8);
     return (($self'owner, $self'members, $self'requiredWeight), $fresh$ret_5);
 }
 
@@ -130,7 +130,7 @@ _ lazy_deployment_completed() method_id {
     
     
     ;; Receive LaunchConfig message
-    if (op == 1513810737) {
+    if (op == 34516962) {
         var msg = in_msg~$LaunchConfig$_load();
         self~$Multisig$_internal_binary_LaunchConfig(msg);
         return (self, true);

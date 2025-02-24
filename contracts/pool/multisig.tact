@@ -6,8 +6,8 @@ message SetManager {
 }
 
 message LaunchConfig {
-    members: map<Address, Int>;
-    requiredWeight: Int as uint16;
+    members: map<Address, Int as uint8>;
+    requiredWeight: Int as uint8;
 }
 
 message Request {
@@ -23,13 +23,13 @@ message Signed {
 contract MultisigSigner {
     master: Address;
 
-    members: map<Address, Int>;
-    weight: Int = 0;
-    requiredWeight: Int;
+    members: map<Address, Int as uint8>;
+    weight: Int as uint8 = 0;
+    requiredWeight: Int as uint8;
     completed: Bool;
     request: Request;
 
-    init(master: Address, members: map<Address, Int>, requiredWeight: Int, request: Request) {
+    init(master: Address, members: map<Address, Int as uint8>, requiredWeight: Int, request: Request) {
         self.master = master;
         self.members = members;
         self.requiredWeight = requiredWeight;
@@ -70,10 +70,10 @@ contract MultisigSigner {
 
 contract Multisig with Deployable, Ownable {
     owner: Address;
-    members: map<Address, Int>;
-    requiredWeight: Int;
+    members: map<Address, Int as uint8>;
+    requiredWeight: Int as uint8;
 
-    init(members: map<Address, Int>, requiredWeight: Int) {
+    init(members: map<Address, Int as uint8>, requiredWeight: Int) {
         self.owner = sender();
         self.members = members;
         self.requiredWeight = requiredWeight;
@@ -119,7 +119,7 @@ contract Multisig with Deployable, Ownable {
         return self.members.get(address);
     }
 
-    get fun members(): map<Address, Int> {
+    get fun members(): map<Address, Int as uint8> {
         return self.members;
     }
 }
