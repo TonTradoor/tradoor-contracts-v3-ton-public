@@ -1,8 +1,8 @@
 {
   "nextDeployId": 4,
   "mockJetton": "EQAJGpLnnf_8hDcQX0AFxPAygd6sERrqgJyq77Z-iEgWVC3B",
-  "tlpJetton": "EQDF3wqTiM2YZsitZV9aQToxa2_9R-TjgF-vdlDQg-lNQ0MD",
-  "pool": "EQD7UDRdp4bXBB3WTKHAufhoh1eR8GmiqlrbwbY5tDt8OaRp",
+  "tlpJetton": "EQC8N6VQOhA7UovcOL_HDzLe7qw4dhc4fP9KJKyrBrtb-b2_",
+  "pool": "EQA72bXw7bNFg7ZLCW9q7uz7oqYP8z_rRIAvidYsPhiOVScY",
   "executors": [
     "0QBWA3yJYPJ9LJCdy2WlzoGO2_0Cw6l7D3exFw25hxR_bDkS",
     "0QAjBLsS_axAf647M2sPtCVCsJ-kI4WP82N72gPLHjsNHY9i",
@@ -11,18 +11,14 @@
   "members": [
     {
       "address": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
-      "weight": 3
+      "weight": 1
     },
     {
       "address": "0QAjBLsS_axAf647M2sPtCVCsJ-kI4WP82N72gPLHjsNHY9i",
       "weight": 1
-    },
-    {
-      "address": "0QBWA3yJYPJ9LJCdy2WlzoGO2_0Cw6l7D3exFw25hxR_bDkS",
-      "weight": 1
     }
   ],
-  "multisig": "EQBhUbaLxfTvrWiIzG5Bv2uBK5kHxu-IXX5glZvuAA_8HGW8",
+  "multisig": "EQCtlKxj8aAIUU0sUjf9IkfZDoAkc_9ddmNXuT_AQWfOfg5I",
   "manager": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
   "compensator": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
   "claimer": "0QDuflXsakZbnfeFGJXSmNRoBhdtzhmeyNAgsTZLZDcd8SWk",
@@ -43,6 +39,7 @@
   "liquidatedPositionShareRate": 0.5,
   "normalPositionShareRate": 0.5,
   "maxLpNetCap": 1000000,
+  "requiredWeight": 1,
   "tokens": [
     {
       "tokenId": 1,

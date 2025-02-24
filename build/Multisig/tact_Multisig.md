@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: Multisig
-BOC Size: 1216 bytes
+BOC Size: 1403 bytes
 
 # Types
-Total Types: 13
+Total Types: 16
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -37,9 +37,21 @@ Signature: `DeployOk{queryId:uint64}`
 TLB: `factory_deploy#6d0ff13b queryId:uint64 cashback:address = FactoryDeploy`
 Signature: `FactoryDeploy{queryId:uint64,cashback:address}`
 
+## ChangeOwner
+TLB: `change_owner#819dbe99 queryId:uint64 newOwner:address = ChangeOwner`
+Signature: `ChangeOwner{queryId:uint64,newOwner:address}`
+
+## ChangeOwnerOk
+TLB: `change_owner_ok#327b2b4a queryId:uint64 newOwner:address = ChangeOwnerOk`
+Signature: `ChangeOwnerOk{queryId:uint64,newOwner:address}`
+
 ## SetManager
 TLB: `set_manager#92f200ce manager:address = SetManager`
 Signature: `SetManager{manager:address}`
+
+## LaunchConfig
+TLB: `launch_config#5a3aeb31 members:dict<address, int> requiredWeight:uint16 = LaunchConfig`
+Signature: `LaunchConfig{members:dict<address, int>,requiredWeight:uint16}`
 
 ## Request
 TLB: `request#d4d15bf8 to:address timeout:uint32 manager:address = Request`
@@ -58,12 +70,14 @@ TLB: `null`
 Signature: `null`
 
 # Get Methods
-Total Get Methods: 2
+Total Get Methods: 3
 
 ## member
 Argument: address
 
 ## members
+
+## owner
 
 # Error Codes
 2: Stack underflow
@@ -115,6 +129,8 @@ Multisig
 Multisig --> BaseTrait
 Multisig --> Deployable
 Deployable --> BaseTrait
+Multisig --> Ownable
+Ownable --> BaseTrait
 ```
 
 # Contract Dependency Diagram

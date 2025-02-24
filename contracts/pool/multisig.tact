@@ -1,7 +1,13 @@
 import "@stdlib/deploy";
+import "@stdlib/ownable";
 
 message SetManager {
     manager: Address;
+}
+
+message LaunchConfig {
+    members: map<Address, Int>;
+    requiredWeight: Int as uint16;
 }
 
 message Request {
@@ -62,13 +68,22 @@ contract MultisigSigner {
     }
 }
 
-contract Multisig with Deployable {
+contract Multisig with Deployable, Ownable {
+    owner: Address;
     members: map<Address, Int>;
     requiredWeight: Int;
 
     init(members: map<Address, Int>, requiredWeight: Int) {
+        self.owner = sender();
         self.members = members;
         self.requiredWeight = requiredWeight;
+    }
+
+    receive(msg: LaunchConfig) { 
+        self.requireOwner();
+        self.members = msg.members;
+        self.requiredWeight = msg.requiredWeight;
+        self.reply("launch config updated".asComment());
     }
 
     receive(msg: Request) {

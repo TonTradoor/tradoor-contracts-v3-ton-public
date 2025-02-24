@@ -143,13 +143,13 @@ contract Pool with Deployable, Resumable, Upgradable{
     }
 
     receive(msg: ListToken) {
-        self.requireOwner();
+        require(self.manager == sender(), "invalid sender");
         self.tokenConfigs.set(msg.tokenId, msg.config);
         self.reply("token listed".asComment());
     }
 
     receive(msg: DelistToken) {
-        self.requireOwner();
+        require(self.manager == sender(), "invalid sender");
         let position: GlobalPosition? = self.globalPositions.get(msg.tokenId);
         if (position != null) {
             require(position!!.longSize + position!!.shortSize == 0, "token cannot be delisted");

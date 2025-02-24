@@ -464,6 +464,112 @@ function dictValueParserFactoryDeploy(): DictionaryValue<FactoryDeploy> {
     }
 }
 
+export type ChangeOwner = {
+    $$type: 'ChangeOwner';
+    queryId: bigint;
+    newOwner: Address;
+}
+
+export function storeChangeOwner(src: ChangeOwner) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(2174598809, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeAddress(src.newOwner);
+    };
+}
+
+export function loadChangeOwner(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 2174598809) { throw Error('Invalid prefix'); }
+    let _queryId = sc_0.loadUintBig(64);
+    let _newOwner = sc_0.loadAddress();
+    return { $$type: 'ChangeOwner' as const, queryId: _queryId, newOwner: _newOwner };
+}
+
+function loadTupleChangeOwner(source: TupleReader) {
+    let _queryId = source.readBigNumber();
+    let _newOwner = source.readAddress();
+    return { $$type: 'ChangeOwner' as const, queryId: _queryId, newOwner: _newOwner };
+}
+
+function loadGetterTupleChangeOwner(source: TupleReader) {
+    let _queryId = source.readBigNumber();
+    let _newOwner = source.readAddress();
+    return { $$type: 'ChangeOwner' as const, queryId: _queryId, newOwner: _newOwner };
+}
+
+function storeTupleChangeOwner(source: ChangeOwner) {
+    let builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
+    builder.writeAddress(source.newOwner);
+    return builder.build();
+}
+
+function dictValueParserChangeOwner(): DictionaryValue<ChangeOwner> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeChangeOwner(src)).endCell());
+        },
+        parse: (src) => {
+            return loadChangeOwner(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type ChangeOwnerOk = {
+    $$type: 'ChangeOwnerOk';
+    queryId: bigint;
+    newOwner: Address;
+}
+
+export function storeChangeOwnerOk(src: ChangeOwnerOk) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(846932810, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeAddress(src.newOwner);
+    };
+}
+
+export function loadChangeOwnerOk(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 846932810) { throw Error('Invalid prefix'); }
+    let _queryId = sc_0.loadUintBig(64);
+    let _newOwner = sc_0.loadAddress();
+    return { $$type: 'ChangeOwnerOk' as const, queryId: _queryId, newOwner: _newOwner };
+}
+
+function loadTupleChangeOwnerOk(source: TupleReader) {
+    let _queryId = source.readBigNumber();
+    let _newOwner = source.readAddress();
+    return { $$type: 'ChangeOwnerOk' as const, queryId: _queryId, newOwner: _newOwner };
+}
+
+function loadGetterTupleChangeOwnerOk(source: TupleReader) {
+    let _queryId = source.readBigNumber();
+    let _newOwner = source.readAddress();
+    return { $$type: 'ChangeOwnerOk' as const, queryId: _queryId, newOwner: _newOwner };
+}
+
+function storeTupleChangeOwnerOk(source: ChangeOwnerOk) {
+    let builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
+    builder.writeAddress(source.newOwner);
+    return builder.build();
+}
+
+function dictValueParserChangeOwnerOk(): DictionaryValue<ChangeOwnerOk> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeChangeOwnerOk(src)).endCell());
+        },
+        parse: (src) => {
+            return loadChangeOwnerOk(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type SetManager = {
     $$type: 'SetManager';
     manager: Address;
@@ -507,6 +613,59 @@ function dictValueParserSetManager(): DictionaryValue<SetManager> {
         },
         parse: (src) => {
             return loadSetManager(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type LaunchConfig = {
+    $$type: 'LaunchConfig';
+    members: Dictionary<Address, bigint>;
+    requiredWeight: bigint;
+}
+
+export function storeLaunchConfig(src: LaunchConfig) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(1513810737, 32);
+        b_0.storeDict(src.members, Dictionary.Keys.Address(), Dictionary.Values.BigInt(257));
+        b_0.storeUint(src.requiredWeight, 16);
+    };
+}
+
+export function loadLaunchConfig(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 1513810737) { throw Error('Invalid prefix'); }
+    let _members = Dictionary.load(Dictionary.Keys.Address(), Dictionary.Values.BigInt(257), sc_0);
+    let _requiredWeight = sc_0.loadUintBig(16);
+    return { $$type: 'LaunchConfig' as const, members: _members, requiredWeight: _requiredWeight };
+}
+
+function loadTupleLaunchConfig(source: TupleReader) {
+    let _members = Dictionary.loadDirect(Dictionary.Keys.Address(), Dictionary.Values.BigInt(257), source.readCellOpt());
+    let _requiredWeight = source.readBigNumber();
+    return { $$type: 'LaunchConfig' as const, members: _members, requiredWeight: _requiredWeight };
+}
+
+function loadGetterTupleLaunchConfig(source: TupleReader) {
+    let _members = Dictionary.loadDirect(Dictionary.Keys.Address(), Dictionary.Values.BigInt(257), source.readCellOpt());
+    let _requiredWeight = source.readBigNumber();
+    return { $$type: 'LaunchConfig' as const, members: _members, requiredWeight: _requiredWeight };
+}
+
+function storeTupleLaunchConfig(source: LaunchConfig) {
+    let builder = new TupleBuilder();
+    builder.writeCell(source.members.size > 0 ? beginCell().storeDictDirect(source.members, Dictionary.Keys.Address(), Dictionary.Values.BigInt(257)).endCell() : null);
+    builder.writeNumber(source.requiredWeight);
+    return builder.build();
+}
+
+function dictValueParserLaunchConfig(): DictionaryValue<LaunchConfig> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeLaunchConfig(src)).endCell());
+        },
+        parse: (src) => {
+            return loadLaunchConfig(src.loadRef().beginParse());
         }
     }
 }
@@ -697,6 +856,7 @@ function dictValueParserMultisigSigner$Data(): DictionaryValue<MultisigSigner$Da
 
 export type Multisig$Data = {
     $$type: 'Multisig$Data';
+    owner: Address;
     members: Dictionary<Address, bigint>;
     requiredWeight: bigint;
 }
@@ -704,6 +864,7 @@ export type Multisig$Data = {
 export function storeMultisig$Data(src: Multisig$Data) {
     return (builder: Builder) => {
         let b_0 = builder;
+        b_0.storeAddress(src.owner);
         b_0.storeDict(src.members, Dictionary.Keys.Address(), Dictionary.Values.BigInt(257));
         b_0.storeInt(src.requiredWeight, 257);
     };
@@ -711,25 +872,29 @@ export function storeMultisig$Data(src: Multisig$Data) {
 
 export function loadMultisig$Data(slice: Slice) {
     let sc_0 = slice;
+    let _owner = sc_0.loadAddress();
     let _members = Dictionary.load(Dictionary.Keys.Address(), Dictionary.Values.BigInt(257), sc_0);
     let _requiredWeight = sc_0.loadIntBig(257);
-    return { $$type: 'Multisig$Data' as const, members: _members, requiredWeight: _requiredWeight };
+    return { $$type: 'Multisig$Data' as const, owner: _owner, members: _members, requiredWeight: _requiredWeight };
 }
 
 function loadTupleMultisig$Data(source: TupleReader) {
+    let _owner = source.readAddress();
     let _members = Dictionary.loadDirect(Dictionary.Keys.Address(), Dictionary.Values.BigInt(257), source.readCellOpt());
     let _requiredWeight = source.readBigNumber();
-    return { $$type: 'Multisig$Data' as const, members: _members, requiredWeight: _requiredWeight };
+    return { $$type: 'Multisig$Data' as const, owner: _owner, members: _members, requiredWeight: _requiredWeight };
 }
 
 function loadGetterTupleMultisig$Data(source: TupleReader) {
+    let _owner = source.readAddress();
     let _members = Dictionary.loadDirect(Dictionary.Keys.Address(), Dictionary.Values.BigInt(257), source.readCellOpt());
     let _requiredWeight = source.readBigNumber();
-    return { $$type: 'Multisig$Data' as const, members: _members, requiredWeight: _requiredWeight };
+    return { $$type: 'Multisig$Data' as const, owner: _owner, members: _members, requiredWeight: _requiredWeight };
 }
 
 function storeTupleMultisig$Data(source: Multisig$Data) {
     let builder = new TupleBuilder();
+    builder.writeAddress(source.owner);
     builder.writeCell(source.members.size > 0 ? beginCell().storeDictDirect(source.members, Dictionary.Keys.Address(), Dictionary.Values.BigInt(257)).endCell() : null);
     builder.writeNumber(source.requiredWeight);
     return builder.build();
@@ -829,11 +994,14 @@ const MultisigSigner_types: ABIType[] = [
     {"name":"Deploy","header":2490013878,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"DeployOk","header":2952335191,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"FactoryDeploy","header":1829761339,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"ChangeOwner","header":2174598809,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"newOwner","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"ChangeOwnerOk","header":846932810,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"newOwner","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"SetManager","header":2465333454,"fields":[{"name":"manager","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"LaunchConfig","header":1513810737,"fields":[{"name":"members","type":{"kind":"dict","key":"address","value":"int"}},{"name":"requiredWeight","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"Request","header":3570490360,"fields":[{"name":"to","type":{"kind":"simple","type":"address","optional":false}},{"name":"timeout","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"manager","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"Signed","header":1935724027,"fields":[{"name":"request","type":{"kind":"simple","type":"Request","optional":false}}]},
     {"name":"MultisigSigner$Data","header":null,"fields":[{"name":"master","type":{"kind":"simple","type":"address","optional":false}},{"name":"members","type":{"kind":"dict","key":"address","value":"int"}},{"name":"weight","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"requiredWeight","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"completed","type":{"kind":"simple","type":"bool","optional":false}},{"name":"request","type":{"kind":"simple","type":"Request","optional":false}}]},
-    {"name":"Multisig$Data","header":null,"fields":[{"name":"members","type":{"kind":"dict","key":"address","value":"int"}},{"name":"requiredWeight","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
+    {"name":"Multisig$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"members","type":{"kind":"dict","key":"address","value":"int"}},{"name":"requiredWeight","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
 ]
 
 const MultisigSigner_getters: ABIGetter[] = [

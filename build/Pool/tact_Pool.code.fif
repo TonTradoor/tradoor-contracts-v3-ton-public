@@ -5277,159 +5277,31 @@ PROGRAM{
     $Pool$_fun_reply INLINECALLDICT
   }>
   $Pool$_internal_binary_ListToken PROCINLINE:<{
-    45 s() 53 s() XCHG
-    44 s() 52 s() XCHG
-    43 s() 51 s() XCHG
-    42 s() 50 s() XCHG
-    41 s() 49 s() XCHG
-    40 s() 48 s() XCHG
-    39 s() 47 s() XCHG
-    38 s() 46 s() XCHG
-    37 s() 53 s() XCHG
-    36 s() 52 s() XCHG
-    35 s() 51 s() XCHG
-    34 s() 50 s() XCHG
-    33 s() 49 s() XCHG
-    32 s() 48 s() XCHG
-    31 s() 47 s() XCHG
-    30 s() 46 s() XCHG
-    29 s() 53 s() XCHG
-    28 s() 52 s() XCHG
-    27 s() 51 s() XCHG
-    26 s() 50 s() XCHG
-    25 s() 49 s() XCHG
-    24 s() 48 s() XCHG
-    23 s() 47 s() XCHG
-    22 s() 46 s() XCHG
-    21 s() 53 s() XCHG
-    20 s() 52 s() XCHG
-    19 s() 51 s() XCHG
-    18 s() 50 s() XCHG
-    17 s() 49 s() XCHG
-    16 s() 48 s() XCHG
-    s15 47 s() XCHG
-    s14 46 s() XCHG
-    s13 53 s() XCHG
-    s12 52 s() XCHG
-    s11 51 s() XCHG
-    s10 50 s() XCHG
-    s9 49 s() XCHG
-    s8 48 s() XCHG
-    s7 47 s() XCHG
-    s6 46 s() XCHG
-    s5 53 s() XCHG
-    s4 52 s() XCHG
-    s3 51 s() XCHG
-    s2 50 s() XCHG
-    s1 49 s() XCHG
-    s0 48 s() XCHG
-    $Pool$_fun_requireOwner INLINECALLDICT
-    s5 46 s() XCHG
-    s4 53 s() XCHG
-    s3 52 s() XCHG
-    s2 51 s() XCHG
-    s1 50 s() XCHG
-    s0 49 s() XCHG
+    41207 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    33 s() PUSH
+    __tact_slice_eq_bits INLINECALLDICT
+    THROWANYIFNOT
+    6 -ROLL
     16 PUSHINT
-    s0 49 s() XCHG
+    s0 s7 XCHG
     $TokenConfig$_store_cell INLINECALLDICT
-    s3 s14 XCHG
-    s2 43 s() XCHG
-    s1 42 s() XCHG
+    s3 22 s() XCHG
+    s1 s2 XCHG
     __tact_dict_set_uint_cell INLINECALLDICT
         B{b5ee9c7241010101001200002000000000746f6b656e206c69737465643bcb0770} B>boc PUSHREF
-    38 s() 46 s() XCHG
-    37 s() 45 s() XCHG
-    36 s() 44 s() XCHG
-    35 s() 43 s() XCHG
-    34 s() 42 s() XCHG
-    33 s() 41 s() XCHG
-    32 s() 40 s() XCHG
-    31 s() 39 s() XCHG
-    30 s() 38 s() XCHG
-    29 s() 37 s() XCHG
-    28 s() 36 s() XCHG
-    27 s() 35 s() XCHG
-    26 s() 34 s() XCHG
-    25 s() 33 s() XCHG
-    24 s() 32 s() XCHG
-    23 s() 31 s() XCHG
-    22 s() 30 s() XCHG
-    21 s() 29 s() XCHG
-    20 s() 28 s() XCHG
-    19 s() 27 s() XCHG
-    18 s() 26 s() XCHG
-    17 s() 25 s() XCHG
-    16 s() 24 s() XCHG
-    s15 23 s() XCHG
-    s14 22 s() XCHG
-    s13 21 s() XCHG
     s1 20 s() XCHG
-    s11 19 s() XCHG
-    s10 18 s() XCHG
-    s9 17 s() XCHG
-    s8 16 s() XCHG
-    s7 s15 XCHG
-    s6 s14 XCHG
-    s5 s13 XCHG
-    s4 s12 XCHG
-    s3 s11 XCHG
-    s2 s10 XCHG
-    s4 s9 XCHG
-    s4 s8 XCHG
-    s4 s7 XCHG
-    s4 s6 XCHG
-    s4 s5 XCHG
-    s3 s3 s0 XCHG3
     $Pool$_fun_reply INLINECALLDICT
   }>
   $Pool$_internal_binary_DelistToken PROCINLINE:<{
-    45 s() 46 s() XCHG
-    44 s() 46 s() XCHG
-    43 s() 46 s() XCHG
-    42 s() 46 s() XCHG
-    41 s() 46 s() XCHG
-    40 s() 46 s() XCHG
-    39 s() 46 s() XCHG
-    38 s() 46 s() XCHG
-    37 s() 46 s() XCHG
-    36 s() 46 s() XCHG
-    35 s() 46 s() XCHG
-    34 s() 46 s() XCHG
-    33 s() 46 s() XCHG
-    32 s() 46 s() XCHG
-    31 s() 46 s() XCHG
-    30 s() 46 s() XCHG
-    29 s() 46 s() XCHG
-    28 s() 46 s() XCHG
-    27 s() 46 s() XCHG
-    26 s() 46 s() XCHG
-    25 s() 46 s() XCHG
-    24 s() 46 s() XCHG
-    23 s() 46 s() XCHG
-    22 s() 46 s() XCHG
-    21 s() 46 s() XCHG
-    20 s() 46 s() XCHG
-    19 s() 46 s() XCHG
-    18 s() 46 s() XCHG
-    17 s() 46 s() XCHG
-    16 s() 46 s() XCHG
-    s15 46 s() XCHG
-    s14 46 s() XCHG
-    s13 46 s() XCHG
-    s12 46 s() XCHG
-    s11 46 s() XCHG
-    s10 46 s() XCHG
-    s9 46 s() XCHG
-    s0 46 s() XCHG
-    s0 s8 XCHG
-    s0 s7 XCHG
-    s0 s6 XCHG
-    5 -ROLL
-    $Pool$_fun_requireOwner INLINECALLDICT
-    s8 PUSH
+    41207 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    26 s() PUSH
+    __tact_slice_eq_bits INLINECALLDICT
+    THROWANYIFNOT
+    s9 PUSH
     16 PUSHINT
-    48 s() PUSH
+    s2 PUSH
     __tact_dict_get_uint_cell INLINECALLDICT
     $GlobalPosition$_load_opt INLINECALLDICT
     DUP
@@ -5450,70 +5322,31 @@ PROGRAM{
     }>ELSE<{
       DROP
     }>
-    46 s() PUSH
-    SWAP
-    s0 20 s() XCHG
+    DUP
+    s0 21 s() XCHG
     16 PUSHINT
         DICTUDEL
     DROP
-    46 s() PUSH
-    s0 s9 XCHG2
-    16 PUSHINT
-        DICTUDEL
-    DROP
-    46 s() PUSH
+    20 s() PUSH
     s0 s10 XCHG2
     16 PUSHINT
         DICTUDEL
     DROP
-    s1 46 s() XCHG
-    s0 s10 XCHG
+    20 s() PUSH
+    s0 s11 XCHG2
+    16 PUSHINT
+        DICTUDEL
+    DROP
+    s1 20 s() XCHG
+    s0 s11 XCHG
     16 PUSHINT
         DICTUDEL
     DROP
         B{b5ee9c7241010101001400002400000000746f6b656e2064656c69737465642069b25b} B>boc PUSHREF
-    45 s() 46 s() XCHG
-    44 s() 45 s() XCHG
-    43 s() 44 s() XCHG
-    42 s() 43 s() XCHG
-    41 s() 42 s() XCHG
-    40 s() 41 s() XCHG
-    39 s() 40 s() XCHG
-    38 s() 39 s() XCHG
-    37 s() 38 s() XCHG
-    36 s() 37 s() XCHG
-    35 s() 36 s() XCHG
-    34 s() 35 s() XCHG
-    33 s() 34 s() XCHG
-    32 s() 33 s() XCHG
-    31 s() 32 s() XCHG
-    30 s() 31 s() XCHG
-    29 s() 30 s() XCHG
-    28 s() 29 s() XCHG
-    27 s() 28 s() XCHG
-    26 s() 27 s() XCHG
-    25 s() 26 s() XCHG
-    24 s() 25 s() XCHG
-    23 s() 24 s() XCHG
-    22 s() 23 s() XCHG
-    21 s() 22 s() XCHG
-    20 s() 21 s() XCHG
-    s8 20 s() XCHG
-    18 s() 19 s() XCHG
-    17 s() 18 s() XCHG
-    16 s() 17 s() XCHG
-    s15 16 s() XCHG
-    s14 s15 XCHG
-    s13 s14 XCHG
-    s12 s13 XCHG
+    s9 20 s() XCHG
     s1 s11 XCHG
-    s1 s12 XCHG
-    s7 s8 XCHG
-    s6 s7 XCHG
-    s5 s6 XCHG
-    s4 s5 XCHG
-    s3 s4 XCHG
-    s2 s3 XCHG
+    s1 s10 XCHG
+    s1 s9 XCHG
     $Pool$_fun_reply INLINECALLDICT
   }>
   $Pool$_internal_binary_WithdrawFee PROCINLINE:<{
