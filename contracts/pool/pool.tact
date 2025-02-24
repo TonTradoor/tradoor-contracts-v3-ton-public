@@ -615,10 +615,10 @@ contract Pool with Deployable, Resumable, Upgradable{
         let tradingFee: Int = 0;
         let lpTradingFee: Int = 0;
         let feeReserveDelta: Int = 0;
+        let tradoorProfit: Int = 0;
         if (sizeDelta > 0) {
             tradingFee = sizeDelta * tradePrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);
             lpTradingFee = tradingFee * tokenConfig.lpTradingFeeRate / PERCENTAGE_BASIS_POINT;
-            let tradoorProfit: Int = 0;
             if (lpRealizedPnl > 0){
                 tradoorProfit = lpRealizedPnl * self.normalPositionShareRate / PERCENTAGE_BASIS_POINT;
             }
@@ -725,7 +725,7 @@ contract Pool with Deployable, Resumable, Upgradable{
             lpEntryPriceAfter: globalLPPosition.entryPrice,
             lpFundAfter: self.globalLPFund,
             lpTradingFee: lpTradingFee,
-            lpRealizedPnl: lpRealizedPnl,
+            lpRealizedPnl: lpRealizedPnl - tradoorProfit,
         }.toCell());
 
         self.transferEstimatedRemainValue(self.executePerpOrderGas * executionFeeMultiple, sender(), -order.executionFee);
@@ -792,10 +792,10 @@ contract Pool with Deployable, Resumable, Upgradable{
 
         let tradingFee: Int = 0;
         let lpTradingFee: Int = 0;
+        let tradoorProfit: Int = 0;
         if (sizeDelta > 0) {
             tradingFee = sizeDelta * tradePrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);
             lpTradingFee = tradingFee * tokenConfig.lpTradingFeeRate / PERCENTAGE_BASIS_POINT;
-            let tradoorProfit: Int = 0;
             if (lpRealizedPnl > 0) {
                 tradoorProfit = lpRealizedPnl * self.normalPositionShareRate / PERCENTAGE_BASIS_POINT;
             }
@@ -911,7 +911,7 @@ contract Pool with Deployable, Resumable, Upgradable{
             lpEntryPriceAfter: globalLPPosition.entryPrice,
             lpFundAfter: self.globalLPFund,
             lpTradingFee: lpTradingFee,
-            lpRealizedPnl: lpRealizedPnl
+            lpRealizedPnl: lpRealizedPnl - tradoorProfit
         }.toCell());
 
         self.transferEstimatedRemainValue(self.executePerpOrderGas, sender(), -order.executionFee - payout);
@@ -1021,7 +1021,10 @@ contract Pool with Deployable, Resumable, Upgradable{
         // trading fee
         let tradingFee: Int = sizeDelta * bankruptcyPrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);
         let lpTradingFee: Int = tradingFee * tokenConfig.lpTradingFeeRate / PERCENTAGE_BASIS_POINT;
-        let tradoorProfit: Int = lpRealizedPnl * self.liquidatedPositionShareRate / PERCENTAGE_BASIS_POINT;
+        let tradoorProfit: Int = 0;
+        if (lpRealizedPnl > 0) {
+            tradoorProfit = lpRealizedPnl * self.liquidatedPositionShareRate / PERCENTAGE_BASIS_POINT;
+        }
         self.feeReserve += tradingFee - lpTradingFee + tradoorProfit;
         self.globalLPFund += lpRealizedPnl - tradoorProfit + lpTradingFee;
 
@@ -1093,7 +1096,7 @@ contract Pool with Deployable, Resumable, Upgradable{
             lpEntryPriceAfter: globalLPPosition.entryPrice,
             lpFundAfter: self.globalLPFund,
             lpTradingFee: lpTradingFee,
-            lpRealizedPnl: lpRealizedPnl
+            lpRealizedPnl: lpRealizedPnl - tradoorProfit
         }.toCell());
 
         self.transferEstimatedRemainValue(self.executePerpOrderGas, sender(), -order.executionFee - payout);

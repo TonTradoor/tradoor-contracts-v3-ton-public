@@ -1,6 +1,6 @@
 # TACT Compilation Report
 Contract: Pool
-BOC Size: 21306 bytes
+BOC Size: 21384 bytes
 
 # Types
 Total Types: 65
