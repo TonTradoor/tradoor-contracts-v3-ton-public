@@ -1,7 +1,7 @@
 import { toNano } from '@ton/core';
 import { NetworkProvider } from '@ton/blueprint';
 import { attachPool, getConfig, getLastTransaction, toUnits, waitForTransaction } from '../utils/util';
-import { MOCK_DECIMAL, PERCENTAGE_DECIMAL } from '../utils/constants';
+import { PERCENTAGE_DECIMAL } from '../utils/constants';
 
 export async function run(provider: NetworkProvider) {
     const pool = attachPool(provider);

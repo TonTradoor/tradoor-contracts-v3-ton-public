@@ -6,10 +6,7 @@ import {
     attachTLPJetton,
     getConfig,
     getLastTransaction,
-    waitForTransaction,
-    toUnits
-} from '../utils/util';
-import { MOCK_DECIMAL, PERCENTAGE_DECIMAL } from '../utils/constants';
+    waitForTransaction} from '../utils/util';
 
 export async function run(provider: NetworkProvider) {
     const pool = attachPool(provider);

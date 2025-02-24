@@ -1,5 +1,4 @@
 import { Address, Dictionary, toNano } from '@ton/core';
-import { Pool } from '../wrappers/Pool';
 import { NetworkProvider } from '@ton/blueprint';
 import { getConfig, setConfig } from '../utils/util';
 import { Multisig } from '../wrappers/Multisig';

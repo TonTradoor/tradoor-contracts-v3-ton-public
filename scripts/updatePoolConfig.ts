@@ -1,9 +1,7 @@
-import { Address, Dictionary, toNano } from '@ton/core';
+import { toNano } from '@ton/core';
 import { NetworkProvider } from '@ton/blueprint';
 import {
-    attachMockJetton,
     attachPool,
-    attachTLPJetton,
     getConfig,
     getLastTransaction,
     waitForTransaction,

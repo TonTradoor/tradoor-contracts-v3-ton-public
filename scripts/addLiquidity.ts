@@ -1,7 +1,6 @@
-import { beginCell, toNano } from '@ton/core';
+import { toNano } from '@ton/core';
 import { NetworkProvider } from '@ton/blueprint';
-import { toUnits, getLastTransaction, waitForTransaction, attachPool, attachMockJettonWallet } from '../utils/util';
-import { MOCK_DECIMAL, OP_CREATE_INCREASE_LP_POSITION_ORDER } from '../utils/constants';
+import { getLastTransaction, waitForTransaction, attachPool } from '../utils/util';
 
 export async function run(provider: NetworkProvider) {
     const pool = attachPool(provider);
