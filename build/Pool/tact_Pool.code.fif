@@ -2297,10 +2297,8 @@ PROGRAM{
     s0 s0 s0 PUSH3
     s0 s0 s0 PUSH3
     s0 s0 s0 PUSH3
-    50000000 PUSHINT
-    100000000 PUSHINT
-    10000000 PUSHINT
-    s3 PUSH
+    s0 s0 s0 PUSH3
+    DUP
         B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
         B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
         B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
@@ -5359,28 +5357,28 @@ PROGRAM{
     ADD
     s1 s15 XCPU
     SUB
-    s0 18 s() XCHG
-    18 s() PUSH
+    s1 18 s() XCHG
     ADD
-    s1 s7 PUSH2
+    17 s() PUSH
+    s7 PUSH
     ADD
     0 PUSHINT
-    43 s() PUSH
-    s7 PUSH
+    42 s() PUSH
+    s6 PUSH
     IF:<{
-      52 s() PUSH
+      51 s() PUSH
       ADD
       OVER
-      57 s() PUSH
+      56 s() PUSH
       s4 PUSH
       SUB
           MAX
-      s6 PUSH
+      s5 PUSH
       23654 PUSHINT
       s0 s2 XCHG
       LEQ
       THROWANYIFNOT
-      40 s() PUSH
+      39 s() PUSH
       0 EQINT
       IF:<{
         s2 POP
@@ -5389,10 +5387,10 @@ PROGRAM{
         s0 s2 XCHG
         1000000000000000000 PUSHINT
         MUL
-        40 s() PUSH
+        39 s() PUSH
         DIV
       }>
-      s5 PUSH
+      s4 PUSH
       1000000000000000000 PUSHINT
       MUL
       OVER
@@ -5400,114 +5398,116 @@ PROGRAM{
       PUSHNULL
       s3 PUSH
       $global_emptySlice INLINECALLDICT
-      s12 PUSH
-      s3 s11 XCPU
+      s11 PUSH
+      s3 s10 XCPU
       s3 s5 XCPU
       s0 s3 XCHG
       $JettonMint$_constructor_origin_receiver_amount_custom_payload_forward_ton_amount_forward_payload INLINECALLDICT
       $JettonMint$_store_cell INLINECALLDICT
-      41 s() PUSH
+      40 s() PUSH
       SWAP
-      55 s() PUSH
+      54 s() PUSH
       SWAP
       $SendParameters$_constructor_to_value_body INLINECALLDICT
       $global_send INLINECALLDICT
       DROP
-      s5 s6 XCPU
-      ADD
-      s0 41 s() XCHG
+      s0 21 s() XCHG
       s5 PUSH
+      ADD
+      s0 40 s() XCHG
+      21 s() PUSH
       ADD
     }>ELSE<{
       NIP
-      50 s() PUSH
+      49 s() PUSH
       ADD
       SWAP
       1000000000000000000 PUSHINT
       MUL
-      39 s() PUSH
+      38 s() PUSH
       DIV
-      s0 s4 PUSH2
+      s0 s3 PUSH2
       MUL
       1000000000000000000 PUSHINT
       DIV
-      s11 s5 s8 PUSH3
+      s10 s4 s7 PUSH3
       PUSHNULL
       $JettonBurn$_constructor_query_id_amount_response_destination_custom_payload INLINECALLDICT
       $JettonBurn$_store_cell INLINECALLDICT
-      39 s() PUSH
+      38 s() PUSH
       SWAP
-      53 s() PUSH
+      52 s() PUSH
       SWAP
       $SendParameters$_constructor_to_value_body INLINECALLDICT
       $global_send INLINECALLDICT
       DROP
-      s4 s4 XCPU
+      s0 20 s() XCHG
+      20 s() PUSH
       SUB
-      s0 40 s() XCHG
+      s0 39 s() XCHG
+      s4 PUSH
+      SUB
       s5 PUSH
-      SUB
-      s6 s4 PUSH2
+      21 s() PUSH
       3 PUSHINT
       $SendParameters$_constructor_to_value_mode INLINECALLDICT
       $global_send INLINECALLDICT
       DROP
-      s0 20 s() XCHG
-      s4 PUSH
+      s0 19 s() XCHG
+      20 s() PUSH
       SUB
-      s4 PUSH
-      s1 21 s() XCHG
-      s5 s6 XCHG
+      20 s() PUSH
+      s5 21 s() XCHG
+      s1 20 s() XCHG
       -ROT
     }>
-    33 s() PUSH
+    32 s() PUSH
     0 GTINT
     IF:<{
-      s9 PUSH
-      34 s() PUSH
+      s8 PUSH
+      33 s() PUSH
       2 PUSHINT
       $SendParameters$_constructor_to_value_mode INLINECALLDICT
       $global_send INLINECALLDICT
       DROP
-      s0 20 s() XCHG
-      33 s() PUSH
+      s0 19 s() XCHG
+      32 s() PUSH
       SUB
-      s0 20 s() XCHG
+      s0 19 s() XCHG
     }>
-    s0 s8 XCHG
+    s0 s7 XCHG
     IF:<{
       1 PUSHINT
     }>ELSE<{
       2 PUSHINT
     }>
-    s8 s12 XCHG
-    s7 s13 XCHG
+    s8 s11 XCHG
+    s7 s12 XCHG
     s0 s6 XCHG
-    s5 s13 XCHG
-    s13 s3 s4 XCHG3
+    s0 s5 XCHG
+    s3 s4 XCHG2
+    s2 21 s() XCHG
     s12 PUSH
     s0 s2 XCHG
-    42 s() PUSH
+    41 s() PUSH
     s0 s2 XCHG
-    s1 18 s() XCHG
-    s0 21 s() XCHG
-    s12 PUSH
-    21 s() PUSH
+    s1 17 s() XCHG
+    s0 20 s() XCHG
+    s11 PUSH
+    20 s() PUSH
     $LiquidityPoolUpdatedEvent$_constructor_trxId_orderId_opType_account_amount_tlpPrice_tlpDelta_tlpSupply_lpFundAfter_realizedLpFundingFeeDelta_realizedLpRolloverFeeDelta_entryLpFundingFeeGrowth_entryRolloverFeeGrowth INLINECALLDICT
     $LiquidityPoolUpdatedEvent$_store_cell INLINECALLDICT
     $global_emit INLINECALLDICT
-    s0 24 s() XCHG
+    s0 23 s() XCHG
     NEGATE
-    s0 s4 XCHG2
-    SUB
     s0 s12 XCHG2
     SUB
-    s1 30 s() XCHG
+    s2 30 s() XCHG
     s6 22 s() XCHG
-    s1 s8 XCHG
-    s1 s11 XCHG
-    s6 s7 s0 XCHG3
-    s5 s5 s0 XCHG3
+    s8 s11 XCHG
+    s2 s8 XCHG
+    s2 s7 XCHG
+    s2 s5 XCHG
     $Pool$_fun_transferEstimatedRemainValue INLINECALLDICT
   }>
   $Pool$_internal_binary_CreateIncreasePerpOrder PROCINLINE:<{
@@ -6246,10 +6246,8 @@ PROGRAM{
     NOT
     THROWANYIFNOT
     19305 PUSHINT
+    s0 s7 XCHG
     45 s() PUSH
-    48 s() PUSH
-    ADD
-    s1 s8 XCHG
     GEQ
     s1 s7 XCHG
     THROWANYIFNOT
@@ -6416,8 +6414,10 @@ PROGRAM{
     DROP
     s2 POP
     19305 PUSHINT
-    42 s() PUSH
-    46 s() PUSH
+    44 s() PUSH
+    1 LSHIFT#
+    43 s() PUSH
+    SWAP
     ADD
     s1 s3 XCHG
     GEQ

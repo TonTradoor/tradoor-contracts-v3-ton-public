@@ -29,9 +29,9 @@ contract Pool with Deployable, Resumable, Upgradable{
     cancelLiquidityOrderGas: Int as coins = 0;
     executeLiquidityOrderGas: Int as coins = 0;
 
-    lpMinExecutionFee: Int as coins = ton("0.05"); 
-    perpMinExecutionFee: Int as coins = ton("0.1");
-    minStorageReserve: Int as coins = ton("0.01");
+    lpMinExecutionFee: Int as coins = 0; 
+    perpMinExecutionFee: Int as coins = 0;
+    minStorageReserve: Int as coins = 0;
 
     tlpSupply: Int as coins = 0;
     tlpJetton: Address = newAddress(0, 0);
@@ -296,8 +296,7 @@ contract Pool with Deployable, Resumable, Upgradable{
 
         self.globalLPFund += lpFundingFeeGrowthDelta + lpRolloverFeeGrowthDelta;
         
-        let feeReserveDelta: Int = (rolloverFeeGrowthDelta - lpRolloverFeeGrowthDelta);
-        self.feeReserve += feeReserveDelta;
+        self.feeReserve += rolloverFeeGrowthDelta - lpRolloverFeeGrowthDelta;
 
         let globalNetLP: Int = self.globalLPFund + self.globalLPUnrealizedPnl;
         let tlpPrice: Int = 0;
@@ -361,7 +360,7 @@ contract Pool with Deployable, Resumable, Upgradable{
             entryRolloverFeeGrowth: self.globalRolloverFeeGrowth
         }.toCell());
 
-        self.transferEstimatedRemainValue(gas, ctx.sender, -order.executionFee - orderAmountReserveDelta - feeReserveDelta);
+        self.transferEstimatedRemainValue(gas, ctx.sender, -order.executionFee - orderAmountReserveDelta);
     }
 
     receive(msg: CreateIncreasePerpOrder){
@@ -466,7 +465,7 @@ contract Pool with Deployable, Resumable, Upgradable{
         let order: PerpOrder = orderOpt!!;
 
         require(!order.isPending, "order is pending");
-        require(ctx.value >= self.cancelPerpOrderGas + self.transferJettonGas, "gas not enough");
+        require(ctx.value >= self.cancelPerpOrderGas, "gas not enough");
 
         let isExecutor: Bool = self.executors.exists(ctx.sender);
         require(isExecutor || ctx.sender == order.account, "invalid sender");
@@ -524,7 +523,7 @@ contract Pool with Deployable, Resumable, Upgradable{
 
     receive(msg: ExecutePerpOrder) {
         let ctx: Context = context();
-        require(ctx.value >= self.executePerpOrderGas + self.transferJettonGas, "gas not enough");
+        require(ctx.value >= self.executePerpOrderGas + self.createPerpOrderGas * 2, "gas not enough");
 
         require(self.executors.exists(ctx.sender), "invalid sender");
         let orderOpt: PerpOrder? = self.perpOrders.get(msg.orderId);
@@ -642,7 +641,6 @@ contract Pool with Deployable, Resumable, Upgradable{
         // trading fee
         let tradingFee: Int = 0;
         let lpTradingFee: Int = 0;
-        let feeReserveDelta: Int = 0;
         let tradoorProfit: Int = 0;
         if (sizeDelta > 0) {
             tradingFee = sizeDelta * tradePrice * tokenConfig.tradingFeeRate / (PERCENTAGE_BASIS_POINT * PRICE_DECIMAL_FACTOR);

@@ -9,6 +9,7 @@ import { TLPJettonWallet } from '../../wrappers/TLPJettonWallet';
 import { toJettonUnits } from './TokenHelper';
 import { PERCENTAGE_BASIS_POINT, PERCENTAGE_DECIMAL } from '../../utils/constants';
 import { toUnits } from '../../utils/util';
+import { Multisig } from '../../wrappers/Multisig';
 
 export class TestEnv {
 
@@ -31,6 +32,8 @@ export class TestEnv {
     static poolTlpWallet: SandboxContract<TLPJettonWallet>;
     static user1JettonWallet: SandboxContract<MockJettonWallet>;
     static user1TlpWallet: SandboxContract<TLPJettonWallet>;
+    static multisig: SandboxContract<Multisig>;
+
 
     // config
     static tlpDecimal: number = 9;
@@ -173,12 +176,7 @@ export class TestEnv {
                 value: toNano('0.1'),
             },
             {
-                $$type: 'UpdateConfig',
-                orderLockTime: 3n * 60n,
-                maxLpNetCap: toJettonUnits(100000n),
-                lpRolloverFeeRate: BigInt(this.lpRolloverFeeRate * PERCENTAGE_BASIS_POINT),
-                liquidatedPositionShareRate: BigInt(this.liquidatedPositionShareRate * PERCENTAGE_BASIS_POINT),
-                normalPositionShareRate: BigInt(this.normalPositionShareRate * PERCENTAGE_BASIS_POINT),
+                $$type: 'UpdateBaseConfig',
                 gasConfig: {
                     $$type: 'GasConfig',
                     mintJettonGas: toNano(0.03),
@@ -197,11 +195,10 @@ export class TestEnv {
                 executorConfig: {
                     $$type: 'ExecutorConfig',
                     executors: executors,
-                    compensator: this.compensator.address,
-                    claimer: this.claimExecutor.address,
                 },
                 contractConfig: {
                     $$type: 'ContractConfig',
+                    multisig: TestEnv.multisig.address,
                     tlpJetton: TestEnv.tlp.address,
                     tlpWallet: TestEnv.poolTlpWallet.address
                 }
