@@ -46,7 +46,7 @@
       "name": "BTC",
       "enable": true,
       "maxLeverage": 105,
-      "liquidationFee": 0.5,
+      "liquidationFee": 0.1,
       "maintenanceRate": 0.005,
       "tradingFeeRate": 0.0009,
       "lpTradingFeeRate": 0.65
@@ -56,7 +56,7 @@
       "name": "ETH",
       "enable": true,
       "maxLeverage": 105,
-      "liquidationFee": 0.5,
+      "liquidationFee": 0.1,
       "maintenanceRate": 0.005,
       "tradingFeeRate": 0.0009,
       "lpTradingFeeRate": 0.65
