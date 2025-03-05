@@ -48,7 +48,6 @@ struct PoolStat {
     executionFeeReserve: Int as coins;
     feeReserve: Int as coins;
     globalLPFund: Int as int128;
-    globalLPUnrealizedPnl: Int as int128;
     globalLpFundingFeeGrowth: Int as coins;
     globalRolloverFeeGrowth: Int as coins;
 }

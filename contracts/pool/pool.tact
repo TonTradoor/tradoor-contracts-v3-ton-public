@@ -79,6 +79,8 @@ contract Pool with Deployable, Resumable, Upgradable{
     upgradeSeqno: Int as uint32 = 1;
     upgradeRequests: map<Int as uint32, UpgradeRequest>;
 
+    prices: map<Int as uint16, Int as uint128>;
+
     init(deployId: Int) {
         self.owner = sender();
     }
@@ -174,6 +176,50 @@ contract Pool with Deployable, Resumable, Upgradable{
     }
 
     receive() {}
+
+    receive (msg: FeedPrices) {
+        require(self.executors.exists(sender()), "invalid sender");
+        self.prices = msg.prices;
+
+        // charge funding fee
+        let lpFundingFeeGrowthDelta: Int = msg.lpFundingFeeGrowth - self.globalLpFundingFeeGrowth;
+        self.globalLpFundingFeeGrowth = msg.lpFundingFeeGrowth;
+
+        // charge rollover fee
+        let rolloverFeeGrowthDelta: Int = msg.rolloverFeeGrowth - self.globalRolloverFeeGrowth;
+        let lpRolloverFeeGrowthDelta: Int = rolloverFeeGrowthDelta * self.lpRolloverFeeRate / PERCENTAGE_BASIS_POINT;
+        self.globalRolloverFeeGrowth = msg.rolloverFeeGrowth;
+
+        self.globalLPFund += lpFundingFeeGrowthDelta + lpRolloverFeeGrowthDelta;
+        
+        self.feeReserve += rolloverFeeGrowthDelta - lpRolloverFeeGrowthDelta;
+        
+        emit(FeeChargedEvent{
+            trxId: msg.trxId,
+            lpFundAfter: self.globalLPFund,
+            realizedLpFundingFeeDelta: lpFundingFeeGrowthDelta,
+            realizedLpRolloverFeeDelta: lpRolloverFeeGrowthDelta,
+            entryLpFundingFeeGrowth: self.globalLpFundingFeeGrowth,
+            entryRolloverFeeGrowth: self.globalRolloverFeeGrowth
+        }.toCell());
+        
+        self.reply("prices updated".asComment());
+    }
+
+    receive (msg: IncreaseAum) {
+        let ctx: Context = context();
+        require(self.manager == ctx.sender, "invalid sender");
+        require(ctx.value >= msg.amount + self.createPerpOrderGas, "invalid amount");
+        self.globalLPFund += msg.amount;
+
+        emit(AumIncreasedEvent{
+            trxId: msg.trxId,
+            amount: msg.amount,
+            lpFundAfter: self.globalLPFund,
+        }.toCell());
+
+        self.reply("aum updated".asComment());
+    }
 
     receive(msg: JettonTransferNotification) {
         let ctx: Context = context();
@@ -286,8 +332,6 @@ contract Pool with Deployable, Resumable, Upgradable{
                 globalLPUnrealizedPnl += globalLPPosition.netSize * (price - globalLPPosition.entryPrice) * (globalLPPosition.isLong ? 1 : -1) / PRICE_DECIMAL_FACTOR;
             }
         }
-        self.globalLPUnrealizedPnl = globalLPUnrealizedPnl;
-
         // charge funding fee
         let lpFundingFeeGrowthDelta: Int = msg.lpFundingFeeGrowth - self.globalLpFundingFeeGrowth;
         self.globalLpFundingFeeGrowth = msg.lpFundingFeeGrowth;
@@ -301,7 +345,7 @@ contract Pool with Deployable, Resumable, Upgradable{
         
         self.feeReserve += rolloverFeeGrowthDelta - lpRolloverFeeGrowthDelta;
 
-        let globalNetLP: Int = self.globalLPFund + self.globalLPUnrealizedPnl;
+        let globalNetLP: Int = self.globalLPFund + globalLPUnrealizedPnl;
         let tlpPrice: Int = 0;
         let amount: Int = 0;
         let tlpDelta: Int = 0;
@@ -1293,7 +1337,6 @@ contract Pool with Deployable, Resumable, Upgradable{
             executionFeeReserve: self.executionFeeReserve,
             feeReserve: self.feeReserve,
             globalLPFund: self.globalLPFund,
-            globalLPUnrealizedPnl: self.globalLPUnrealizedPnl,
             globalLpFundingFeeGrowth: self.globalLpFundingFeeGrowth,
             globalRolloverFeeGrowth: self.globalRolloverFeeGrowth,
         };
@@ -1319,6 +1362,20 @@ contract Pool with Deployable, Resumable, Upgradable{
             compensateIndexNext: self.compensateIndexNext,
             compensate: self.compensates.get(compensateId)
         }
+    }
+
+    get fun tlpPrice(): Int {
+        let globalLPUnrealizedPnl: Int = 0;
+        let prices: map<Int as uint16, Int as uint128> = self.prices;
+        foreach ( tokenId,price in prices) {
+            let globalLPPositionOpt: GlobalLPPosition? = self.globalLPPositions.get(tokenId);
+            if (globalLPPositionOpt != null) {
+                let globalLPPosition: GlobalLPPosition = globalLPPositionOpt!!;
+                globalLPUnrealizedPnl += globalLPPosition.netSize * (price - globalLPPosition.entryPrice) * (globalLPPosition.isLong ? 1 : -1) / PRICE_DECIMAL_FACTOR;
+            }
+        }
+        let globalNetLP: Int = self.globalLPFund + globalLPUnrealizedPnl;
+        return globalNetLP  * JETTON_PRICE_DECIMAL_FACTOR / self.tlpSupply;
     }
 
 }

@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: Pool
-BOC Size: 24049 bytes
+BOC Size: 24842 bytes
 
 # Types
-Total Types: 68
+Total Types: 72
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -105,6 +105,14 @@ Signature: `DelistToken{tokenId:uint16}`
 TLB: `withdraw_fee#8fe2e211 feeReceiver:Maybe address = WithdrawFee`
 Signature: `WithdrawFee{feeReceiver:Maybe address}`
 
+## FeedPrices
+TLB: `feed_prices#90cb4c4b trxId:uint64 lpFundingFeeGrowth:coins rolloverFeeGrowth:coins prices:dict<uint16, uint128> = FeedPrices`
+Signature: `FeedPrices{trxId:uint64,lpFundingFeeGrowth:coins,rolloverFeeGrowth:coins,prices:dict<uint16, uint128>}`
+
+## IncreaseAum
+TLB: `increase_aum#0ea2a5cf trxId:uint64 amount:coins = IncreaseAum`
+Signature: `IncreaseAum{trxId:uint64,amount:coins}`
+
 ## CancelLiquidityOrder
 TLB: `cancel_liquidity_order#69ef6dfe orderId:uint64 trxId:uint64 = CancelLiquidityOrder`
 Signature: `CancelLiquidityOrder{orderId:uint64,trxId:uint64}`
@@ -193,6 +201,14 @@ Signature: `CompensateCancelledEvent{compensateId:uint64,trxId:uint64}`
 TLB: `compensate_executed_event#db45e438 compensateId:uint64 trxId:uint64 = CompensateExecutedEvent`
 Signature: `CompensateExecutedEvent{compensateId:uint64,trxId:uint64}`
 
+## FeeChargedEvent
+TLB: `fee_charged_event#7a53bc1b trxId:uint64 lpFundAfter:int128 realizedLpFundingFeeDelta:coins realizedLpRolloverFeeDelta:coins entryLpFundingFeeGrowth:coins entryRolloverFeeGrowth:coins = FeeChargedEvent`
+Signature: `FeeChargedEvent{trxId:uint64,lpFundAfter:int128,realizedLpFundingFeeDelta:coins,realizedLpRolloverFeeDelta:coins,entryLpFundingFeeGrowth:coins,entryRolloverFeeGrowth:coins}`
+
+## AumIncreasedEvent
+TLB: `aum_increased_event#0a5f0ef8 trxId:uint64 amount:coins lpFundAfter:int128 = AumIncreasedEvent`
+Signature: `AumIncreasedEvent{trxId:uint64,amount:coins,lpFundAfter:int128}`
+
 ## AccountInfo
 TLB: `_ isExecutor:bool isCompensator:bool isClaimer:bool isManager:bool = AccountInfo`
 Signature: `AccountInfo{isExecutor:bool,isCompensator:bool,isClaimer:bool,isManager:bool}`
@@ -206,8 +222,8 @@ TLB: `_ name:^string enable:bool maxLeverage:uint16 liquidationFee:coins mainten
 Signature: `TokenConfig{name:^string,enable:bool,maxLeverage:uint16,liquidationFee:coins,maintenanceRate:uint32,tradingFeeRate:uint32,lpTradingFeeRate:uint32}`
 
 ## PoolStat
-TLB: `_ tlpSupply:coins orderAmountReserve:coins executionFeeReserve:coins feeReserve:coins globalLPFund:int128 globalLPUnrealizedPnl:int128 globalLpFundingFeeGrowth:coins globalRolloverFeeGrowth:coins = PoolStat`
-Signature: `PoolStat{tlpSupply:coins,orderAmountReserve:coins,executionFeeReserve:coins,feeReserve:coins,globalLPFund:int128,globalLPUnrealizedPnl:int128,globalLpFundingFeeGrowth:coins,globalRolloverFeeGrowth:coins}`
+TLB: `_ tlpSupply:coins orderAmountReserve:coins executionFeeReserve:coins feeReserve:coins globalLPFund:int128 globalLpFundingFeeGrowth:coins globalRolloverFeeGrowth:coins = PoolStat`
+Signature: `PoolStat{tlpSupply:coins,orderAmountReserve:coins,executionFeeReserve:coins,feeReserve:coins,globalLPFund:int128,globalLpFundingFeeGrowth:coins,globalRolloverFeeGrowth:coins}`
 
 ## AccountPerpPosition
 TLB: `_ positions:dict<address, ^DirectionPerpPosition{longPosition:PerpPosition{positionId:uint64,margin:coins,size:coins,entryPrice:uint128,entryFundingFeeGrowth:int128,entryRolloverFeeGrowth:int128},shortPosition:PerpPosition{positionId:uint64,margin:coins,size:coins,entryPrice:uint128,entryFundingFeeGrowth:int128,entryRolloverFeeGrowth:int128}}> = AccountPerpPosition`
@@ -278,7 +294,7 @@ TLB: `null`
 Signature: `null`
 
 # Get Methods
-Total Get Methods: 12
+Total Get Methods: 13
 
 ## accountInfo
 Argument: account
@@ -302,6 +318,8 @@ Argument: orderId
 
 ## compensate
 Argument: compensateId
+
+## tlpPrice
 
 ## stopped
 
@@ -377,6 +395,7 @@ Argument: seqno
 52989: OrderBook: incorrect value transferred
 53296: Contract not stopped
 54119: non-existent order
+54178: invalid amount
 60785: OrderBook: insufficient execution fee
 62409: insufficient margin
 

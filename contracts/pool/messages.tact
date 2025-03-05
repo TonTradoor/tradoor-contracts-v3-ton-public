@@ -70,6 +70,18 @@ message DelistToken {
 message WithdrawFee {
     feeReceiver: Address?;
 }
+
+message FeedPrices {
+    trxId: Int as uint64;
+    lpFundingFeeGrowth: Int as coins;
+    rolloverFeeGrowth: Int as coins;
+    prices: map<Int as uint16, Int as uint128>;
+}
+
+message IncreaseAum {
+    trxId: Int as uint64;
+    amount: Int as coins;
+}
 // ============================ LP ================================ //
 
 message CancelLiquidityOrder {
