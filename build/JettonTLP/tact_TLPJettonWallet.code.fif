@@ -5,7 +5,6 @@ PROGRAM{
   DECLPROC __tact_store_address
   DECLPROC __tact_create_address
   DECLPROC __tact_compute_contract_address
-  DECLPROC __tact_my_balance
   DECLPROC __tact_not_null
   DECLPROC __tact_context_get
   DECLPROC __tact_store_bool
@@ -142,10 +141,6 @@ PROGRAM{
     HASHCU
     __tact_create_address INLINECALLDICT
   }>
-  __tact_my_balance PROCINLINE:<{
-    BALANCE
-    FIRST
-  }>
   __tact_not_null PROCINLINE:<{
     DUP
     ISNULL
@@ -181,7 +176,7 @@ PROGRAM{
     EQUAL
     129 THROWIFNOT
     64 LDU
-    LDGRAMS
+    LDVARUINT16
     __tact_load_address INLINECALLDICT
     SWAP
     __tact_load_address_opt INLINECALLDICT
@@ -194,7 +189,7 @@ PROGRAM{
       PUSHNULL
       SWAP
     }>
-    LDGRAMS
+    LDVARUINT16
     s6 s6 XCPU
     s1 s6 XCHG
     s1 s5 XCHG
@@ -208,7 +203,7 @@ PROGRAM{
     s1 s3 XCHG
     64 STU
     SWAP
-    STGRAMS
+    STVARUINT16
     SWAP
     __tact_store_address INLINECALLDICT
     SWAP
@@ -227,7 +222,7 @@ PROGRAM{
     EQUAL
     129 THROWIFNOT
     64 LDU
-    LDGRAMS
+    LDVARUINT16
     __tact_load_address INLINECALLDICT
     SWAP
     1 LDI
@@ -259,13 +254,13 @@ PROGRAM{
     s1 s5 XCHG
     64 STU
     s0 s3 XCHG2
-    STGRAMS
+    STVARUINT16
     SWAP
     __tact_store_address INLINECALLDICT
     SWAP
     __tact_store_address INLINECALLDICT
     SWAP
-    STGRAMS
+    STVARUINT16
     SWAP
     STSLICER
   }>
@@ -282,12 +277,12 @@ PROGRAM{
     EQUAL
     129 THROWIFNOT
     64 LDU
-    LDGRAMS
+    LDVARUINT16
     __tact_load_address INLINECALLDICT
     SWAP
     __tact_load_address INLINECALLDICT
     SWAP
-    LDGRAMS
+    LDVARUINT16
     s5 s5 XCPU
     s1 s5 XCHG
     s1 s4 XCHG
@@ -300,7 +295,7 @@ PROGRAM{
     EQUAL
     129 THROWIFNOT
     64 LDU
-    LDGRAMS
+    LDVARUINT16
     -ROT
   }>
   $JettonBurnNotification$_store PROCINLINE:<{
@@ -310,7 +305,7 @@ PROGRAM{
     s1 s3 XCHG
     64 STU
     SWAP
-    STGRAMS
+    STVARUINT16
     SWAP
     __tact_store_address INLINECALLDICT
     SWAP
@@ -329,19 +324,19 @@ PROGRAM{
     EQUAL
     129 THROWIFNOT
     64 LDU
-    LDGRAMS
+    LDVARUINT16
     -ROT
   }>
   $TLPJettonWallet$_store PROCINLINE:<{
     2SWAP
-    STGRAMS
+    STVARUINT16
     ROT
     __tact_store_address INLINECALLDICT
     SWAP
     __tact_store_address INLINECALLDICT
   }>
   $TLPJettonWallet$_load PROCINLINE:<{
-    LDGRAMS
+    LDVARUINT16
     __tact_load_address INLINECALLDICT
     SWAP
     __tact_load_address INLINECALLDICT
@@ -410,7 +405,7 @@ PROGRAM{
     __tact_compute_contract_address INLINECALLDICT
   }>
   $global_send PROCREF:<{
-    NEWC
+        NEWC
     1 PUSHINT
     SWAP
     2 STI
@@ -422,7 +417,7 @@ PROGRAM{
     s0 s5 XCHG2
     __tact_store_address INLINECALLDICT
     s0 s3 XCHG2
-    STGRAMS
+        STVARUINT16
     0 PUSHINT
     SWAP
     105 STI
@@ -439,7 +434,7 @@ PROGRAM{
     IF:<{
       TRUE
       __tact_store_bool INLINECALLDICT
-      NEWC
+          NEWC
       FALSE
       __tact_store_bool INLINECALLDICT
       FALSE
@@ -453,7 +448,7 @@ PROGRAM{
         s0 s4 XCHG
         __tact_not_null INLINECALLDICT
         s0 s4 XCHG2
-        STREF
+            STREF
       }>ELSE<{
         s4 POP
         s0 s3 XCHG
@@ -469,7 +464,7 @@ PROGRAM{
         s0 s4 XCHG
         __tact_not_null INLINECALLDICT
         s0 s4 XCHG2
-        STREF
+            STREF
       }>ELSE<{
         s4 POP
         s0 s3 XCHG
@@ -482,9 +477,9 @@ PROGRAM{
       TRUE
       __tact_store_bool INLINECALLDICT
       s0 s2 XCHG
-      ENDC
+          ENDC
       ROT
-      STREF
+          STREF
     }>ELSE<{
       s3 POP
       s3 POP
@@ -501,27 +496,27 @@ PROGRAM{
       SWAP
       __tact_not_null INLINECALLDICT
       SWAP
-      STREF
+          STREF
     }>ELSE<{
       NIP
       FALSE
       __tact_store_bool INLINECALLDICT
     }>
-    ENDC
+        ENDC
     SWAP
-    SENDRAWMSG
+        SENDMSG
   }>
   $Context$_fun_readForwardFee PROCREF:<{
     3 1 BLKDROP2
     __tact_load_address INLINECALLDICT
     DROP
-    LDGRAMS
+        LDVARUINT16
     NIP
     1 PUSHINT
-    SDSKIPFIRST
-    LDGRAMS
+        SDSKIPFIRST
+        LDVARUINT16
     NIP
-    LDGRAMS
+        LDVARUINT16
     DROP
     3 MULCONST
     1 RSHIFT#
@@ -584,12 +579,12 @@ PROGRAM{
   $TLPJettonWallet$_fun__internal_transfer_estimate_remain_value PROCINLINE:<{
     s1 s5 XCHG
     5 BLKDROP
-    __tact_my_balance INLINECALLDICT
+        BALANCE FIRST
     s3 PUSH
     SUB
     15000000 PUSHINT
     TUCK
-    MIN
+        MIN
     SUB
     10000000 PUSHINT
     ADD
@@ -635,6 +630,7 @@ PROGRAM{
       4 -ROLL
       $SendParameters$_constructor_to_value_mode_bounce_body INLINECALLDICT
       $global_send INLINECALLDICT
+      DROP
     }>ELSE<{
       5 BLKDROP
     }>
@@ -653,7 +649,7 @@ PROGRAM{
     s2 POP
     3 3 BLKDROP2
     s3 POP
-    B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
+        B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
     OVER
     __tact_slice_eq_bits INLINECALLDICT
     NOT
@@ -673,6 +669,7 @@ PROGRAM{
       s1 s3 XCHG
       $SendParameters$_constructor_to_value_bounce_mode_body INLINECALLDICT
       $global_send INLINECALLDICT
+      DROP
     }>ELSE<{
       3 BLKDROP
     }>
@@ -703,6 +700,7 @@ PROGRAM{
     s4 s4 XCHG2
     $SendParameters$_constructor_to_value_mode_bounce_body INLINECALLDICT
     $global_send INLINECALLDICT
+    DROP
   }>
   $TLPJettonWallet$_fun__transfer_validate PROCINLINE:<{
     s9 s10 XCHG
@@ -771,15 +769,14 @@ PROGRAM{
     s0 s1 s7 XCHG3
     $SendParameters$_constructor_to_value_bounce_mode_body_code_data INLINECALLDICT
     $global_send INLINECALLDICT
+    DROP
   }>
   $WalletData$_constructor_balance_owner_jetton_jetton_wallet_code PROCINLINE:<{
   }>
   $TLPJettonWallet$_fun_get_wallet_data PROCREF:<{
     s2 s1 s0 PUSH3
-    s5 s4 s3 PUSH3
-    s7 s6 s1 XC2PU
+    s4 s3 s1 XC2PU
     $TLPJettonWallet$_fun_calculate_jetton_wallet_init INLINECALLDICT
-    3 2 BLKDROP2
     $StateInit$_get_code INLINECALLDICT
     s3 s6 XCHG
     s5 s4 s0 XCHG3

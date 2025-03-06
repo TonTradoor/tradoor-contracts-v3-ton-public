@@ -21,14 +21,14 @@
 
 ((slice, cell, int), int) $Multisig$_fun_member((slice, cell, int) $self, slice $address) impure inline_ref {
     var (($self'owner, $self'members, $self'requiredWeight)) = $self;
-    var $fresh$ret_5 = __tact_dict_get_slice_uint($self'members, 267, $address, 8);
-    return (($self'owner, $self'members, $self'requiredWeight), $fresh$ret_5);
+    var $fresh$ret_33 = __tact_dict_get_slice_uint($self'members, 267, $address, 8);
+    return (($self'owner, $self'members, $self'requiredWeight), $fresh$ret_33);
 }
 
 ((slice, cell, int), cell) $Multisig$_fun_members((slice, cell, int) $self) impure inline_ref {
     var (($self'owner, $self'members, $self'requiredWeight)) = $self;
-    var $fresh$ret_6 = $self'members;
-    return (($self'owner, $self'members, $self'requiredWeight), $fresh$ret_6);
+    var $fresh$ret_34 = $self'members;
+    return (($self'owner, $self'members, $self'requiredWeight), $fresh$ret_34);
 }
 
 ((slice, cell, int), ()) $Multisig$_fun_requireOwner((slice, cell, int) $self) impure inline_ref {
@@ -39,8 +39,8 @@
 
 ((slice, cell, int), slice) $Multisig$_fun_owner((slice, cell, int) $self) impure inline_ref {
     var (($self'owner, $self'members, $self'requiredWeight)) = $self;
-    var $fresh$ret_7 = $self'owner;
-    return (($self'owner, $self'members, $self'requiredWeight), $fresh$ret_7);
+    var $fresh$ret_35 = $self'owner;
+    return (($self'owner, $self'members, $self'requiredWeight), $fresh$ret_35);
 }
 
 ;;

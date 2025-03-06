@@ -20,7 +20,8 @@
 
 ((int, slice, slice), (cell, cell)) $MockJettonWallet$_fun_calculate_jetton_wallet_init((int, slice, slice) $self, slice $owner_address) impure inline {
     var (($self'balance, $self'owner, $self'jetton_master)) = $self;
-    return (($self'balance, $self'owner, $self'jetton_master), $MockJettonWallet$_init_child(__tact_context_sys, $owner_address, $self'jetton_master));
+    var $fresh$ret_0 = $MockJettonWallet$_init_child(__tact_context_sys, $owner_address, $self'jetton_master);
+    return (($self'balance, $self'owner, $self'jetton_master), $fresh$ret_0);
 }
 
 ((int, slice, slice), ()) $MockJettonWallet$_fun__internal_transfer_validate((int, slice, slice) $self, (int, slice, int, slice) $ctx, (int, int, slice, slice, int, slice) $msg) impure inline {
@@ -38,13 +39,14 @@
     var (($self'balance, $self'owner, $self'jetton_master)) = $self;
     var (($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw)) = $ctx;
     var (($msg'query_id, $msg'amount, $msg'from, $msg'response_address, $msg'forward_ton_amount, $msg'forward_payload)) = $msg;
-    int $tonBalanceBeforeMsg = (__tact_my_balance() - $ctx'value);
-    int $storage_fee = (15000000 - min($tonBalanceBeforeMsg, 15000000));
+    int $tonBalanceBeforeMsg = ($global_myBalance() - $ctx'value);
+    int $storage_fee = (15000000 - $global_min($tonBalanceBeforeMsg, 15000000));
     int $remain = ($ctx'value - ($storage_fee + 10000000));
     if (($msg'forward_ton_amount > 0)) {
         $remain = ($remain - ($Context$_fun_readForwardFee(($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw)) + $msg'forward_ton_amount));
     }
-    return (($self'balance, $self'owner, $self'jetton_master), $remain);
+    var $fresh$ret_1 = $remain;
+    return (($self'balance, $self'owner, $self'jetton_master), $fresh$ret_1);
 }
 
 ((int, slice, slice), ()) $MockJettonWallet$_fun__internal_transfer_notification((int, slice, slice) $self, (int, slice, int, slice) $ctx, (int, int, slice, slice, int, slice) $msg) impure inline {
@@ -115,7 +117,8 @@
 
 ((int, slice, slice), (int, slice, slice, cell)) $MockJettonWallet$_fun_get_wallet_data((int, slice, slice) $self) impure inline_ref {
     var (($self'balance, $self'owner, $self'jetton_master)) = $self;
-    return (($self'balance, $self'owner, $self'jetton_master), $WalletData$_constructor_balance_owner_jetton_jetton_wallet_code($self'balance, $self'owner, $self'jetton_master, $StateInit$_get_code(($self'balance, $self'owner, $self'jetton_master)~$MockJettonWallet$_fun_calculate_jetton_wallet_init($self'owner))));
+    var $fresh$ret_2 = $WalletData$_constructor_balance_owner_jetton_jetton_wallet_code($self'balance, $self'owner, $self'jetton_master, $StateInit$_get_code(($self'balance, $self'owner, $self'jetton_master)~$MockJettonWallet$_fun_calculate_jetton_wallet_init($self'owner)));
+    return (($self'balance, $self'owner, $self'jetton_master), $fresh$ret_2);
 }
 
 ;;
@@ -206,14 +209,14 @@ _ lazy_deployment_completed() method_id {
         }
         
         ;; Bounced handler for JettonInternalTransfer message
-        if (op == 395134233) {
+        if (op == 0x178d4519) {
             var msg = in_msg~$JettonInternalTransfer$_load_bounced();
             self~$MockJettonWallet$_receive_binary_bounce_JettonInternalTransfer(msg);
             return (self, true);
         }
         
         ;; Bounced handler for JettonBurnNotification message
-        if (op == 2078119902) {
+        if (op == 0x7bdd97de) {
             var msg = in_msg~$JettonBurnNotification$_load_bounced();
             self~$MockJettonWallet$_receive_binary_bounce_JettonBurnNotification(msg);
             return (self, true);
@@ -230,21 +233,21 @@ _ lazy_deployment_completed() method_id {
     
     
     ;; Receive JettonTransfer message
-    if (op == 260734629) {
+    if (op == 0xf8a7ea5) {
         var msg = in_msg~$JettonTransfer$_load();
         self~$MockJettonWallet$_internal_binary_JettonTransfer(msg);
         return (self, true);
     }
     
     ;; Receive JettonBurn message
-    if (op == 1499400124) {
+    if (op == 0x595f07bc) {
         var msg = in_msg~$JettonBurn$_load();
         self~$MockJettonWallet$_internal_binary_JettonBurn(msg);
         return (self, true);
     }
     
     ;; Receive JettonInternalTransfer message
-    if (op == 395134233) {
+    if (op == 0x178d4519) {
         var msg = in_msg~$JettonInternalTransfer$_load();
         self~$MockJettonWallet$_internal_binary_JettonInternalTransfer(msg);
         return (self, true);

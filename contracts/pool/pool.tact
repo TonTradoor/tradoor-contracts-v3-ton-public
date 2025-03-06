@@ -218,7 +218,7 @@ contract Pool with Deployable, Resumable, Upgradable{
             lpFundAfter: self.globalLPFund,
         }.toCell());
 
-        self.reply("aum updated".asComment());
+        self.transferEstimatedRemainValue(self.createPerpOrderGas, ctx.sender, msg.amount);
     }
 
     receive(msg: JettonTransferNotification) {

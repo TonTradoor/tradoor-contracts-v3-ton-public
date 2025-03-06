@@ -5,16 +5,17 @@ import { getLastTransaction, waitForTransaction, attachPool } from '../utils/uti
 export async function run(provider: NetworkProvider) {
     const pool = attachPool(provider);
     
-    let amount = await provider.ui().input('amount:');
+    let amount = Number(await provider.ui().input('amount:'));
 
     const lastTrx = await getLastTransaction(provider, pool.address);
     await pool.send(
         provider.sender(),
         {
-            value: toNano(0.2 + amount),
+            value: toNano(amount + 0.2),
         },
         {
             $$type: 'IncreaseAum',
+            trxId: 1n,
             amount: toNano(amount)
         }
     );

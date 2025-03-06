@@ -20,7 +20,8 @@
 
 ((int, int, slice, cell), (cell, cell)) $TLPJettonMaster$_fun_calculate_jetton_wallet_init((int, int, slice, cell) $self, slice $owner_address) impure inline {
     var (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content)) = $self;
-    return (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content), $TLPJettonWallet$_init_child(__tact_context_sys, $owner_address, my_address()));
+    var $fresh$ret_24 = $TLPJettonWallet$_init_child(__tact_context_sys, $owner_address, $global_myAddress());
+    return (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content), $fresh$ret_24);
 }
 
 ((int, int, slice, cell), ()) $TLPJettonMaster$_fun__mint_validate((int, int, slice, cell) $self, (int, slice, int, slice) $ctx, (slice, slice, int, cell, int, slice) $msg) impure inline {
@@ -38,7 +39,7 @@
     var (($msg'origin, $msg'receiver, $msg'amount, $msg'custom_payload, $msg'forward_ton_amount, $msg'forward_payload)) = $msg;
     var ($initCode'code, $initCode'data) = ($self'total_supply, $self'mintable, $self'owner, $self'jetton_content)~$TLPJettonMaster$_fun_calculate_jetton_wallet_init($msg'receiver);
     $self'total_supply = ($self'total_supply + $msg'amount);
-    $global_send($SendParameters$_constructor_to_value_bounce_mode_body_code_data($global_contractAddress(($initCode'code, $initCode'data)), 0, true, 64, $JettonInternalTransfer$_store_cell($JettonInternalTransfer$_constructor_query_id_amount_response_address_from_forward_ton_amount_forward_payload(0, $msg'amount, $msg'origin, my_address(), $msg'forward_ton_amount, $msg'forward_payload)), $initCode'code, $initCode'data));
+    $global_send($SendParameters$_constructor_to_value_bounce_mode_body_code_data($global_contractAddress(($initCode'code, $initCode'data)), 0, true, 64, $JettonInternalTransfer$_store_cell($JettonInternalTransfer$_constructor_query_id_amount_response_address_from_forward_ton_amount_forward_payload(0, $msg'amount, $msg'origin, $global_myAddress(), $msg'forward_ton_amount, $msg'forward_payload)), $initCode'code, $initCode'data));
     return (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content), ());
 }
 
@@ -64,13 +65,15 @@
 
 ((int, int, slice, cell), (int, int, slice, cell, cell)) $TLPJettonMaster$_fun_get_jetton_data((int, int, slice, cell) $self) impure inline_ref {
     var (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content)) = $self;
-    return (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content), $JettonData$_constructor_total_supply_mintable_admin_address_jetton_content_jetton_wallet_code($self'total_supply, $self'mintable, $self'owner, $self'jetton_content, $StateInit$_get_code(($self'total_supply, $self'mintable, $self'owner, $self'jetton_content)~$TLPJettonMaster$_fun_calculate_jetton_wallet_init(my_address()))));
+    var $fresh$ret_25 = $JettonData$_constructor_total_supply_mintable_admin_address_jetton_content_jetton_wallet_code($self'total_supply, $self'mintable, $self'owner, $self'jetton_content, $StateInit$_get_code(($self'total_supply, $self'mintable, $self'owner, $self'jetton_content)~$TLPJettonMaster$_fun_calculate_jetton_wallet_init($global_myAddress())));
+    return (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content), $fresh$ret_25);
 }
 
 ((int, int, slice, cell), slice) $TLPJettonMaster$_fun_get_wallet_address((int, int, slice, cell) $self, slice $owner_address) impure inline_ref {
     var (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content)) = $self;
     var ($initCode'code, $initCode'data) = ($self'total_supply, $self'mintable, $self'owner, $self'jetton_content)~$TLPJettonMaster$_fun_calculate_jetton_wallet_init($owner_address);
-    return (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content), $global_contractAddress(($initCode'code, $initCode'data)));
+    var $fresh$ret_26 = $global_contractAddress(($initCode'code, $initCode'data));
+    return (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content), $fresh$ret_26);
 }
 
 ((int, int, slice, cell), ()) $TLPJettonMaster$_fun_requireOwner((int, int, slice, cell) $self) impure inline_ref {
@@ -81,7 +84,8 @@
 
 ((int, int, slice, cell), slice) $TLPJettonMaster$_fun_owner((int, int, slice, cell) $self) impure inline_ref {
     var (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content)) = $self;
-    return (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content), $self'owner);
+    var $fresh$ret_27 = $self'owner;
+    return (($self'total_supply, $self'mintable, $self'owner, $self'jetton_content), $fresh$ret_27);
 }
 
 ;;
@@ -181,7 +185,7 @@ _ lazy_deployment_completed() method_id {
     }
     
     ;; Receive JettonBurnNotification message
-    if (op == 2078119902) {
+    if (op == 0x7bdd97de) {
         var msg = in_msg~$JettonBurnNotification$_load();
         self~$TLPJettonMaster$_internal_binary_JettonBurnNotification(msg);
         return (self, true);

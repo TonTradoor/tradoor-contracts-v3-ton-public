@@ -28,12 +28,13 @@ trait Upgradable with Ownable {
     upgradeSeqno: Int;
     upgradeRequests: map<Int, UpgradeRequest>;
 
+    //todo time lock
     receive (msg: RequestUpgrade) {
         self.requireOwner();
         let request = UpgradeRequest{
             code: msg.code, 
             data: msg.data,
-            unlockTime: now() + 3 * 24 * 60 * 60
+            unlockTime: now() + 3 * 60
         };
         let seqno = self.upgradeSeqno;
         self.upgradeSeqno += 1;

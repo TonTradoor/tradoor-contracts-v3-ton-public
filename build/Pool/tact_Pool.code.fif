@@ -5345,25 +5345,27 @@ PROGRAM{
     DROP
     s2 POP
     41207 PUSHINT
-    SWAP
-    32 s() PUSH
+    OVER
+    33 s() PUSH
     __tact_slice_eq_bits INLINECALLDICT
     THROWANYIFNOT
     54178 PUSHINT
-    s2 PUSH
-    44 s() PUSH
+    s3 PUSH
+    45 s() PUSH
     ADD
-    s1 s2 XCHG
+    s1 s3 XCHG
     GEQ
+    s1 s2 XCHG
     THROWANYIFNOT
-    s10 s10 XCPU
+    s11 s1 XCPU
     ADD
-    s10 s10 XCPU
+    s2 s1 s2 XCPU2
     $AumIncreasedEvent$_constructor_trxId_amount_lpFundAfter INLINECALLDICT
     $AumIncreasedEvent$_store_cell INLINECALLDICT
     $global_emit INLINECALLDICT
-        B{b5ee9c7241010101001100001e0000000061756d2075706461746564207a1a2e} B>boc PUSHREF
-    $Pool$_fun_reply INLINECALLDICT
+    41 s() PUSH
+    s0 s11 s11 XCHG3
+    $Pool$_fun_transferEstimatedRemainValue INLINECALLDICT
   }>
   $Pool$_internal_binary_JettonTransferNotification PROCINLINE:<{
     __tact_context_get INLINECALLDICT
@@ -7768,7 +7770,7 @@ PROGRAM{
     s0 50 s() XCHG
     $Pool$_fun_requireOwner INLINECALLDICT
         NOW
-    259200 PUSHINT
+    180 PUSHINT
     ADD
     s2 52 s() XCHG
     s1 51 s() XCHG

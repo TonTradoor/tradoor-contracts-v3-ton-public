@@ -4,7 +4,6 @@ PROGRAM{
   DECLPROC __tact_store_address
   DECLPROC __tact_create_address
   DECLPROC __tact_compute_contract_address
-  DECLPROC __tact_my_balance
   DECLPROC __tact_not_null
   DECLPROC __tact_context_get
   DECLPROC __tact_context_get_sender
@@ -123,10 +122,6 @@ PROGRAM{
     HASHCU
     __tact_create_address INLINECALLDICT
   }>
-  __tact_my_balance PROCINLINE:<{
-    BALANCE
-    FIRST
-  }>
   __tact_not_null PROCINLINE:<{
     DUP
     ISNULL
@@ -187,7 +182,7 @@ PROGRAM{
       PUSHNULL
       SWAP
     }>
-    LDGRAMS
+    LDVARUINT16
     s5 s5 XCPU
     s1 s5 XCHG
     s1 s4 XCHG
@@ -200,13 +195,13 @@ PROGRAM{
     s1 s5 XCHG
     64 STU
     s0 s3 XCHG2
-    STGRAMS
+    STVARUINT16
     SWAP
     __tact_store_address INLINECALLDICT
     SWAP
     __tact_store_address INLINECALLDICT
     SWAP
-    STGRAMS
+    STVARUINT16
     SWAP
     STSLICER
   }>
@@ -223,7 +218,7 @@ PROGRAM{
     EQUAL
     129 THROWIFNOT
     64 LDU
-    LDGRAMS
+    LDVARUINT16
     __tact_load_address INLINECALLDICT
     SWAP
     __tact_load_address INLINECALLDICT
@@ -253,14 +248,14 @@ PROGRAM{
   }>
   $MockJettonMaster$_store PROCINLINE:<{
     s4 s3 XCHG2
-    STGRAMS
+    STVARUINT16
     1 STI
     ROT
     __tact_store_address INLINECALLDICT
     STREF
   }>
   $MockJettonMaster$_load PROCINLINE:<{
-    LDGRAMS
+    LDVARUINT16
     1 LDI
     __tact_load_address INLINECALLDICT
     SWAP
@@ -274,7 +269,7 @@ PROGRAM{
     DUP
     ISNULL
     128 THROWIF
-    2 UNTUPLE
+        2 UNTUPLE
   }>
   $JettonData$_to_external PROCINLINE:<{
   }>
@@ -338,7 +333,7 @@ PROGRAM{
     __tact_compute_contract_address INLINECALLDICT
   }>
   $global_send PROCREF:<{
-    NEWC
+        NEWC
     1 PUSHINT
     SWAP
     2 STI
@@ -350,7 +345,7 @@ PROGRAM{
     s0 s5 XCHG2
     __tact_store_address INLINECALLDICT
     s0 s3 XCHG2
-    STGRAMS
+        STVARUINT16
     0 PUSHINT
     SWAP
     105 STI
@@ -367,7 +362,7 @@ PROGRAM{
     IF:<{
       TRUE
       __tact_store_bool INLINECALLDICT
-      NEWC
+          NEWC
       FALSE
       __tact_store_bool INLINECALLDICT
       FALSE
@@ -381,7 +376,7 @@ PROGRAM{
         s0 s4 XCHG
         __tact_not_null INLINECALLDICT
         s0 s4 XCHG2
-        STREF
+            STREF
       }>ELSE<{
         s4 POP
         s0 s3 XCHG
@@ -397,7 +392,7 @@ PROGRAM{
         s0 s4 XCHG
         __tact_not_null INLINECALLDICT
         s0 s4 XCHG2
-        STREF
+            STREF
       }>ELSE<{
         s4 POP
         s0 s3 XCHG
@@ -410,9 +405,9 @@ PROGRAM{
       TRUE
       __tact_store_bool INLINECALLDICT
       s0 s2 XCHG
-      ENDC
+          ENDC
       ROT
-      STREF
+          STREF
     }>ELSE<{
       s3 POP
       s3 POP
@@ -429,15 +424,15 @@ PROGRAM{
       SWAP
       __tact_not_null INLINECALLDICT
       SWAP
-      STREF
+          STREF
     }>ELSE<{
       NIP
       FALSE
       __tact_store_bool INLINECALLDICT
     }>
-    ENDC
+        ENDC
     SWAP
-    SENDRAWMSG
+        SENDMSG
   }>
   $MockJettonWallet$_init_child PROCREF:<{
     s0 s2 XCHG
@@ -483,7 +478,7 @@ PROGRAM{
   }>
   $MockJettonMaster$_fun_calculate_jetton_wallet_init PROCINLINE:<{
     __tact_context_sys GETGLOB
-    MYADDR
+        MYADDR
     s1 s2 XCHG
     $MockJettonWallet$_init_child INLINECALLDICT
   }>
@@ -508,6 +503,7 @@ PROGRAM{
     s2 s3 XCHG2
     $SendParameters$_constructor_bounce_to_value_mode_body_code_data INLINECALLDICT
     $global_send INLINECALLDICT
+    DROP
   }>
   $MockJettonMaster$_fun_notify PROCINLINE:<{
     __tact_context_get_sender INLINECALLDICT
@@ -534,7 +530,7 @@ PROGRAM{
     TRUE
     64 PUSHINT
     s2 PUSH
-    MYADDR
+        MYADDR
     s1 s5 XCHG
     s4 s14 XCHG
     s3 s15 XCHG
@@ -548,6 +544,7 @@ PROGRAM{
     s0 s0 s7 XCHG3
     $SendParameters$_constructor_to_value_bounce_mode_body_code_data INLINECALLDICT
     $global_send INLINECALLDICT
+    DROP
     s3 s3 XCHG2
   }>
   $MockJettonMaster$_fun__burn_notification_validate PROCINLINE:<{
@@ -578,7 +575,7 @@ PROGRAM{
     5 BLKDROP
     s1 s5 XCHG
     SUB
-    B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
+        B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
     s5 PUSH
     __tact_slice_eq_bits INLINECALLDICT
     NOT
@@ -589,6 +586,7 @@ PROGRAM{
       66 PUSHINT
       $SendParameters$_constructor_to_value_bounce_mode INLINECALLDICT
       $global_send INLINECALLDICT
+      DROP
     }>ELSE<{
       s4 POP
     }>
@@ -597,14 +595,12 @@ PROGRAM{
   }>
   $MockJettonMaster$_fun_get_jetton_data PROCREF:<{
     s3 s2 s1 PUSH3
-    s3 s6 s5 PUSH3
-    s7 s6 PUSH2
-    MYADDR
-    s4 s12 XCHG
-    s3 s11 XCHG
-    s10 s9 s0 XCHG3
+    s3 PUSH
+        MYADDR
+    s4 s8 XCHG
+    s3 s7 XCHG
+    s6 s5 s0 XCHG3
     $MockJettonMaster$_fun_calculate_jetton_wallet_init INLINECALLDICT
-    4 2 BLKDROP2
     $StateInit$_get_code INLINECALLDICT
     s4 s8 XCHG
     s3 s7 XCHG

@@ -23,8 +23,8 @@
 
 ((slice, cell, int, int, int, (slice, int, slice, slice, slice)), (slice, int, slice, slice, slice)) $MultisigSigner$_fun_request((slice, cell, int, int, int, (slice, int, slice, slice, slice)) $self) impure inline_ref {
     var (($self'master, $self'members, $self'weight, $self'requiredWeight, $self'completed, ($self'request'to, $self'request'timeout, $self'request'manager, $self'request'compensator, $self'request'claimer))) = $self;
-    var $fresh$ret_0 = ($self'request'to, $self'request'timeout, $self'request'manager, $self'request'compensator, $self'request'claimer);
-    return (($self'master, $self'members, $self'weight, $self'requiredWeight, $self'completed, ($self'request'to, $self'request'timeout, $self'request'manager, $self'request'compensator, $self'request'claimer)), $fresh$ret_0);
+    var $fresh$ret_28 = ($self'request'to, $self'request'timeout, $self'request'manager, $self'request'compensator, $self'request'claimer);
+    return (($self'master, $self'members, $self'weight, $self'requiredWeight, $self'completed, ($self'request'to, $self'request'timeout, $self'request'manager, $self'request'compensator, $self'request'claimer)), $fresh$ret_28);
 }
 
 ;;
