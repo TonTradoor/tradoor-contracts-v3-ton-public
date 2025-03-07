@@ -67,7 +67,6 @@ contract Pool with Deployable, Resumable, Upgradable{
     executionFeeReserve: Int as coins = 0; 
 
     globalLPFund: Int as int128 = 0;
-    globalLPUnrealizedPnl: Int as int128 = 0;
 
     globalLpFundingFeeGrowth: Int as coins = 0;
     globalRolloverFeeGrowth: Int as coins = 0;
