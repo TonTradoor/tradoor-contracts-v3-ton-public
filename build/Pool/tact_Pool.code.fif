@@ -5357,6 +5357,8 @@ PROGRAM{
     GEQ
     s1 s2 XCHG
     THROWANYIFNOT
+    s13 s1 XCPU
+    ADD
     s11 s1 XCPU
     ADD
     s2 s1 s2 XCPU2
@@ -5364,6 +5366,7 @@ PROGRAM{
     $AumIncreasedEvent$_store_cell INLINECALLDICT
     $global_emit INLINECALLDICT
     41 s() PUSH
+    s11 s13 XCHG
     s0 s11 s11 XCHG3
     $Pool$_fun_transferEstimatedRemainValue INLINECALLDICT
   }>

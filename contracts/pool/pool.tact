@@ -210,6 +210,7 @@ contract Pool with Deployable, Resumable, Upgradable{
         let ctx: Context = context();
         require(self.manager == ctx.sender, "invalid sender");
         require(ctx.value >= msg.amount + self.createPerpOrderGas, "invalid amount");
+        self.orderAmountReserve += msg.amount;
         self.globalLPFund += msg.amount;
 
         emit(AumIncreasedEvent{

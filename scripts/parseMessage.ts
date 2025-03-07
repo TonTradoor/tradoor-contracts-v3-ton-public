@@ -1,6 +1,13 @@
 import { Cell } from '@ton/core';
 import { NetworkProvider } from '@ton/blueprint';
-import { loadCancelPerpOrder, loadCreateTpSlPerpOrder, loadExecuteLiquidityOrder, loadLiquidatePerpPosition, loadLiquidityOrder } from '../wrappers/Pool';
+import {
+    loadCancelPerpOrder,
+    loadCreateTpSlPerpOrder,
+    loadExecuteLiquidityOrder,
+    loadIncreaseAum,
+    loadLiquidatePerpPosition,
+    loadLiquidityOrder,
+} from '../wrappers/Pool';
 
 export async function run(provider: NetworkProvider) {
 
@@ -10,7 +17,8 @@ export async function run(provider: NetworkProvider) {
         'CreateTpSlPerpOrder',
         'CancelPerpOrder',
         'LiquidatePerpPosition',
-        'ExecuteLiquidityOrder'
+        'ExecuteLiquidityOrder',
+        'IncreaseAum'
     ], a => a).then(async (msg) => {
         const body = Buffer.from(rawBody, 'hex').toString('base64');
         const slice = Cell.fromBase64(body).asSlice();
@@ -28,6 +36,10 @@ export async function run(provider: NetworkProvider) {
         }
         if (msg === 'ExecuteLiquidityOrder') {
             const msg = loadExecuteLiquidityOrder(slice);
+            console.log(`msg:`, msg);
+        }
+        if (msg == 'IncreaseAum') {
+            const msg = loadIncreaseAum(slice);
             console.log(`msg:`, msg);
         }
     });
