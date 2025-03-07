@@ -4703,10 +4703,17 @@ PROGRAM{
     3 BLKDROP
     s9 s(-1) PUXC
     ADD
-    1000000000000000000 PUSHINT
-    MUL
     31 s() PUSH
-    DIV
+    0 EQINT
+    IF:<{
+      DROP
+      1000000000000000000 PUSHINT
+    }>ELSE<{
+      1000000000000000000 PUSHINT
+      MUL
+      31 s() PUSH
+      DIV
+    }>
   }>
   $SendParameters$_constructor_bounce_to_value_mode_body_code_data PROCINLINE:<{
   }>

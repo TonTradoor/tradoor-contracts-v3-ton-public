@@ -1376,7 +1376,7 @@ contract Pool with Deployable, Resumable, Upgradable{
             }
         }
         let globalNetLP: Int = self.globalLPFund + globalLPUnrealizedPnl;
-        return globalNetLP  * JETTON_PRICE_DECIMAL_FACTOR / self.tlpSupply;
+        return self.tlpSupply == 0 ? PRICE_DECIMAL_FACTOR : (globalNetLP * JETTON_PRICE_DECIMAL_FACTOR / self.tlpSupply);
     }
 
 }

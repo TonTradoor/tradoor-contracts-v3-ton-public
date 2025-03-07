@@ -451,7 +451,7 @@
         ($tokenId, $price, $fresh$flag_11) = __tact_dict_next_uint_uint($prices, 16, $tokenId, 128);
     }
     int $globalNetLP = ($self'globalLPFund + $globalLPUnrealizedPnl);
-    var $fresh$ret_12 = (($globalNetLP * 1000000000000000000) / $self'tlpSupply);
+    var $fresh$ret_12 = (($self'tlpSupply == 0) ? 1000000000000000000 : (($globalNetLP * 1000000000000000000) / $self'tlpSupply));
     return (($self'owner, $self'stopped, $self'orderLockTime, $self'maxLpNetCap, $self'lpRolloverFeeRate, $self'liquidatedPositionShareRate, $self'normalPositionShareRate, $self'mintJettonGas, $self'burnJettonGas, $self'transferJettonGas, $self'createPerpOrderGas, $self'cancelPerpOrderGas, $self'executePerpOrderGas, $self'createLiquidityOrderGas, $self'cancelLiquidityOrderGas, $self'executeLiquidityOrderGas, $self'lpMinExecutionFee, $self'perpMinExecutionFee, $self'minStorageReserve, $self'tlpSupply, $self'tlpJetton, $self'tlpWallet, $self'manager, $self'compensator, $self'claimer, $self'executors, $self'tokenConfigs, $self'liquidityOrders, $self'liquidityOrderIndexNext, $self'perpOrders, $self'perpOrderExs, $self'perpOrderIndexNext, $self'compensates, $self'compensateIndexNext, $self'positionIndexNext, $self'positions, $self'globalLPPositions, $self'globalPositions, $self'feeReserve, $self'orderAmountReserve, $self'executionFeeReserve, $self'globalLPFund, $self'globalLPUnrealizedPnl, $self'globalLpFundingFeeGrowth, $self'globalRolloverFeeGrowth, $self'multisig, $self'publicKey, $self'upgradeSeqno, $self'upgradeRequests, $self'prices), $fresh$ret_12);
 }
 
