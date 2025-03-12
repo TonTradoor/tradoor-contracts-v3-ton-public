@@ -1,6 +1,6 @@
 # TACT Compilation Report
 Contract: Pool
-BOC Size: 24573 bytes
+BOC Size: 24610 bytes
 
 # Types
 Total Types: 72
@@ -294,7 +294,7 @@ TLB: `null`
 Signature: `null`
 
 # Get Methods
-Total Get Methods: 13
+Total Get Methods: 14
 
 ## accountInfo
 Argument: account
@@ -320,6 +320,8 @@ Argument: orderId
 Argument: compensateId
 
 ## tlpPrice
+
+## prices
 
 ## stopped
 
