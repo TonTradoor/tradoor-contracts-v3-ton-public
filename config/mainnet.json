@@ -39,7 +39,7 @@
   "lpRolloverFeeRate": 0.5,
   "liquidatedPositionShareRate": 0.35,
   "normalPositionShareRate": 0.35,
-  "maxLpNetCap": 1000000,
+  "maxLpNetCap": 1100000,
   "requiredWeight": 1,
   "tokens": [
     {
