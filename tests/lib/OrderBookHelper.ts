@@ -1,7 +1,7 @@
 import { SandboxContract, TreasuryContract } from "@ton/sandbox";
-import { Address, beginCell, toNano } from "@ton/core";
+import { Address, toNano } from "@ton/core";
 import { TestEnv } from "./TestEnv";
-import { getAllBalance, getJettonWallet, toJettonUnits } from "./TokenHelper";
+import { getAllBalance, toJettonUnits } from "./TokenHelper";
 
 export async function createCompensate(executor: SandboxContract<TreasuryContract>, orderType: number, orderId: bigint,
     refundReceiver: Address, refundAmount: number, executionFeeReceiver: Address, executionFee: number) {
@@ -92,36 +92,5 @@ export async function executeCompensate(executor: SandboxContract<TreasuryContra
         balanceBefore,
         balanceAfter,
         compensate
-    };
-}
-
-
-export async function sendCompensateJetton(user: SandboxContract<TreasuryContract>, amount: number) {
-    let balanceBefore = await getAllBalance();
-    // create order
-    const jettonWallet = await getJettonWallet(user.address);
-    const trxResult = await jettonWallet.send(
-        user.getSender(),
-        {
-            value: toNano(0.2),
-        },
-        {
-            $$type: 'JettonTransfer',
-            query_id: 0n,
-            amount: toJettonUnits(amount),
-            destination: TestEnv.pool.address,
-            response_destination: user.address,
-            custom_payload: null,
-            forward_ton_amount: toNano(0),
-            forward_payload: beginCell().endCell().asSlice()
-        }
-    );
-    // after trx
-    let balanceAfter = await getAllBalance();
-
-    return {
-        trxResult,
-        balanceBefore,
-        balanceAfter,
     };
 }

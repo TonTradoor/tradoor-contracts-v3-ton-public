@@ -1,7 +1,6 @@
-import { Address, beginCell, fromNano, toNano } from "@ton/core";
+import { Address, fromNano, toNano } from "@ton/core";
 import { fromUnits, toUnits } from '../../utils/util';
 import { TestEnv } from "./TestEnv";
-import { MockJettonWallet } from "../../wrappers/MockJettonWallet";
 import { TLPJettonWallet } from "../../wrappers/TLPJettonWallet";
 
 export async function delistToken(tokenId: bigint) {
@@ -23,36 +22,6 @@ export async function delistToken(tokenId: bigint) {
         tokenConfigBefore,
         tokenConfigAfter
     };
-}
-
-export async function mint(to: Address, amount: string) {
-    const mintResult = await TestEnv.jetton.send(
-        TestEnv.deployer.getSender(),
-        {
-            value: toNano('0.1'),
-        },
-        {
-            $$type: 'JettonMint',
-            origin: TestEnv.deployer.address,
-            amount: toJettonUnits(amount),
-            receiver: to,
-            custom_payload: null,
-            forward_ton_amount: 0n,
-            forward_payload: beginCell().endCell().asSlice(),
-        }
-    );
-
-    expect(mintResult.transactions).toHaveTransaction({
-        from: TestEnv.deployer.address,
-        to: TestEnv.jetton.address,
-        success: true,
-    });
-
-    return mintResult;
-}
-
-export async function getJettonWallet(senderAddress: Address) {
-    return TestEnv.blockchain.openContract(await MockJettonWallet.fromInit(senderAddress, TestEnv.jetton.address));
 }
 
 export async function getTlpWallet(senderAddress: Address) {
@@ -83,20 +52,6 @@ export async function getFriendlyTonBalance(address: Address) {
     return fromNano(await getTonBalance(address));
 }
 
-export async function getJettonBalance(address: Address) {
-    let jettonWallet = await getJettonWallet(address);
-    let jettonWalletSmart = await TestEnv.blockchain.getContract(jettonWallet.address);
-    if (jettonWalletSmart.accountState?.type == 'active') {
-        let jettonData = await jettonWallet.getGetWalletData();
-        return jettonData.balance;
-    }
-    return 0n;
-}
-
-export async function getFriendlyJettonBalance(address: Address) {
-    let balance = await getJettonBalance(address);
-    return fromUnits(balance, TestEnv.jettonDecimal);
-}
 
 export async function getTlpBalance(address: Address) {
     let tlpWallet = await getTlpWallet(address);
@@ -118,17 +73,11 @@ export async function getAllBalance() {
         user1TonBalance: await getTonBalance(TestEnv.user1.address),
         user2TonBalance: await getTonBalance(TestEnv.user2.address),
         user3TonBalance: await getTonBalance(TestEnv.user3.address),
-        poolJettonBalance: await getJettonBalance(TestEnv.pool.address),
-        user0JettonBalance: await getJettonBalance(TestEnv.user0.address),
-        user1JettonBalance: await getJettonBalance(TestEnv.user1.address),
-        user2JettonBalance: await getJettonBalance(TestEnv.user2.address),
-        user3JettonBalance: await getJettonBalance(TestEnv.user3.address),
         poolTlpBalance: await getTlpBalance(TestEnv.pool.address),
         user0TlpBalance: await getTlpBalance(TestEnv.user0.address),
         user1TlpBalance: await getTlpBalance(TestEnv.user1.address),
         user2TlpBalance: await getTlpBalance(TestEnv.user2.address),
         user3TlpBalance: await getTlpBalance(TestEnv.user3.address),
-        claimExecutorJettonBalance: await getJettonBalance(TestEnv.claimExecutor.address),
     }
 }
 

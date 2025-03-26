@@ -1,37 +1,22 @@
 import { SandboxContract, TreasuryContract } from "@ton/sandbox";
 import { beginCell, Dictionary, toNano } from "@ton/core";
 import { TestEnv } from "./TestEnv";
-import { getAllBalance, getJettonWallet, getTlpWallet, toJettonUnits, toTlpUnits } from "./TokenHelper";
-import { OP_CREATE_INCREASE_LP_POSITION_ORDER } from "../../utils/constants";
+import { getAllBalance, getTlpWallet, toJettonUnits, toTlpUnits } from "./TokenHelper";
 
 export async function createIncreaseLiquidityOrder(user: SandboxContract<TreasuryContract>, liquidity: number, executionFee: number) {
     let balanceBefore = await getAllBalance();
     let orderIdBefore = (await TestEnv.pool.getLiquidityOrder(0n)).liquidityOrderIndexNext;
     // create order
-    const jettonWallet = await getJettonWallet(user.address);
-    const trxResult = await jettonWallet.send(
+    let trxResult = await TestEnv.pool.send(
         user.getSender(),
         {
-            value: toNano(executionFee + 0.2),
+            value: toNano(0.2 + executionFee + liquidity),
         },
         {
-            $$type: 'JettonTransfer',
-            query_id: 0n,
-            amount: toJettonUnits(liquidity),
-            destination: TestEnv.pool.address,
-            response_destination: user.address,
-            custom_payload: null,
-            forward_ton_amount: toNano(executionFee + 0.1),
-            forward_payload: 
-                beginCell()
-                .storeUint(1, 1)
-                .storeRef(
-                    beginCell()
-                    .storeUint(OP_CREATE_INCREASE_LP_POSITION_ORDER, 8) // op
-                    .storeCoins(toJettonUnits(liquidity)) // liquidity
-                    .storeCoins(toNano(executionFee)) // execution fee
-                    .endCell()
-                ).endCell().asSlice()
+            $$type: 'CreateAddLiquidityOrder',
+            executionFee: toNano(executionFee),
+            amount: toNano(liquidity),
+            trxId: 0n
         }
     );
     // after trx

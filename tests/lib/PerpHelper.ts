@@ -1,51 +1,42 @@
 import { SandboxContract, TreasuryContract } from "@ton/sandbox";
-import { Address, beginCell, toNano } from "@ton/core";
+import { Address, toNano } from "@ton/core";
 import { TestEnv } from "./TestEnv";
-import { now } from "../../utils/util";
-import { getAllBalance, getJettonWallet, toJettonUnits, toPriceUnits } from "./TokenHelper";
-import { OP_CREATE_INCREASE_PERP_POSITION_ORDER } from "../../utils/constants";
+import { now, toUnits } from '../../utils/util';
+import { getAllBalance, toJettonUnits, toPriceUnits } from "./TokenHelper";
+import { PRICE_DECIMAL } from '../../utils/constants';
 
 export async function createIncreasePerpOrder(user: SandboxContract<TreasuryContract>, executionFee: number, isMarket: boolean, 
     tokenId: number, isLong: boolean, margin: number, size: number, triggerPrice: number, tpSize: number, tpPrice: number, slSize: number, slPrice: number) {
     let balanceBefore = await getAllBalance();
     let orderIdBefore = (await TestEnv.pool.getPerpOrder(0n)).perpOrderIndexNext;
+    let totalExecution = executionFee;
+    if (tpSize > 0 && tpPrice > 0) {
+        totalExecution += executionFee;
+    }
+    if (slSize > 0 && slPrice > 0) {
+        totalExecution += executionFee;
+    }
     // create order
-    const jettonWallet = await getJettonWallet(user.address);
-    const trxResult = await jettonWallet.send(
+    let trxResult = await TestEnv.pool.send(
         user.getSender(),
         {
-            value: toNano(executionFee + 0.2),
+            value: toNano(0.3 + totalExecution  + margin),
         },
         {
-            $$type: 'JettonTransfer',
-            query_id: 0n,
-            amount: toJettonUnits(margin),
-            destination: TestEnv.pool.address,
-            response_destination: user.address,
-            custom_payload: null,
-            forward_ton_amount: toNano(executionFee + 0.1),
-            forward_payload: 
-                beginCell()
-                .storeUint(1, 1)
-                .storeRef(
-                    beginCell()
-                    .storeUint(OP_CREATE_INCREASE_PERP_POSITION_ORDER, 8) // op
-                    .storeCoins(toNano(executionFee)) // execution fee
-                    .storeInt(isMarket? -1n : 0n, 1)
-                    .storeUint(tokenId, 16)
-                    .storeInt(isLong? -1n : 0n, 1)
-                    .storeCoins(toJettonUnits(margin))
-                    .storeCoins(toJettonUnits(size))
-                    .storeUint(toPriceUnits(triggerPrice), 128)
-                    .storeUint(now(), 32)
-                    .storeRef(
-                        beginCell()
-                        .storeCoins(toJettonUnits(tpSize))
-                        .storeUint(toPriceUnits(tpPrice), 128)
-                        .storeCoins(toJettonUnits(slSize))
-                        .storeUint(toPriceUnits(slPrice), 128)
-                    ).endCell()
-                ).endCell().asSlice()
+            $$type: 'CreateIncreasePerpOrder',
+            trxId: 0n,
+            tokenId: BigInt(tokenId),
+            isLong: isLong,
+            isMarket: isMarket,
+            marginDelta: toNano(margin),
+            sizeDelta: toNano(size),
+            triggerPrice: toUnits(triggerPrice, PRICE_DECIMAL),
+            requestTime: BigInt(now()),
+            executionFee: toNano(executionFee),
+            tpSize: toNano(tpSize),
+            tpPrice: toUnits(tpPrice, PRICE_DECIMAL),
+            slSize: toNano(slSize),
+            slPrice: toUnits(slPrice, PRICE_DECIMAL),
         }
     );
     // after trx
@@ -157,8 +148,8 @@ export async function createDecreasePerpOrder(user: SandboxContract<TreasuryCont
             executionFee: toNano(executionFee),
             tokenId: BigInt(tokenId),
             isLong: isLong,
-            marginDelta: toJettonUnits(margin),
-            sizeDelta: toJettonUnits(size),
+            marginDelta: toNano(margin),
+            sizeDelta: toNano(size),
             triggerPrice: toPriceUnits(triggerPrice),
             requestTime: BigInt(now()),
             trxId: 1n
@@ -183,20 +174,27 @@ export async function createTpSlPerpOrder(user: SandboxContract<TreasuryContract
     tokenId: number, isLong: boolean, tpSize: number, tpPrice: number, slSize: number, slPrice: number) {
     let balanceBefore = await getAllBalance();
     let orderIdBefore = (await TestEnv.pool.getPerpOrder(0n)).perpOrderIndexNext;
+    let totalExecution = executionFee;
+    if (tpSize > 0 && tpPrice > 0) {
+        totalExecution += executionFee;
+    }
+    if (slSize > 0 && slPrice > 0) {
+        totalExecution += executionFee;
+    }
     // create order
     const trxResult = await TestEnv.pool.send(
         user.getSender(),
         {
-            value: toNano(executionFee + 0.1),
+            value: toNano(totalExecution + 0.1),
         },
         {
             $$type: 'CreateTpSlPerpOrder',
             executionFee: toNano(executionFee),
             tokenId: BigInt(tokenId),
             isLong: isLong,
-            tpSize: toJettonUnits(tpSize),
+            tpSize: toNano(tpSize),
             tpPrice: toPriceUnits(tpPrice),
-            slSize: toJettonUnits(slSize),
+            slSize: toNano(slSize),
             slPrice: toPriceUnits(slPrice),
             requestTime: BigInt(now()),
             trxId: 1n
@@ -288,8 +286,8 @@ export async function adlPerpPosition(executor: SandboxContract<TreasuryContract
             tokenId: BigInt(tokenId),
             account: account,
             isLong: isLong,
-            marginDelta: toJettonUnits(margin),
-            sizeDelta: toJettonUnits(size),
+            marginDelta: toNano(margin),
+            sizeDelta: toNano(size),
             trxId: 1n,
             price: toPriceUnits(price),
             premiumRate: 0n,
