@@ -111,6 +111,16 @@
       "maintenanceRate": 0.015,
       "tradingFeeRate": 0.0015,
       "lpTradingFeeRate": 0.65
+    },
+    {
+      "tokenId": 8,
+      "name": "PARTI",
+      "enable": true,
+      "maxLeverage": 21,
+      "liquidationFee": 0.1,
+      "maintenanceRate": 0.015,
+      "tradingFeeRate": 0.0015,
+      "lpTradingFeeRate": 0.65
     }
   ]
 }
