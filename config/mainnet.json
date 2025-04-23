@@ -121,6 +121,66 @@
       "maintenanceRate": 0.015,
       "tradingFeeRate": 0.0015,
       "lpTradingFeeRate": 0.65
+    },
+    {
+      "tokenId": 9,
+      "name": "WCT",
+      "enable": true,
+      "maxLeverage": 21,
+      "liquidationFee": 0.1,
+      "maintenanceRate": 0.015,
+      "tradingFeeRate": 0.0015,
+      "lpTradingFeeRate": 0.1
+    },
+    {
+      "tokenId": 10,
+      "name": "TRX",
+      "enable": true,
+      "maxLeverage": 21,
+      "liquidationFee": 0.1,
+      "maintenanceRate": 0.015,
+      "tradingFeeRate": 0.0015,
+      "lpTradingFeeRate": 0.1
+    },
+    {
+      "tokenId": 11,
+      "name": "RED",
+      "enable": true,
+      "maxLeverage": 21,
+      "liquidationFee": 0.1,
+      "maintenanceRate": 0.015,
+      "tradingFeeRate": 0.0015,
+      "lpTradingFeeRate": 0.1
+    },
+    {
+      "tokenId": 12,
+      "name": "MOVE",
+      "enable": true,
+      "maxLeverage": 21,
+      "liquidationFee": 0.1,
+      "maintenanceRate": 0.015,
+      "tradingFeeRate": 0.0015,
+      "lpTradingFeeRate": 0.1
+    },
+    {
+      "tokenId": 13,
+      "name": "BABY",
+      "enable": true,
+      "maxLeverage": 21,
+      "liquidationFee": 0.1,
+      "maintenanceRate": 0.015,
+      "tradingFeeRate": 0.0015,
+      "lpTradingFeeRate": 0.1
+    },
+    {
+      "tokenId": 14,
+      "name": "HYPER",
+      "enable": true,
+      "maxLeverage": 21,
+      "liquidationFee": 0.1,
+      "maintenanceRate": 0.015,
+      "tradingFeeRate": 0.0015,
+      "lpTradingFeeRate": 0.1
     }
   ]
 }
