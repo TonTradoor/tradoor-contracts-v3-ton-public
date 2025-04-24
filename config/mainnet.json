@@ -50,7 +50,7 @@
       "liquidationFee": 0.1,
       "maintenanceRate": 0.005,
       "tradingFeeRate": 0.0009,
-      "lpTradingFeeRate": 0.65
+      "lpTradingFeeRate": 0.1
     },
     {
       "tokenId": 2,
@@ -60,7 +60,7 @@
       "liquidationFee": 0.1,
       "maintenanceRate": 0.005,
       "tradingFeeRate": 0.0009,
-      "lpTradingFeeRate": 0.65
+      "lpTradingFeeRate": 0.1
     },
     {
       "tokenId": 3,
@@ -70,7 +70,7 @@
       "liquidationFee": 0.1,
       "maintenanceRate": 0.015,
       "tradingFeeRate": 0.0015,
-      "lpTradingFeeRate": 0.65
+      "lpTradingFeeRate": 0.1
     },
     {
       "tokenId": 4,
@@ -80,7 +80,7 @@
       "liquidationFee": 0.1,
       "maintenanceRate": 0.01,
       "tradingFeeRate": 0.0009,
-      "lpTradingFeeRate": 0.65
+      "lpTradingFeeRate": 0.1
     },
     {
       "tokenId": 5,
@@ -90,7 +90,7 @@
       "liquidationFee": 0.1,
       "maintenanceRate": 0.005,
       "tradingFeeRate": 0.0009,
-      "lpTradingFeeRate": 0.65
+      "lpTradingFeeRate": 0.1
     },
     {
       "tokenId": 6,
@@ -100,7 +100,7 @@
       "liquidationFee": 0.1,
       "maintenanceRate": 0.015,
       "tradingFeeRate": 0.0015,
-      "lpTradingFeeRate": 0.65
+      "lpTradingFeeRate": 0.1
     },
     {
       "tokenId": 7,
@@ -110,7 +110,7 @@
       "liquidationFee": 0.1,
       "maintenanceRate": 0.015,
       "tradingFeeRate": 0.0015,
-      "lpTradingFeeRate": 0.65
+      "lpTradingFeeRate": 0.1
     },
     {
       "tokenId": 8,
@@ -120,7 +120,7 @@
       "liquidationFee": 0.1,
       "maintenanceRate": 0.015,
       "tradingFeeRate": 0.0015,
-      "lpTradingFeeRate": 0.65
+      "lpTradingFeeRate": 0.1
     },
     {
       "tokenId": 9,
