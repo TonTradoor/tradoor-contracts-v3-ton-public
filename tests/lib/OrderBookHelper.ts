@@ -67,13 +67,13 @@ export async function cancelCompensate(executor: SandboxContract<TreasuryContrac
     };
 }
 
-export async function executeCompensate(executor: SandboxContract<TreasuryContract>, compensateId: bigint) {
+export async function executeCompensate(executor: SandboxContract<TreasuryContract>, gas: number, compensateId: bigint) {
     let balanceBefore = await getAllBalance();
 
     const trxResult = await TestEnv.pool.send(
         executor.getSender(),
         {
-            value: toNano('0.2'),
+            value: toNano(gas),
         },
         {
             $$type: 'ExecuteOrCancelCompensate',

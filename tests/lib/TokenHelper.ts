@@ -1,28 +1,33 @@
-import { Address, fromNano, toNano } from "@ton/core";
+import { Address, fromNano, Sender, toNano } from "@ton/core";
 import { fromUnits, toUnits } from '../../utils/util';
 import { TestEnv } from "./TestEnv";
 import { TLPJettonWallet } from "../../wrappers/TLPJettonWallet";
+import { buildOnchainMetadata } from "../../contracts/jetton/utils/jetton-helpers";
 
-export async function delistToken(tokenId: bigint) {
-    let tokenConfigBefore = (await TestEnv.pool.getTokenConfig(tokenId));
+export async function updateJettonContent(sender: Sender) {
+
+    const jettonParams = {
+        name: 'TON Tradoor LP',
+        description: '12345',
+        symbol: 'TON-TLP',
+        image: 'https://cache.tonapi.io/imgproxy/j-LhzbGesMjo5C17FRTdMQrGT1xCNJCjO4GmNDdY0Dk/rs:fill:200:200:1/g:no/aHR0cHM6Ly90b24uYXBwL21lZGlhL2pldHRvbi0xYmY5NTgxNC03ODdhLTRlMmQtODZlYS1lMGRhZTNhOTQ4NGMuanBnP3c9NjQwJnE9NTA.webp',
+        decimals: '9'
+    };
+
     const trxResult = await TestEnv.pool.send(
-        TestEnv.deployer.getSender(),
+        sender,
         {
             value: toNano('0.1'),
         },
         {
-            $$type: 'DelistToken',
-            tokenId: tokenId
+            $$type: 'JettonUpdateContent',
+            jetton_content: buildOnchainMetadata(jettonParams),
         }
     );
-    let tokenConfigAfter = (await TestEnv.pool.getTokenConfig(tokenId));
 
-    return {
-        trxResult,
-        tokenConfigBefore,
-        tokenConfigAfter
-    };
+    return { trxResult };
 }
+
 
 export async function getTlpWallet(senderAddress: Address) {
     return TestEnv.blockchain.openContract(await TLPJettonWallet.fromInit(senderAddress, TestEnv.tlp.address));

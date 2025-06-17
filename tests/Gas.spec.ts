@@ -2,7 +2,7 @@ import { Blockchain, SandboxContract, TreasuryContract, printTransactionFees } f
 import { toNano, fromNano, Dictionary } from '@ton/core';
 import { Pool } from '../wrappers/Pool';
 import { TestEnv } from './lib/TestEnv';
-import { toJettonUnits, toPriceUnits } from './lib/TokenHelper';
+import { toPriceUnits } from './lib/TokenHelper';
 import { createDecreaseLiquidityOrder, createIncreaseLiquidityOrder, executeLiquidityOrder } from './lib/LPHelper';
 import '@ton/test-utils';
 import { createDecreasePerpOrder, createIncreasePerpOrder, executePerpOrder } from './lib/PerpHelper';
@@ -10,10 +10,8 @@ import { now } from '../utils/util';
 
 describe('GAS', () => {
     let blockchain: Blockchain;
-    let deployer: SandboxContract<TreasuryContract>;
     let pool: SandboxContract<Pool>;
     let executor: SandboxContract<TreasuryContract>;
-    let compensator: SandboxContract<TreasuryContract>;
     let user0: SandboxContract<TreasuryContract>;
     let user1: SandboxContract<TreasuryContract>;
 
@@ -21,10 +19,8 @@ describe('GAS', () => {
         await TestEnv.resetEnv();
 
         blockchain = TestEnv.blockchain;
-        deployer = TestEnv.deployer;
         pool = TestEnv.pool;
         executor = TestEnv.executor;
-        compensator = TestEnv.compensator;
         user0 = TestEnv.user0;
         user1 = TestEnv.user1;
     });
@@ -41,7 +37,7 @@ describe('GAS', () => {
         blockchain.now = blockchain.now - blockchain.now % 3600 + 70 * 60; // HH+1:10
         /* =========================== increase LP ================================ */
         /// create order
-        let lpLiquidity = 10000;
+        let liquidity = 10000;
         let executionFee = 0.1;
         const prices =  Dictionary.empty(Dictionary.Keys.Int(16), Dictionary.Values.BigInt(128));
         prices.set(1, toPriceUnits(60000)).set(2, toPriceUnits(3000));
@@ -50,7 +46,7 @@ describe('GAS', () => {
         let rolloverFeeGrowth = 0;
 
         // create order
-        const createIncreaseResult = await createIncreaseLiquidityOrder(user0, lpLiquidity, executionFee);
+        const createIncreaseResult = await createIncreaseLiquidityOrder(user0, { liquidity, executionFee });
         printTransactionFees(createIncreaseResult.trxResult.transactions);
 
         console.log('create increase LP order gas used:', fromNano(createIncreaseResult.balanceBefore.user0TonBalance - createIncreaseResult.balanceAfter.user0TonBalance - toNano(executionFee)));
@@ -113,8 +109,8 @@ describe('GAS', () => {
         console.log('pool ton balance', fromNano(executeResult.balanceAfter.poolTonBalance));
 
 
-        expect(executeResult.positionDataAfter.globalLPPosition?.netSize).toEqual(toJettonUnits(size));
-        expect(executeResult.positionDataAfter.globalLPPosition?.isLong).toBeFalsy();
+        expect(executeResult.positionDataAfter!.globalLPPosition?.netSize).toEqual(toNano(size));
+        expect(executeResult.positionDataAfter!.globalLPPosition?.isLong).toBeFalsy();
 
 
         /* =========================== increase short perp ================================ */
@@ -152,9 +148,8 @@ describe('GAS', () => {
         console.log('position data after increase short:', executeIncreaseShortResult.positionDataAfter);
         console.log('pool ton balance', fromNano(executeIncreaseShortResult.balanceAfter.poolTonBalance));
 
-
-        expect(executeIncreaseShortResult.positionDataAfter.globalLPPosition?.netSize).toEqual(toJettonUnits(increaseShortSize - size));
-        expect(executeIncreaseShortResult.positionDataAfter.globalLPPosition?.isLong).toBeTruthy();
+        expect(executeIncreaseShortResult.positionDataAfter!.globalLPPosition?.netSize).toEqual(toNano(increaseShortSize - size));
+        expect(executeIncreaseShortResult.positionDataAfter!.globalLPPosition?.isLong).toBeTruthy();
 
         /* =========================== decrease short perp ================================ */
         blockchain.now = blockchain.now + 30 * 60; // HH+1:10
@@ -192,9 +187,8 @@ describe('GAS', () => {
         console.log('position data after decrease short:', executeDecreaseShortResult.positionDataAfter);
         console.log('pool ton balance', fromNano(executeDecreaseShortResult.balanceAfter.poolTonBalance));
 
-
-        expect(executeDecreaseShortResult.positionDataAfter.globalLPPosition?.netSize).toEqual(toJettonUnits(size));
-        expect(executeDecreaseShortResult.positionDataAfter.globalLPPosition?.isLong).toBeFalsy();
+        expect(executeDecreaseShortResult.positionDataAfter!.globalLPPosition?.netSize).toEqual(toNano(size));
+        expect(executeDecreaseShortResult.positionDataAfter!.globalLPPosition?.isLong).toBeFalsy();
 
         /* =========================== decrease long perp ================================ */
         blockchain.now = blockchain.now + 30 * 60; // HH+1:40
@@ -232,18 +226,22 @@ describe('GAS', () => {
         console.log('position data after decrease long:', executeDecreaseLongResult.positionDataAfter);
         console.log('pool ton balance', fromNano(executeDecreaseLongResult.balanceAfter.poolTonBalance));
 
-
-        expect(executeDecreaseLongResult.positionDataAfter.globalLPPosition?.netSize).toEqual(0n);
-        expect(executeDecreaseLongResult.positionDataAfter.globalLPPosition?.isLong).toBeFalsy();
+        expect(executeDecreaseLongResult.positionDataAfter!.globalLPPosition?.netSize).toEqual(0n);
+        expect(executeDecreaseLongResult.positionDataAfter!.globalLPPosition?.isLong).toBeFalsy();
 
         /* =========================== decrease LP ================================ */
+        console.log(`>>>>>>tlp balance: ${executeDecreaseLongResult.balanceAfter.user0TlpBalance}`)
         /// create order
-        const createDecreaseLPResult = await createDecreaseLiquidityOrder(user0, lpLiquidity, executionFee);
+        const createDecreaseLPResult = await createDecreaseLiquidityOrder(user0, liquidity, executionFee);
         printTransactionFees(createDecreaseLPResult.trxResult.transactions);
+        expect(createDecreaseLPResult.trxResult.transactions).toHaveTransaction({
+            from: TestEnv.poolTlpWallet.address,
+            to: pool.address,
+            success: true,
+        });
 
         console.log('create decrease LP order gas used:', fromNano(createDecreaseLPResult.balanceBefore.user0TonBalance - createDecreaseLPResult.balanceAfter.user0TonBalance - toNano(executionFee)));
         console.log('pool ton balance', fromNano(createDecreaseLPResult.balanceAfter.poolTonBalance));
-
 
         /// executor order
         prices.set(1, toPriceUnits(60000)).set(2, toPriceUnits(3000));

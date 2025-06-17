@@ -148,7 +148,6 @@ message CancelPerpOrder {
 message ExecutePerpOrder {
     orderId: Int as uint64;
     trxId: Int as uint64;
-    tokenId: Int as uint16;
     price: Int as uint128;
     premiumRate: Int as int32;
     fundingFeeGrowth: Int as int128;

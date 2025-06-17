@@ -3,14 +3,20 @@ import { beginCell, Dictionary, toNano } from "@ton/core";
 import { TestEnv } from "./TestEnv";
 import { getAllBalance, getTlpWallet, toJettonUnits, toTlpUnits } from "./TokenHelper";
 
-export async function createIncreaseLiquidityOrder(user: SandboxContract<TreasuryContract>, liquidity: number, executionFee: number) {
+export async function createIncreaseLiquidityOrder(user: SandboxContract<TreasuryContract>,
+    params: { liquidity?: number, executionFee?: number, gas?: number }) {
+
+    const liquidity = params.liquidity || 10000;
+    const executionFee = params.executionFee || 0.1;
+    const gas = params.gas || 0.2;
+
     let balanceBefore = await getAllBalance();
     let orderIdBefore = (await TestEnv.pool.getLiquidityOrder(0n)).liquidityOrderIndexNext;
     // create order
     let trxResult = await TestEnv.pool.send(
         user.getSender(),
         {
-            value: toNano(0.2 + executionFee + liquidity),
+            value: toNano(gas + executionFee + liquidity),
         },
         {
             $$type: 'CreateAddLiquidityOrder',
@@ -34,13 +40,13 @@ export async function createIncreaseLiquidityOrder(user: SandboxContract<Treasur
     };
 }
 
-export async function cancelLiquidityOrder(executor: SandboxContract<TreasuryContract>, orderId: bigint) {
+export async function cancelLiquidityOrder(executor: SandboxContract<TreasuryContract>, orderId: bigint, gas?: number) {
     let balanceBefore = await getAllBalance();
-    
+
     const trxResult = await TestEnv.pool.send(
         executor.getSender(),
         {
-            value: toNano('0.2'),
+            value: toNano(gas || 0.2),
         },
         {
             $$type: 'CancelLiquidityOrder',
@@ -62,7 +68,7 @@ export async function cancelLiquidityOrder(executor: SandboxContract<TreasuryCon
 }
 
 
-export async function executeLiquidityOrder(executor: SandboxContract<TreasuryContract>, orderId: bigint, 
+export async function executeLiquidityOrder(executor: SandboxContract<TreasuryContract>, orderId: bigint,
     prices: Dictionary<number, bigint>, lpFundingFeeGrowth: number, rolloverFeeGrowth: number) {
     let balanceBefore = await getAllBalance();
     let orderBefore = (await TestEnv.pool.getLiquidityOrder(orderId)).liquidityOrder;
@@ -118,15 +124,7 @@ export async function createDecreaseLiquidityOrder(user: SandboxContract<Treasur
             response_destination: user.address,
             custom_payload: null,
             forward_ton_amount: toNano(executionFee + 0.1),
-            forward_payload:
-                beginCell()
-                    .storeUint(1, 1)
-                    .storeRef(
-                        beginCell()
-                            .storeCoins(toTlpUnits(tlp))
-                            .storeCoins(toNano(executionFee)) // execution fee
-                            .endCell()
-                    ).endCell().asSlice()
+            forward_payload: beginCell().storeCoins(toNano(executionFee)).asSlice()
         }
     );
     // after trx

@@ -8,6 +8,7 @@ import { toJettonUnits } from './TokenHelper';
 import { PERCENTAGE_BASIS_POINT } from '../../utils/constants';
 import { Multisig, Request } from '../../wrappers/Multisig';
 import { MultisigSigner } from '../../build/Multisig/tact_MultisigSigner';
+import { updateBaseConfig } from './PoolHelper';
 
 export class TestEnv {
 
@@ -15,6 +16,7 @@ export class TestEnv {
     static deployer: SandboxContract<TreasuryContract>;
     static executor: SandboxContract<TreasuryContract>;
     static executor1: SandboxContract<TreasuryContract>;
+    static manager: SandboxContract<TreasuryContract>;
     static compensator: SandboxContract<TreasuryContract>;
     static claimExecutor: SandboxContract<TreasuryContract>;
     static user0: SandboxContract<TreasuryContract>;
@@ -30,6 +32,7 @@ export class TestEnv {
 
     static members: Dictionary<Address, number> = Dictionary.empty(Dictionary.Keys.Address(), Dictionary.Values.Uint(8));
     static requiredWeight: bigint = 1n;
+    static timeout: bigint = 60n * 60n; // 1 hour
 
     // config
     static tlpDecimal: number = 9;
@@ -39,7 +42,7 @@ export class TestEnv {
     static lpRolloverFeeRate: number = 0.7;
     static liquidatedPositionShareRate: number = 0.5;
     static normalPositionShareRate: number = 0.5;
-    static tokenConfig = [{
+    static tokenConfigs = [{
         tokenId: 1n,
         name: 'BTC',
         tradingFeeRate: 0.001,
@@ -63,6 +66,7 @@ export class TestEnv {
         TestEnv.deployer = await TestEnv.blockchain.treasury('deployer');
         TestEnv.executor = await TestEnv.blockchain.treasury('executor');
         TestEnv.executor1 = await TestEnv.blockchain.treasury('executor1');
+        TestEnv.manager = await TestEnv.blockchain.treasury('manager');
         TestEnv.compensator = await TestEnv.blockchain.treasury('compensator');
         TestEnv.claimExecutor = await TestEnv.blockchain.treasury('claimExecutor');
 
@@ -72,7 +76,7 @@ export class TestEnv {
         TestEnv.user3 = await TestEnv.blockchain.treasury('user3');
 
         this.members.set(TestEnv.deployer.address, 1);
-        TestEnv.multisig = TestEnv.blockchain.openContract(await Multisig.fromInit(this.members, this.requiredWeight));
+        TestEnv.multisig = TestEnv.blockchain.openContract(await Multisig.fromInit(this.members, this.requiredWeight, this.timeout));
 
         // deploy pool
         const poolDeployResult = await TestEnv.pool.send(
@@ -133,42 +137,9 @@ export class TestEnv {
             .set(this.executor1.address, true);
 
         // set config to pool
-        const setBaseConfigResult = await TestEnv.pool.send(
-            TestEnv.deployer.getSender(),
-            {
-                value: toNano('0.1'),
-            },
-            {
-                $$type: 'UpdateBaseConfig',
-                gasConfig: {
-                    $$type: 'GasConfig',
-                    mintJettonGas: toNano(0.03),
-                    burnJettonGas: toNano(0.03),
-                    transferJettonGas: toNano(0.03),
-                    createPerpOrderGas: toNano(0.03),
-                    cancelPerpOrderGas: toNano(0.03),
-                    executePerpOrderGas: toNano(0.03),
-                    createLiquidityOrderGas: toNano(0.03),
-                    cancelLiquidityOrderGas: toNano(0.03),
-                    executeLiquidityOrderGas: toNano(0.03),
-                    minStorageReserve: toNano(0.03),
-                    lpMinExecutionFee: toNano(0.03),
-                    perpMinExecutionFee: toNano(0.03),
-                },
-                executorConfig: {
-                    $$type: 'ExecutorConfig',
-                    executors: executors,
-                },
-                contractConfig: {
-                    $$type: 'ContractConfig',
-                    multisig: TestEnv.multisig.address,
-                    tlpJetton: TestEnv.tlp.address,
-                    tlpWallet: TestEnv.poolTlpWallet.address
-                }
-            }
-        );
+        const setBaseConfigResult = await updateBaseConfig(TestEnv.deployer.getSender());;
 
-        expect(setBaseConfigResult.transactions).toHaveTransaction({
+        expect(setBaseConfigResult.trxResult.transactions).toHaveTransaction({
             from: TestEnv.deployer.address,
             to: TestEnv.pool.address,
             success: true,
@@ -177,8 +148,7 @@ export class TestEnv {
         var multsigRequest: Request = {
             $$type: 'Request',
             to: TestEnv.pool.address,
-            timeout: BigInt(Math.floor(Date.now() / 1000) + 60 * 60),
-            manager: TestEnv.deployer.address,
+            manager: TestEnv.manager.address,
             compensator: this.compensator.address,
             claimer: this.claimExecutor.address
         };
@@ -198,7 +168,7 @@ export class TestEnv {
         });
 
 
-        var multisigSigner = TestEnv.blockchain.openContract(await MultisigSigner.fromInit(TestEnv.multisig.address, this.members, this.requiredWeight, multsigRequest));
+        var multisigSigner = TestEnv.blockchain.openContract(await MultisigSigner.fromInit(TestEnv.multisig.address, this.members, this.requiredWeight, this.timeout, multsigRequest));
         const approveSetManagerResult = await multisigSigner.send(
             TestEnv.deployer.getSender(),
             {
@@ -214,7 +184,7 @@ export class TestEnv {
         });
 
         const setPoolConfigResult = await TestEnv.pool.send(
-            TestEnv.deployer.getSender(),
+            TestEnv.manager.getSender(),
             {
                 value: toNano('0.1'),
             },
@@ -229,16 +199,16 @@ export class TestEnv {
         );
 
         expect(setPoolConfigResult.transactions).toHaveTransaction({
-            from: TestEnv.deployer.address,
+            from: TestEnv.manager.address,
             to: TestEnv.pool.address,
             success: true,
         });
 
         // set token config to pool
-        for (let index = 0; index < this.tokenConfig.length; index++) {
-            const { tokenId, name, tradingFeeRate, lpTradingFeeRate } = this.tokenConfig[index];
+        for (let index = 0; index < this.tokenConfigs.length; index++) {
+            const { tokenId, name, tradingFeeRate, lpTradingFeeRate } = this.tokenConfigs[index];
             const setPoolTokenConfigResult = await TestEnv.pool.send(
-                TestEnv.deployer.getSender(),
+                TestEnv.manager.getSender(),
                 {
                     value: toNano('0.1'),
                 },
@@ -259,7 +229,7 @@ export class TestEnv {
             );
     
             expect(setPoolTokenConfigResult.transactions).toHaveTransaction({
-                from: TestEnv.deployer.address,
+                from: TestEnv.manager.address,
                 to: TestEnv.pool.address,
                 success: true,
             });

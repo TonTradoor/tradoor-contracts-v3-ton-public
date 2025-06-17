@@ -29,6 +29,10 @@ contract Pool with Deployable, Resumable, Upgradable{
     cancelLiquidityOrderGas: Int as coins = 0;
     executeLiquidityOrderGas: Int as coins = 0;
 
+    updateConfigGas: Int as coins = ton("0.05");
+    withdrawFeeGas: Int as coins = ton("0.05");
+    feedPricesGas: Int as coins = ton("0.05");
+
     lpMinExecutionFee: Int as coins = 0; 
     perpMinExecutionFee: Int as coins = 0;
     minStorageReserve: Int as coins = 0;
@@ -98,7 +102,8 @@ contract Pool with Deployable, Resumable, Upgradable{
 
     receive(msg: UpdateBaseConfig) {
         self.requireOwner();
-
+        let ctx: Context = context();
+        require(ctx.value >= self.updateConfigGas, "gas not enough");
         // contract
         let contractConfig: ContractConfig? = msg.contractConfig;
         if (contractConfig != null) {
@@ -132,6 +137,10 @@ contract Pool with Deployable, Resumable, Upgradable{
             self.createLiquidityOrderGas = gasConfig!!.createLiquidityOrderGas;
             self.cancelLiquidityOrderGas = gasConfig!!.cancelLiquidityOrderGas;
             self.executeLiquidityOrderGas = gasConfig!!.executeLiquidityOrderGas;
+
+            self.updateConfigGas = gasConfig!!.updateConfigGas;
+            self.withdrawFeeGas = gasConfig!!.withdrawFeeGas;
+            self.feedPricesGas = gasConfig!!.feedPricesGas;
         }
 
         self.reply("base config updated".asComment());
@@ -167,7 +176,9 @@ contract Pool with Deployable, Resumable, Upgradable{
     }
 
     receive(msg: WithdrawFee) {
-        require(sender() == self.claimer, "invalid sender");
+        let ctx: Context = context();
+        require(ctx.sender == self.claimer, "invalid sender");
+        require(ctx.value >= self.withdrawFeeGas, "gas not enough");
         require(self.feeReserve > 0, "insufficient fee reserve");
         let feeReceiver = msg.feeReceiver != null ? msg.feeReceiver!! : sender();
         send(SendParameters{to: feeReceiver, value: self.feeReserve, mode: SendIgnoreErrors | SendRemainingValue});
@@ -177,7 +188,12 @@ contract Pool with Deployable, Resumable, Upgradable{
     receive() {}
 
     receive (msg: FeedPrices) {
-        require(self.executors.exists(sender()), "invalid sender");
+        let ctx: Context = context();
+        require(self.executors.exists(ctx.sender), "invalid sender");
+        require(ctx.value >= self.feedPricesGas, "gas not enough");
+        foreach ( tokenId, _ in self.tokenConfigs) {
+            require(msg.prices.exists(tokenId), "price not exist");
+        }
         self.prices = msg.prices;
 
         // charge funding fee
@@ -242,6 +258,7 @@ contract Pool with Deployable, Resumable, Upgradable{
     }
 
     receive(msg: CreateAddLiquidityOrder){
+        self.requireNotStopped();
         let ctx: Context = context();
         require(msg.executionFee >= self.lpMinExecutionFee, "insufficient execution fee");
         require(ctx.value >= self.createLiquidityOrderGas + msg.amount + msg.executionFee, "incorrect value transferred");
@@ -416,6 +433,22 @@ contract Pool with Deployable, Resumable, Upgradable{
         let executionFee = msg.executionFee;
         require(executionFee >= self.perpMinExecutionFee, "OrderBook: insufficient execution fee");
 
+        if (msg.isLong) {
+            if (msg.tpSize > 0 && msg.tpPrice > 0) {
+                require(msg.tpPrice >= msg.triggerPrice, "tp price must be greater than trigger price");
+            }
+            if (msg.slSize > 0 && msg.slPrice > 0) {
+                require(msg.slPrice <= msg.triggerPrice, "sl price must be less than trigger price");
+            }
+        } else {
+            if (msg.tpSize > 0 && msg.tpPrice > 0) {
+                require(msg.tpPrice <= msg.triggerPrice, "tp price must be less than trigger price");
+            }
+            if (msg.slSize > 0 && msg.slPrice > 0) {
+                require(msg.slPrice >= msg.triggerPrice, "sl price must be greater than trigger price");
+            }
+        }
+
         let totalExecutionFee  = executionFee;
         if (msg.tpSize > 0 && msg.tpPrice > 0) {
             totalExecutionFee += executionFee;
@@ -454,6 +487,26 @@ contract Pool with Deployable, Resumable, Upgradable{
         self.requireNotStopped();
         
         let ctx: Context = context();
+
+        let position: PerpPosition = self.getPosition(msg.tokenId, ctx.sender, msg.isLong);
+        require(position.size > 0, "position not exist");
+
+        let entryPrice: Int = position.entryPrice;
+        if (msg.isLong) {
+            if (msg.tpSize > 0 && msg.tpPrice > 0) {
+                require(msg.tpPrice >= entryPrice, "tp price must be greater than trigger price");
+            }
+            if (msg.slSize > 0 && msg.slPrice > 0) {
+                require(msg.slPrice <= entryPrice, "sl price must be less than trigger price");
+            }
+        } else {
+            if (msg.tpSize > 0 && msg.tpPrice > 0) {
+                require(msg.tpPrice <= entryPrice, "tp price must be less than trigger price");
+            }
+            if (msg.slSize > 0 && msg.slPrice > 0) {
+                require(msg.slPrice >= entryPrice, "sl price must be greater than trigger price");
+            }
+        }
 
         let executionFeeMultiple: Int = 0;
         if (msg.tpSize > 0 && msg.tpPrice > 0) {
@@ -619,6 +672,22 @@ contract Pool with Deployable, Resumable, Upgradable{
 
         self.transferEstimatedRemainValue(self.executePerpOrderGas + extraGas, sender(), -order.executionFee - payout);
 
+    }
+
+    fun getPosition(tokenId: Int, account: Address, isLong: Bool): PerpPosition {
+        let accountPerpPositionOpt: AccountPerpPosition? = self.positions.get(tokenId);
+        let accountPerpPosition: AccountPerpPosition = accountPerpPositionOpt != null ? accountPerpPositionOpt!! : AccountPerpPosition{
+            positions: emptyMap()
+        };
+
+        let directionPerpPositionOpt: DirectionPerpPosition? = accountPerpPosition.positions.get(account);
+        let directionPerpPosition: DirectionPerpPosition = directionPerpPositionOpt != null ? directionPerpPositionOpt!! : DirectionPerpPosition{
+            longPosition: PerpPosition {},
+            shortPosition: PerpPosition {}
+        };
+
+        let perpPosition: PerpPosition = isLong ? directionPerpPosition.longPosition : directionPerpPosition.shortPosition;
+        return perpPosition;
     }
 
     fun increasePerpPosition(trxId: Int, orderId: Int, opType: Int, account: Address, tokenId: Int, isLong: Bool, marginDelta: Int, sizeDelta: Int, tradePrice: Int, fundingFeeGrowth: Int, rolloverFeeGrowth: Int) {
@@ -910,7 +979,6 @@ contract Pool with Deployable, Resumable, Upgradable{
         self.positions.set(tokenId, accountPerpPosition);
         self.globalPositions.set(tokenId, globalPosition);
         self.globalLPPositions.set(tokenId, globalLPPosition);
-        self.perpOrders.del(orderId);
 
         send(SendParameters{ to: account, value: payout, mode: SendIgnoreErrors | SendPayGasSeparately});
         self.orderAmountReserve -= payout;
@@ -1196,10 +1264,10 @@ contract Pool with Deployable, Resumable, Upgradable{
 
         if(compensate.orderType != null) {
             if (compensate.orderType == ORDER_TYPE_LP) {
-                self.liquidityOrders.del(compensate.orderId);
+                require(self.liquidityOrders.del(compensate.orderId), "order not found")
             } else {
-                self.perpOrders.del(compensate.orderId);
-                self.perpOrderExs.del(compensate.orderId);
+                require(self.perpOrders.del(compensate.orderId), "order not found");
+                require(self.perpOrderExs.del(compensate.orderId), "order not found");
             }
         }
         let orderAmountReserveDelta: Int = 0;

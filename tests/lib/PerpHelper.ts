@@ -6,7 +6,7 @@ import { getAllBalance, toJettonUnits, toPriceUnits } from "./TokenHelper";
 import { PRICE_DECIMAL } from '../../utils/constants';
 
 export async function createIncreasePerpOrder(user: SandboxContract<TreasuryContract>, executionFee: number, isMarket: boolean, 
-    tokenId: number, isLong: boolean, margin: number, size: number, triggerPrice: number, tpSize: number, tpPrice: number, slSize: number, slPrice: number) {
+    tokenId: number, isLong: boolean, margin: number, size: number, triggerPrice: number, tpSize: number, tpPrice: number, slSize: number, slPrice: number, gas?: number) {
     let balanceBefore = await getAllBalance();
     let orderIdBefore = (await TestEnv.pool.getPerpOrder(0n)).perpOrderIndexNext;
     let totalExecution = executionFee;
@@ -20,7 +20,7 @@ export async function createIncreasePerpOrder(user: SandboxContract<TreasuryCont
     let trxResult = await TestEnv.pool.send(
         user.getSender(),
         {
-            value: toNano(0.3 + totalExecution  + margin),
+            value: toNano((gas || 0.3) + totalExecution  + margin),
         },
         {
             $$type: 'CreateIncreasePerpOrder',
@@ -56,13 +56,13 @@ export async function createIncreasePerpOrder(user: SandboxContract<TreasuryCont
     };
 }
 
-export async function cancelPerpOrder(executor: SandboxContract<TreasuryContract>, orderId: bigint) {
+export async function cancelPerpOrder(executor: SandboxContract<TreasuryContract>, orderId: bigint, gas?: number) {
     let balanceBefore = await getAllBalance();
     
     const trxResult = await TestEnv.pool.send(
         executor.getSender(),
         {
-            value: toNano(0.2),
+            value: toNano(gas || 0.2),
         },
         {
             $$type: 'CancelPerpOrder',
@@ -84,23 +84,26 @@ export async function cancelPerpOrder(executor: SandboxContract<TreasuryContract
 }
 
 
-export async function executePerpOrder(executor: SandboxContract<TreasuryContract>, orderId: bigint, price: number, fundingFeeGrowth: number, rolloverFeeGrowth: number) {
+export async function executePerpOrder(executor: SandboxContract<TreasuryContract>, orderId: bigint, price: number, fundingFeeGrowth: number, rolloverFeeGrowth: number, gas?: number) {
     let balanceBefore = await getAllBalance();
     let orderBefore = (await TestEnv.pool.getPerpOrder(orderId)).perpOrder;
-    let positionDataBefore = await TestEnv.pool.getPerpPosition(orderBefore?.tokenId!!, orderBefore?.account!!);
-    let positionBefore = orderBefore?.isLong!! ? positionDataBefore?.perpPosition?.longPosition!! : positionDataBefore?.perpPosition?.shortPosition!!;
     let poolStatBefore = await TestEnv.pool.getPoolStat();
+    let positionDataBefore;
+    let positionBefore;
+    if (orderBefore) {
+        positionDataBefore = await TestEnv.pool.getPerpPosition(orderBefore?.tokenId!!, orderBefore?.account!!);
+        positionBefore = orderBefore?.isLong!! ? positionDataBefore?.perpPosition?.longPosition!! : positionDataBefore?.perpPosition?.shortPosition!!;
+    }
 
     const trxResult = await TestEnv.pool.send(
         executor.getSender(),
         {
-            value: toNano('0.3'),
+            value: toNano(gas || 0.3),
         },
         {
             $$type: 'ExecutePerpOrder',
             orderId: orderId,
             trxId: 2n,
-            tokenId: 1n,
             price: toPriceUnits(price),
             premiumRate: 0n,
             fundingFeeGrowth: toJettonUnits(fundingFeeGrowth),
@@ -112,10 +115,13 @@ export async function executePerpOrder(executor: SandboxContract<TreasuryContrac
     let balanceAfter = await getAllBalance();
     let orderAfter = (await TestEnv.pool.getPerpOrder(orderId)).perpOrder;
     let orderExAfter = (await TestEnv.pool.getPerpOrder(orderId)).perpOrder;
-    let positionDataAfter = await TestEnv.pool.getPerpPosition(orderBefore?.tokenId!!, orderBefore?.account!!);
-    let positionAfter = orderBefore?.isLong!! ? positionDataAfter?.perpPosition?.longPosition!! : positionDataAfter?.perpPosition?.shortPosition!!;
     let poolStatAfter = await TestEnv.pool.getPoolStat();
-
+    let positionDataAfter;
+    let positionAfter;
+    if (orderBefore) {
+        positionDataAfter = await TestEnv.pool.getPerpPosition(orderBefore?.tokenId!!, orderBefore?.account!!);
+        positionAfter = orderBefore?.isLong!! ? positionDataAfter?.perpPosition?.longPosition!! : positionDataAfter?.perpPosition?.shortPosition!!;
+    }
     return {
         trxResult,
         balanceBefore,
@@ -132,16 +138,15 @@ export async function executePerpOrder(executor: SandboxContract<TreasuryContrac
     };
 }
 
-
 export async function createDecreasePerpOrder(user: SandboxContract<TreasuryContract>, executionFee: number, 
-    tokenId: number, isLong: boolean, margin: number, size: number, triggerPrice: number) {
+    tokenId: number, isLong: boolean, margin: number, size: number, triggerPrice: number, gas?: number) {
     let balanceBefore = await getAllBalance();
     let orderIdBefore = (await TestEnv.pool.getPerpOrder(0n)).perpOrderIndexNext;
     // create order
     const trxResult = await TestEnv.pool.send(
         user.getSender(),
         {
-            value: toNano('0.2'),
+            value: toNano(gas || 0.2),
         },
         {
             $$type: 'CreateDecreasePerpOrder',
@@ -224,7 +229,7 @@ export async function createTpSlPerpOrder(user: SandboxContract<TreasuryContract
 }
 
 
-export async function liquidatePerpPosition(executor: SandboxContract<TreasuryContract>, tokenId: number, account: Address, isLong: boolean, price: number, premiumRate: number) {
+export async function liquidatePerpPosition(executor: SandboxContract<TreasuryContract>, tokenId: number, account: Address, isLong: boolean, price: number, premiumRate: number, gas?: number) {
     let balanceBefore = await getAllBalance();
     let positionDataBefore = await TestEnv.pool.getPerpPosition(BigInt(tokenId), account);
     let positionBefore = isLong ? positionDataBefore?.perpPosition?.longPosition!! : positionDataBefore?.perpPosition?.shortPosition!!;
@@ -234,7 +239,7 @@ export async function liquidatePerpPosition(executor: SandboxContract<TreasuryCo
     const trxResult = await TestEnv.pool.send(
         executor.getSender(),
         {
-            value: toNano('0.3'),
+            value: toNano(gas || 0.3),
         },
         {
             $$type: 'LiquidatePerpPosition',
@@ -269,7 +274,7 @@ export async function liquidatePerpPosition(executor: SandboxContract<TreasuryCo
     };
 }
 
-export async function adlPerpPosition(executor: SandboxContract<TreasuryContract>, tokenId: number, account: Address, isLong: boolean, margin: number, size: number, price: number, premiumRate: number) {
+export async function adlPerpPosition(executor: SandboxContract<TreasuryContract>, tokenId: number, account: Address, isLong: boolean, margin: number, size: number, price: number, premiumRate: number, gas?: number) {
     let balanceBefore = await getAllBalance();
     let positionDataBefore = await TestEnv.pool.getPerpPosition(BigInt(tokenId), account);
     let positionBefore = isLong ? positionDataBefore?.perpPosition?.longPosition!! : positionDataBefore?.perpPosition?.shortPosition!!;
@@ -279,7 +284,7 @@ export async function adlPerpPosition(executor: SandboxContract<TreasuryContract
     const trxResult = await TestEnv.pool.send(
         executor.getSender(),
         {
-            value: toNano('0.3'),
+            value: toNano(gas || 0.3),
         },
         {
             $$type: 'ADLPerpPosition',
